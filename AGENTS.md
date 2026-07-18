@@ -13,13 +13,25 @@
   It is evidence, not production application code. Its generated `ios/`,
   `android/`, `.expo/`, `dist/`, and `node_modules/` directories stay ignored.
 
-The M1 root workspace is not scaffolded yet. Preserve existing prototypes until
-their adopt/adapt/discard review in `FND-08`.
+The M1 root workspace is scaffolded. Existing mobile and design-token source
+files remain quarantined prototypes until their adopt/adapt/discard review in
+`FND-08`; do not import them into production application code before that review.
 
 ## Build, Test, and Development Commands
 
-There are currently no root package commands. For the native harness, use Node
-24.18.0 and pnpm 11.14.0:
+Use Node 24.18.0 and pnpm 11.14.0. From the repository root:
+
+```sh
+pnpm install --frozen-lockfile
+pnpm validate
+pnpm check:workspace
+pnpm check:format
+pnpm typecheck
+./tooling/validate-clean-checkout.sh
+```
+
+Application start/build commands arrive in `FND-03`. For the retained native
+harness:
 
 ```sh
 cd spikes/native-compat

@@ -1,13 +1,8 @@
 {
   "name": "@littlearc/design-tokens",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Provisional LittleArc design tokens pending FND-08 reconciliation",
   "main": "src/index.ts",
-  "types": "src/index.ts",
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "typescript": "5.x",
-    "@types/react-native": "*"
-  }
+  "types": "src/index.ts"
 }

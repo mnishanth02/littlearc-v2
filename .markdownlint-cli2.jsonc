@@ -1,0 +1,16 @@
+{
+  "config": {
+    "MD013": false,
+    "MD029": false
+  },
+  "gitignore": true,
+  "globs": ["**/*.md"],
+  "ignores": [
+    "**/node_modules/**",
+    "**/.turbo/**",
+    "**/.expo/**",
+    "**/android/**",
+    "**/ios/**",
+    "docs/littlearc-complete-product-plan.md"
+  ]
+}

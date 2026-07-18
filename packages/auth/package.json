@@ -1,0 +1,6 @@
+{
+  "name": "@littlearc/auth",
+  "version": "0.0.0",
+  "private": true,
+  "description": "LittleArc authentication and authorization policy"
+}

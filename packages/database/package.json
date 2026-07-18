@@ -1,0 +1,6 @@
+{
+  "name": "@littlearc/database",
+  "version": "0.0.0",
+  "private": true,
+  "description": "LittleArc database adapters and migrations; implementation begins in FND-05"
+}

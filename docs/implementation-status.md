@@ -42,20 +42,21 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | Scope | Tag | Owner | Next action or completion evidence |
 | --- | --- | --- | --- |
 | M0. Readiness and evidence | `COMPLETE` | Founder/product + engineering | Gate 0A closed on 18 July 2026; see the M0 dossier |
-| M1. Engineering foundation | `READY` | Engineering | Start `FND-01` using synthetic fixtures |
-| `FND-01` Monorepo and toolchain | `READY` | Engineering | Write the package brief, inventory existing prototype files, then implement the root workspace foundation |
-| `FND-02` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order after `FND-01`; `FND-03` is the next package in sequence |
+| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-03` on the accepted FND-01 foundation |
+| `FND-01` Monorepo and toolchain | `COMPLETE` | Engineering | Root workspace, boundaries, exact pins, and clean-checkout proof accepted; see [evidence](./fnd-01-implementation-evidence.md) |
+| `FND-03` Application skeletons | `READY` | Engineering | Write the package brief, then scaffold the four application runtimes |
+| `FND-02`, `FND-04` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order; `FND-02` follows the real application tasks from `FND-03` |
 | M2 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
-There is currently no `IN PROGRESS` implementation package. Change `FND-01`
-from `READY` to `IN PROGRESS` when its package brief and implementation work
-actually begin.
+No implementation package is currently active. `FND-03` is the next `READY`
+package.
 
 ## 4. Completed Register
 
 | Date | Item | Tag | Evidence and outcome |
 | --- | --- | --- | --- |
 | 18 Jul 2026 | M0 Gate 0A and engineering close-out | `COMPLETE` | Proceed decision, accepted dependency baseline, decisions `M0-D01` through `M0-D10`, and later-gate obligations are recorded in the M0 dossier |
+| 18 Jul 2026 | [`FND-01` monorepo and toolchain](./fnd-01-implementation-evidence.md) | `COMPLETE` | Root pnpm/Turborepo workspace, 13 package nodes, exact pins, shared configuration, boundary/environment policy, 18 tests, and temporary clean-checkout validation pass |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -70,17 +71,12 @@ actually begin.
 
 No implementation item is currently tagged `IN PROGRESS`.
 
-When work starts, add one row with its owner, start date, immediate next action,
-and work-package brief or branch reference. Keep no more than the deliberately
-active work in this section.
-
 ## 6. Ready Queue
 
 | Priority | Item | Tag | Entry condition | Definition of done |
 | ---: | --- | --- | --- | --- |
-| 1 | `FND-01` Monorepo and toolchain | `READY` | M0 Gate 0A passed | Root pnpm/Turborepo workspace, exact versions, shared configuration, package boundaries, environment templates, and one-command clean-checkout validation pass |
-| 2 | `FND-03` Application skeletons | `NOT STARTED` | `FND-01` foundation available | Mobile, API, worker, and staff shells run; accepted native configuration is transferred into `apps/mobile` |
-| 3 | `FND-02` CI and supply-chain baseline | `NOT STARTED` | Stable root commands from `FND-01` | Deterministic validation and required supply-chain checks run in CI |
+| 1 | `FND-03` Application skeletons | `READY` | `FND-01` foundation available | Mobile, API, worker, and staff shells run; accepted native configuration is transferred into `apps/mobile` |
+| 2 | `FND-02` CI and supply-chain baseline | `NOT STARTED` | Stable root commands from `FND-01` | Deterministic validation and required supply-chain checks run in CI |
 
 The complete dependency order remains in Section 25 of the implementation
 roadmap. This table should show only the next few actionable packages.
@@ -118,5 +114,5 @@ For every status change:
 6. Never mark an item `COMPLETE` when only its implementation is written;
    required validation and evidence must also pass.
 
-The next status change should be `FND-01`: `READY` to `IN PROGRESS` when its
-planning brief and implementation begin.
+The next status change should be `FND-03`: `READY` to `IN PROGRESS` when its
+package brief and implementation begin.

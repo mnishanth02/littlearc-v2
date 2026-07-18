@@ -1,0 +1,6 @@
+{
+  "name": "@littlearc/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "description": "LittleArc Expo mobile application; runtime scaffold begins in FND-03"
+}

@@ -1,0 +1,36 @@
+export const environmentCatalog = {
+  "apps/api/.env.example": {
+    APP_ENV: { classification: "public", owner: "FND-03", secret: false },
+    BETTER_AUTH_SECRET: { classification: "secret", owner: "OFF-01", secret: true },
+    DATABASE_URL: { classification: "secret", owner: "FND-05", secret: true },
+    HOST: { classification: "public", owner: "FND-03", secret: false },
+    KEY_WRAPPING_SECRET_V1: { classification: "secret", owner: "FND-06", secret: true },
+    PORT: { classification: "public", owner: "FND-03", secret: false },
+    S3_ACCESS_KEY_ID: { classification: "secret", owner: "FND-06", secret: true },
+    S3_BUCKET_NAME: { classification: "sensitive", owner: "FND-06", secret: true },
+    S3_ENDPOINT: { classification: "sensitive", owner: "FND-06", secret: true },
+    S3_SECRET_ACCESS_KEY: { classification: "secret", owner: "FND-06", secret: true },
+  },
+  "apps/mobile/.env.example": {
+    EXPO_PUBLIC_API_BASE_URL: { classification: "public", owner: "FND-03", secret: false },
+    EXPO_PUBLIC_APP_ENV: { classification: "public", owner: "FND-03", secret: false },
+  },
+  "apps/ops-web/.env.example": {
+    APP_ENV: { classification: "public", owner: "FND-03", secret: false },
+    BETTER_AUTH_SECRET: { classification: "secret", owner: "FND-03", secret: true },
+    NEXT_PUBLIC_APP_URL: { classification: "public", owner: "FND-03", secret: false },
+    STAFF_API_BASE_URL: { classification: "sensitive", owner: "FND-03", secret: false },
+  },
+  "apps/worker/.env.example": {
+    AI_PROVIDER_CREDENTIALS: { classification: "secret", owner: "FND-07", secret: true },
+    APP_ENV: { classification: "public", owner: "FND-03", secret: false },
+    DATABASE_URL: { classification: "secret", owner: "FND-05", secret: true },
+    EMAIL_PROVIDER_API_KEY: { classification: "secret", owner: "FND-07", secret: true },
+    KEY_WRAPPING_SECRET_V1: { classification: "secret", owner: "FND-06", secret: true },
+    PUSH_PROVIDER_CREDENTIALS: { classification: "secret", owner: "FND-07", secret: true },
+    S3_ACCESS_KEY_ID: { classification: "secret", owner: "FND-06", secret: true },
+    S3_BUCKET_NAME: { classification: "sensitive", owner: "FND-06", secret: true },
+    S3_ENDPOINT: { classification: "sensitive", owner: "FND-06", secret: true },
+    S3_SECRET_ACCESS_KEY: { classification: "secret", owner: "FND-06", secret: true },
+  },
+};
