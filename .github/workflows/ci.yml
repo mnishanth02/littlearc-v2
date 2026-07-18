@@ -25,7 +25,7 @@ jobs:
           persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 11.14.0
           run_install: false
@@ -62,7 +62,7 @@ jobs:
         run: node tooling/ci/write-build-metadata.mjs
 
       - name: Upload source traceability metadata
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ci-source-metadata-${{ github.sha }}
           path: .artifacts/ci/build-metadata.json

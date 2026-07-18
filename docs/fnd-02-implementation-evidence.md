@@ -1,7 +1,7 @@
 # FND-02 Implementation Evidence
 
 > **Work package:** `FND-02`
-> **Status:** Locally implemented; hosted acceptance pending
+> **Status:** Complete
 > **Evidence date:** 18 July 2026
 > **Toolchain:** Node.js 24.18.0, pnpm 11.14.0
 > **Plan:** [FND-02 package plan](./fnd-02-ci-and-supply-chain-plan.md)
@@ -94,31 +94,65 @@ No prototype source under `apps/mobile/src/app`, `apps/mobile/src/components`,
 `apps/mobile/src/theme`, `packages/design-tokens/src`, or
 `spikes/native-compat` was changed.
 
-## 3. Hosted acceptance still required
+## 3. Hosted validation and repository controls
 
-`FND-02` remains `IN PROGRESS`. Local execution cannot establish GitHub-hosted
-runner behavior or mutate repository administration settings, and the repository
-currently has no configured Git remote. Completion requires:
+The public repository is
+[`mnishanth02/littlearc-v2`](https://github.com/mnishanth02/littlearc-v2).
+The local `development` branch tracks `origin/development`, and `main` is
+the default branch.
 
-1. Commit and push these files to the organization-owned repository through a
-   pull request.
-2. Confirm these checks pass on that pull request:
-   `CI / quality`, `Supply Chain / dependency review`, and
-   `Supply Chain / secret scan`.
-3. Confirm dependency review is available for the repository visibility and
-   GitHub plan; enable GitHub Code Security if the private-repository plan
-   requires it.
-4. Create an active `main` ruleset requiring a pull request and the three named
-   checks, blocking force pushes and branch deletion, with no routine bypass.
-5. Enable GitHub secret scanning and push protection where repository ownership
-   and plan permit it.
-6. Download the CI metadata artifact and verify its `sourceCommit` equals the
-   tested Actions SHA and its lockfile digest matches the checked-out lockfile.
-7. Authorize the Renovate app and confirm its first dependency dashboard or
-   scheduled run.
+The following no-cost controls were enabled and verified on 18 July 2026:
 
-The repository administrator must attach the Actions run URL and ruleset/security
-settings evidence here before changing the package to `COMPLETE`.
+- Dependabot vulnerability alerts and automatic security updates
+- GitHub secret scanning and push protection; the alert inventory was empty
+- Repository-wide full-SHA pin enforcement for GitHub Actions
+- Read-only default workflow token permissions without pull-request approval
+  capability
+- Active `Protect main` ruleset, ID `19144543`
+- Required pull requests for `main`
+- Required `quality`, `dependency review`, and `secret scan` checks
+- Strict up-to-date branch enforcement, blocked force pushes, blocked branch
+  deletion, and required review-thread resolution
+
+The initial hosted
+[`CI` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29639376503)
+passed on commit `5468e89e151077dbaf265cf9bef529e3c924b1d9`. Its downloaded
+metadata artifact matched that source commit and the local lockfile digest
+`b91381a802bd6b5f172a5b98e221dcce31b19cf865f81f0b6812d000f19ce8f1`.
+
+The manually dispatched
+[`Supply Chain` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29648207005)
+passed both the current dependency audit and full-history secret scan.
+
+Pull request [#1](https://github.com/mnishanth02/littlearc-v2/pull/1) proved all
+three required checks. The final
+[`CI` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29648367759)
+and
+[`Supply Chain` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29648367756)
+passed `quality`, `dependency review`, and `secret scan` on head commit
+`6fc5ce03d804607191ac15d78bd2b27039e258e5`.
+
+The first pull-request CI run reported that two pinned actions still declared
+the retired Node 20 action runtime. The branch was updated to
+`pnpm/action-setup@v6.0.9` and `actions/upload-artifact@v7.0.1`, both
+reviewed at full commit SHAs and both declaring the Node 24 action runtime. The
+replacement run passed without that annotation.
+
+The downloaded PR artifact identified tested merge commit
+`aedf11802746beb6e6a9f78ba580cc86c0c212c7`, pull-request head
+`6fc5ce03d804607191ac15d78bd2b27039e258e5`, and the expected lockfile
+digest. This closes the hosted traceability gate.
+
+GitHub secret validity checks and non-provider pattern scanning remain disabled
+because GitHub did not make those optional capabilities available through the
+current free repository configuration. TruffleHog and GitHub provider-pattern
+scanning remain active, so this limitation is recorded as reference rather than
+a blocker.
+
+Renovate installation remains a no-cost manual follow-up because GitHub App
+authorization requires an interactive signed-in browser. The configuration is
+committed and validated; update automation is useful maintenance support, not a
+blocker for the deterministic CI and supply-chain control baseline.
 
 ## 4. Deferred ownership
 
@@ -128,3 +162,4 @@ settings evidence here before changing the package to `COMPLETE`.
 | Contract generation and first drift-manifest entry | `FND-04` | OpenAPI/client generation exists |
 | Production environment and reviewed-branch deployment controls | `FND-06` and release work | Organization-owned Railway access and release workflow exist |
 | Signed artifact attestations and binary provenance | Release hardening | A distributable artifact is produced |
+| Moderate `uuid` advisory in retained M0 harness | `FND-03` harness retirement | Production mobile configuration replaces the non-production spike |

@@ -42,17 +42,16 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | Scope | Tag | Owner | Next action or completion evidence |
 | --- | --- | --- | --- |
 | M0. Readiness and evidence | `COMPLETE` | Founder/product + engineering | Gate 0A closed on 18 July 2026; see the M0 dossier |
-| M1. Engineering foundation | `IN PROGRESS` | Engineering | Complete local `FND-02` controls, then obtain the first hosted CI evidence |
+| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-03` on the accepted repository and CI foundation |
 | `FND-01` Monorepo and toolchain | `COMPLETE` | Engineering | Root workspace, boundaries, exact pins, and clean-checkout proof accepted; see [evidence](./fnd-01-implementation-evidence.md) |
 | `FND-03` Application skeletons | `READY` | Engineering | Write the package brief, then scaffold the four application runtimes |
-| `FND-02` CI and supply-chain baseline | `IN PROGRESS` | Engineering | Local controls pass; obtain hosted Actions and repository-settings acceptance recorded in the [evidence](./fnd-02-implementation-evidence.md) |
+| `FND-02` CI and supply-chain baseline | `COMPLETE` | Engineering | Local and hosted validation, required PR checks, source traceability, and repository controls accepted; see [evidence](./fnd-02-implementation-evidence.md) |
 | `FND-04` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order |
 | M2 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
-`FND-02` is active by explicit delivery direction ahead of `FND-03`. The
-workflow baseline can be established against the stable root commands from
-`FND-01`; application-specific jobs will enter the same task graph when
-`FND-03` adds them.
+`FND-02` was completed by explicit delivery direction ahead of `FND-03`.
+Application-specific jobs will enter the accepted task graph when `FND-03`
+adds them.
 
 ## 4. Completed Register
 
@@ -60,6 +59,7 @@ workflow baseline can be established against the stable root commands from
 | --- | --- | --- | --- |
 | 18 Jul 2026 | M0 Gate 0A and engineering close-out | `COMPLETE` | Proceed decision, accepted dependency baseline, decisions `M0-D01` through `M0-D10`, and later-gate obligations are recorded in the M0 dossier |
 | 18 Jul 2026 | [`FND-01` monorepo and toolchain](./fnd-01-implementation-evidence.md) | `COMPLETE` | Root pnpm/Turborepo workspace, 13 package nodes, exact pins, shared configuration, boundary/environment policy, 18 tests, and temporary clean-checkout validation pass |
+| 18 Jul 2026 | [`FND-02` CI and supply-chain baseline](./fnd-02-implementation-evidence.md) | `COMPLETE` | Deterministic GitHub Actions, 23 tooling tests, dependency review, dual secret scanning, scheduled audit, main ruleset, immutable action pins, and source/lockfile traceability pass locally and on pull request #1 |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -72,9 +72,7 @@ workflow baseline can be established against the stable root commands from
 
 ## 5. In-Progress Register
 
-| Started | Item | Tag | Owner | Immediate next action |
-| --- | --- | --- | --- | --- |
-| 18 Jul 2026 | [`FND-02` CI and supply-chain baseline](./fnd-02-ci-and-supply-chain-plan.md) | `IN PROGRESS` | Engineering | Local [evidence](./fnd-02-implementation-evidence.md) passes; run the workflows on GitHub and activate required repository rules |
+No implementation item is currently tagged `IN PROGRESS`.
 
 ## 6. Ready Queue
 
@@ -104,6 +102,8 @@ roadmap. This table should show only the next few actionable packages.
 | `spikes/native-compat` source harness | `RETAINED` | Reproducible M0 native configuration and OCR workaround evidence | Meet the harness-retirement trigger in Section 7 |
 | ML Kit core 5.0.0 pnpm override | `RETAINED` | Resolves the OCR wrapper's invalid React 17-era runtime dependency graph | Remove only when the wrapper publishes a compatible core dependency and all native checks remain green |
 | Long probe-screen title wrapping | `DEFERRED` | Structural accessibility passed; visual wrapping needs product UI treatment | Resolve during `FND-08` component and typography reconciliation |
+| Moderate `uuid` advisory in retained M0 harness | `DEFERRED` | The vulnerable transitive package exists only in the non-production compatibility harness; root production audit is clean | Reassess during `FND-03` transfer and remove with harness retirement |
+| Renovate GitHub App authorization | `DEFERRED` | Validated configuration is committed; interactive App authorization was unavailable in this session and is not a CI baseline blocker | Install from the Renovate GitHub App page and confirm its dependency dashboard |
 
 ## 9. Update Protocol
 
@@ -118,6 +118,5 @@ For every status change:
 6. Never mark an item `COMPLETE` when only its implementation is written;
    required validation and evidence must also pass.
 
-The next status change should be `FND-02`: `IN PROGRESS` to `COMPLETE` only
-after local evidence, a hosted GitHub Actions run, and repository-side required
-checks are recorded.
+The next status change should be `FND-03`: `READY` to `IN PROGRESS` when
+its package brief and implementation begin.
