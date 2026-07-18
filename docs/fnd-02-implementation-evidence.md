@@ -1,7 +1,7 @@
 # FND-02 Implementation Evidence
 
 > **Work package:** `FND-02`
-> **Status:** Hosted acceptance in progress
+> **Status:** Complete
 > **Evidence date:** 18 July 2026
 > **Toolchain:** Node.js 24.18.0, pnpm 11.14.0
 > **Plan:** [FND-02 package plan](./fnd-02-ci-and-supply-chain-plan.md)
@@ -124,24 +124,35 @@ The manually dispatched
 [`Supply Chain` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29648207005)
 passed both the current dependency audit and full-history secret scan.
 
-The first pull-request run passed all three required checks. Its initial CI run
-reported that two pinned actions still declared the retired Node 20 action
-runtime. The branch was updated to `pnpm/action-setup@v6.0.9` and
-`actions/upload-artifact@v7.0.1`, both reviewed at full commit SHAs and both
-declaring the Node 24 action runtime. The final run must remain warning-free
-before merge.
+Pull request [#1](https://github.com/mnishanth02/littlearc-v2/pull/1) proved all
+three required checks. The final
+[`CI` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29648367759)
+and
+[`Supply Chain` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29648367756)
+passed `quality`, `dependency review`, and `secret scan` on head commit
+`6fc5ce03d804607191ac15d78bd2b27039e258e5`.
 
-Hosted acceptance remains open only until the current `development` to
-`main` pull request proves all three required pull-request checks. Renovate
-installation is a no-cost manual follow-up because GitHub App authorization
-requires an interactive signed-in browser; it is useful maintenance automation,
-not a blocker for the deterministic CI and supply-chain control baseline.
+The first pull-request CI run reported that two pinned actions still declared
+the retired Node 20 action runtime. The branch was updated to
+`pnpm/action-setup@v6.0.9` and `actions/upload-artifact@v7.0.1`, both
+reviewed at full commit SHAs and both declaring the Node 24 action runtime. The
+replacement run passed without that annotation.
+
+The downloaded PR artifact identified tested merge commit
+`aedf11802746beb6e6a9f78ba580cc86c0c212c7`, pull-request head
+`6fc5ce03d804607191ac15d78bd2b27039e258e5`, and the expected lockfile
+digest. This closes the hosted traceability gate.
 
 GitHub secret validity checks and non-provider pattern scanning remain disabled
 because GitHub did not make those optional capabilities available through the
 current free repository configuration. TruffleHog and GitHub provider-pattern
 scanning remain active, so this limitation is recorded as reference rather than
 a blocker.
+
+Renovate installation remains a no-cost manual follow-up because GitHub App
+authorization requires an interactive signed-in browser. The configuration is
+committed and validated; update automation is useful maintenance support, not a
+blocker for the deterministic CI and supply-chain control baseline.
 
 ## 4. Deferred ownership
 

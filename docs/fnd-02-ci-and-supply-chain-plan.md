@@ -1,8 +1,9 @@
 # FND-02 Continuous Integration and Supply-Chain Baseline
 
-> **Status:** In progress
+> **Status:** Complete
 > **Owner:** Engineering
 > **Started:** 18 July 2026
+> **Completed:** 18 July 2026
 > **Work package:** `FND-02`
 > **Depends on:** `FND-01`
 > **Acceptance evidence:** `docs/fnd-02-implementation-evidence.md`
@@ -154,7 +155,7 @@ local acceptance; a repository administrator owns hosted settings evidence.
 | --- | --- | --- |
 | Compromised mutable action tag | Full commit SHA pins | Renovate reviews future SHA updates |
 | Malicious pull-request code | Read-only token, no secrets, isolated hosted runner | Review any future self-hosted runner use |
-| Dependency-review feature unavailable | Hosted gate fails visibly | Confirm repository plan or enable GitHub Code Security |
+| Dependency-review availability changes | Public-repository PR proof | Recheck the control before any visibility change |
 | Secret-scanner image tag moves | Pin action SHA and scanner version | Replace with digest-pinned execution when the action supports it |
 | False secret positives | Report verified and unknown results; review findings | Never suppress a real credential with a broad exclusion |
 | Stale generated output | Manifest-driven regeneration and diff | `FND-04` registers generated clients |
