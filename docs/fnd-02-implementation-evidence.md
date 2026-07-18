@@ -124,6 +124,13 @@ The manually dispatched
 [`Supply Chain` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29648207005)
 passed both the current dependency audit and full-history secret scan.
 
+The first pull-request run passed all three required checks. Its initial CI run
+reported that two pinned actions still declared the retired Node 20 action
+runtime. The branch was updated to `pnpm/action-setup@v6.0.9` and
+`actions/upload-artifact@v7.0.1`, both reviewed at full commit SHAs and both
+declaring the Node 24 action runtime. The final run must remain warning-free
+before merge.
+
 Hosted acceptance remains open only until the current `development` to
 `main` pull request proves all three required pull-request checks. Renovate
 installation is a no-cost manual follow-up because GitHub App authorization
@@ -144,3 +151,4 @@ a blocker.
 | Contract generation and first drift-manifest entry | `FND-04` | OpenAPI/client generation exists |
 | Production environment and reviewed-branch deployment controls | `FND-06` and release work | Organization-owned Railway access and release workflow exist |
 | Signed artifact attestations and binary provenance | Release hardening | A distributable artifact is produced |
+| Moderate `uuid` advisory in retained M0 harness | `FND-03` harness retirement | Production mobile configuration replaces the non-production spike |

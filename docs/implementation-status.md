@@ -104,6 +104,7 @@ roadmap. This table should show only the next few actionable packages.
 | `spikes/native-compat` source harness | `RETAINED` | Reproducible M0 native configuration and OCR workaround evidence | Meet the harness-retirement trigger in Section 7 |
 | ML Kit core 5.0.0 pnpm override | `RETAINED` | Resolves the OCR wrapper's invalid React 17-era runtime dependency graph | Remove only when the wrapper publishes a compatible core dependency and all native checks remain green |
 | Long probe-screen title wrapping | `DEFERRED` | Structural accessibility passed; visual wrapping needs product UI treatment | Resolve during `FND-08` component and typography reconciliation |
+| Moderate `uuid` advisory in retained M0 harness | `DEFERRED` | The vulnerable transitive package exists only in the non-production compatibility harness; root production audit is clean | Reassess during `FND-03` transfer and remove with harness retirement |
 
 ## 9. Update Protocol
 
