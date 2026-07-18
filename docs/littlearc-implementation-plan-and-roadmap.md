@@ -1,11 +1,12 @@
 # LittleArc Implementation Plan and Roadmap
 
-> **Status:** Accepted execution baseline — M0 closed; M1 authorized
-> **Version:** 1.1
+> **Status:** Accepted execution baseline — see the [Implementation Status Tracker](./implementation-status.md) for live delivery state
+> **Version:** 1.2
 > **Last updated:** 18 July 2026
 > **Product source:** [LittleArc Complete Product Plan](./littlearc-complete-product-plan.md)
 > **Architecture source:** [LittleArc Architecture and Technology Stack](./littlearc-architecture-and-tech-stack.md)
 > **Design-system source:** [LittleArc Design System](./design-system.md)
+> **Delivery-status source:** [LittleArc Implementation Status Tracker](./implementation-status.md)
 > **Audience:** Product, design, engineering, security, operations, QA, and implementation agents
 
 ---
@@ -275,6 +276,9 @@ The shortest safe path to a private beta is:
 
 The overlaps are intentional. A milestone may begin preparatory work before the
 previous gate, but it may not depend on an unverified assumption from that gate.
+Live progress, blockers, deferred obligations, retained artifacts, and completion
+evidence are maintained outside this roadmap in the implementation status
+tracker.
 
 ## 9. M0 — Readiness and Evidence
 
@@ -1385,21 +1389,29 @@ Recommended working sessions:
 
 ## 25. First Planning Queue
 
-The recommended order for the next item-by-item planning sessions is:
+The recommended M1 implementation sequence is:
 
-1. `RDY-06` — Revalidate and freeze the compatible dependency snapshot.
-2. `RDY-07` — Implement the spike harness, device matrix, and acceptance evidence.
-3. `RDY-09` — Complete live Railway, organization, store, signing, and custody verification.
-4. `RDY-01` + `RDY-02` — Execute the research cohorts and five critical-flow tests.
-5. `RDY-03` + `RDY-08` — Obtain pediatric, privacy/legal, and security approval.
-6. `FND-01` — Plan the exact monorepo scaffold and root commands.
-7. `FND-04` — Plan contract generation and the initial domain kernel.
-8. `FND-05` — Plan PostgreSQL roles, migrations, tenant context, and RLS tests.
-9. `FND-03` — Plan the four application skeletons and staging smoke path.
-10. `FND-08` — Reconcile the design-system prototypes after the scaffold exists.
-11. `OFF-01` + `OFF-02` — Plan authentication, household, consent, and audit.
-12. `OFF-03` + `OFF-04` — Plan local security and synchronization.
-13. `OFF-05` — Plan the emergency-card walking skeleton and Gate 2 scenarios.
+1. `FND-01` — finalize the monorepo scaffold, exact pins, root
+   commands, task graph, configuration boundaries, and clean-checkout workflow.
+2. `FND-03` — create the four application skeletons and transfer the
+   accepted Expo/native configuration into the real mobile application.
+3. `FND-02` — establish deterministic CI and the supply-chain baseline around
+   the root commands created by `FND-01`.
+4. `FND-04` — establish contract generation and the initial domain kernel.
+5. `FND-05` — establish PostgreSQL roles, migrations, tenant context, and RLS tests.
+6. `FND-07` — add observability and privacy guardrails before feature data flows.
+7. `FND-08` — reconcile the design-system prototypes after the scaffold exists.
+8. `FND-09` — record the implemented foundation choices and spike retirement
+   decision in ADRs.
+9. `FND-06` — provision and validate the Railway environment skeleton when the
+   required organization-owned access is available.
+10. `OFF-01` + `OFF-02` — plan authentication, household, consent, and audit.
+11. `OFF-03` + `OFF-04` — plan local security and synchronization.
+12. `OFF-05` — plan the emergency-card walking skeleton and Gate 2 scenarios.
+
+This section expresses dependency order, not current delivery state. Use the
+[Implementation Status Tracker](./implementation-status.md) to select the next
+`READY` item and to see completed, active, blocked, or deferred work.
 
 The first implementation commit should not be a feature screen. It should follow
 the accepted `FND-01` plan and create the reproducible repository foundation.
