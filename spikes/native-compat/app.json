@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "LittleArc M0 Native Compatibility",
+    "slug": "littlearc-m0-native-compat",
+    "version": "0.0.1",
+    "runtimeVersion": "m0-1",
+    "scheme": "littlearc-m0",
+    "orientation": "portrait",
+    "ios": {
+      "bundleIdentifier": "com.littlearc.spike.nativecompat",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow this synthetic M0 harness to test document scanning.",
+        "NSFaceIDUsageDescription": "Allow this synthetic M0 harness to test protected local key access.",
+        "NSPhotoLibraryUsageDescription": "Allow this synthetic M0 harness to test local image import."
+      }
+    },
+    "android": {
+      "package": "com.littlearc.spike.nativecompat",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.USE_BIOMETRIC"
+      ]
+    },
+    "plugins": [
+      "expo-dev-client",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.4"
+          },
+          "android": {
+            "minSdkVersion": 29,
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36
+          }
+        }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true,
+          "enableFTS": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": false,
+          "faceIDPermission": "Allow this synthetic M0 harness to test protected local key access."
+        }
+      ],
+      "expo-local-authentication",
+      "expo-notifications",
+      [
+        "react-native-document-scanner-plugin",
+        {
+          "cameraPermission": "Allow this synthetic M0 harness to test document scanning."
+        }
+      ]
+    ],
+    "experiments": {
+      "reactCompiler": true
+    }
+  }
+}

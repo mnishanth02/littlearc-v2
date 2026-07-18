@@ -1,0 +1,54 @@
+{
+  "name": "@littlearc/native-compat-spike",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Disposable M0 Expo native compatibility harness; not production code",
+  "main": "index.ts",
+  "packageManager": "pnpm@11.14.0",
+  "engines": {
+    "node": "24.18.0"
+  },
+  "scripts": {
+    "start": "expo start --dev-client",
+    "prebuild": "expo prebuild --clean",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "doctor": "expo-doctor",
+    "typecheck": "tsc --noEmit",
+    "export": "expo export --platform all --output-dir dist"
+  },
+  "dependencies": {
+    "@better-auth/expo": "1.6.23",
+    "@infinitered/react-native-mlkit-text-recognition": "5.0.1",
+    "@react-native/normalize-colors": "0.86.0",
+    "better-auth": "1.6.23",
+    "expo": "57.0.7",
+    "expo-build-properties": "57.0.6",
+    "expo-constants": "57.0.6",
+    "expo-crypto": "57.0.1",
+    "expo-dev-client": "57.0.7",
+    "expo-document-picker": "57.0.1",
+    "expo-file-system": "57.0.1",
+    "expo-image-picker": "57.0.5",
+    "expo-linking": "57.0.3",
+    "expo-local-authentication": "57.0.1",
+    "expo-network": "57.0.1",
+    "expo-notifications": "57.0.6",
+    "expo-secure-store": "57.0.1",
+    "expo-sqlite": "57.0.1",
+    "expo-web-browser": "57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.0",
+    "react-native-document-scanner-plugin": "2.0.4",
+    "react-native-nitro-modules": "0.36.1",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-unistyles": "3.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "babel-preset-expo": "57.0.3",
+    "expo-doctor": "1.20.1",
+    "expo-mcp": "~0.2.4",
+    "typescript": "6.0.3"
+  }
+}
