@@ -103,7 +103,7 @@ the default branch.
 
 The following no-cost controls were enabled and verified on 18 July 2026:
 
-- Dependabot vulnerability alerts and automatic security updates
+- Dependabot vulnerability alerts
 - GitHub secret scanning and push protection; the alert inventory was empty
 - Repository-wide full-SHA pin enforcement for GitHub Actions
 - Read-only default workflow token permissions without pull-request approval
@@ -153,6 +153,15 @@ Renovate installation remains a no-cost manual follow-up because GitHub App
 authorization requires an interactive signed-in browser. The configuration is
 committed and validated; update automation is useful maintenance support, not a
 blocker for the deterministic CI and supply-chain control baseline.
+
+Dependabot automatic security updates were exercised once and then disabled.
+The
+[`Dependabot Updates` run](https://github.com/mnishanth02/littlearc-v2/actions/runs/29648131449)
+reported `security_update_not_possible`: the retained M0 harness resolves
+`uuid@7.0.3`, while the first version GitHub currently considers fixed is
+`14.0.0`. The alert remains open and visible. A forced transitive major
+override would invalidate the retained native evidence, so remediation belongs
+to the `FND-03` transfer and harness-retirement decision.
 
 ## 4. Deferred ownership
 
