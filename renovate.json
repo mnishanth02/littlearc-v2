@@ -1,0 +1,23 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "timezone": "Asia/Kolkata",
+  "schedule": ["before 5am on monday"],
+  "rangeStrategy": "pin",
+  "dependencyDashboard": true,
+  "ignorePaths": ["spikes/native-compat/**"],
+  "packageRules": [
+    {
+      "description": "Group non-native development tooling",
+      "matchDepTypes": ["devDependencies"],
+      "excludePackageNames": ["expo", "react", "react-native"],
+      "groupName": "development tooling"
+    },
+    {
+      "description": "Keep native runtime upgrades isolated for compatibility review",
+      "matchPackageNames": ["expo", "react", "react-native", "@react-native/**"],
+      "groupName": "native runtime",
+      "separateMajorMinor": true
+    }
+  ]
+}

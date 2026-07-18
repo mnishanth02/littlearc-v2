@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out tested source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        with:
+          version: 11.14.0
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate formatting, policy, and types
+        run: pnpm validate
+
+      - name: Run unit tests
+        run: pnpm test:unit
+
+      - name: Run contract tests
+        run: pnpm test:contract
+
+      - name: Build workspace
+        run: pnpm build
+
+      - name: Verify lockfile remained unchanged
+        run: git diff --exit-code -- pnpm-lock.yaml
+
+      - name: Write source traceability metadata
+        env:
+          GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          LITTLEARC_CI_OUTPUT: .artifacts/ci/build-metadata.json
+        run: node tooling/ci/write-build-metadata.mjs
+
+      - name: Upload source traceability metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-source-metadata-${{ github.sha }}
+          path: .artifacts/ci/build-metadata.json
+          if-no-files-found: error
+          retention-days: 14

@@ -42,14 +42,17 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | Scope | Tag | Owner | Next action or completion evidence |
 | --- | --- | --- | --- |
 | M0. Readiness and evidence | `COMPLETE` | Founder/product + engineering | Gate 0A closed on 18 July 2026; see the M0 dossier |
-| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-03` on the accepted FND-01 foundation |
+| M1. Engineering foundation | `IN PROGRESS` | Engineering | Complete local `FND-02` controls, then obtain the first hosted CI evidence |
 | `FND-01` Monorepo and toolchain | `COMPLETE` | Engineering | Root workspace, boundaries, exact pins, and clean-checkout proof accepted; see [evidence](./fnd-01-implementation-evidence.md) |
 | `FND-03` Application skeletons | `READY` | Engineering | Write the package brief, then scaffold the four application runtimes |
-| `FND-02`, `FND-04` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order; `FND-02` follows the real application tasks from `FND-03` |
+| `FND-02` CI and supply-chain baseline | `IN PROGRESS` | Engineering | Local controls pass; obtain hosted Actions and repository-settings acceptance recorded in the [evidence](./fnd-02-implementation-evidence.md) |
+| `FND-04` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order |
 | M2 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
-No implementation package is currently active. `FND-03` is the next `READY`
-package.
+`FND-02` is active by explicit delivery direction ahead of `FND-03`. The
+workflow baseline can be established against the stable root commands from
+`FND-01`; application-specific jobs will enter the same task graph when
+`FND-03` adds them.
 
 ## 4. Completed Register
 
@@ -69,14 +72,15 @@ package.
 
 ## 5. In-Progress Register
 
-No implementation item is currently tagged `IN PROGRESS`.
+| Started | Item | Tag | Owner | Immediate next action |
+| --- | --- | --- | --- | --- |
+| 18 Jul 2026 | [`FND-02` CI and supply-chain baseline](./fnd-02-ci-and-supply-chain-plan.md) | `IN PROGRESS` | Engineering | Local [evidence](./fnd-02-implementation-evidence.md) passes; run the workflows on GitHub and activate required repository rules |
 
 ## 6. Ready Queue
 
 | Priority | Item | Tag | Entry condition | Definition of done |
 | ---: | --- | --- | --- | --- |
 | 1 | `FND-03` Application skeletons | `READY` | `FND-01` foundation available | Mobile, API, worker, and staff shells run; accepted native configuration is transferred into `apps/mobile` |
-| 2 | `FND-02` CI and supply-chain baseline | `NOT STARTED` | Stable root commands from `FND-01` | Deterministic validation and required supply-chain checks run in CI |
 
 The complete dependency order remains in Section 25 of the implementation
 roadmap. This table should show only the next few actionable packages.
@@ -114,5 +118,6 @@ For every status change:
 6. Never mark an item `COMPLETE` when only its implementation is written;
    required validation and evidence must also pass.
 
-The next status change should be `FND-03`: `READY` to `IN PROGRESS` when its
-package brief and implementation begin.
+The next status change should be `FND-02`: `IN PROGRESS` to `COMPLETE` only
+after local evidence, a hosted GitHub Actions run, and repository-side required
+checks are recorded.

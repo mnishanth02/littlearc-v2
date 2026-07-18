@@ -16,6 +16,10 @@
       "dependsOn": ["^typecheck"],
       "outputs": ["coverage/**"]
     },
+    "test:contract": {
+      "dependsOn": ["^typecheck"],
+      "outputs": ["coverage/**"]
+    },
     "typecheck": {
       "dependsOn": ["^typecheck"],
       "outputs": []

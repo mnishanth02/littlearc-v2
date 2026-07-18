@@ -11,14 +11,19 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "check": "pnpm check:toolchain && pnpm check:workspace && pnpm check:format",
+    "check": "pnpm check:toolchain && pnpm check:workspace && pnpm check:supply-chain && pnpm check:format",
+    "check:ci": "node tooling/ci/check-workflows.mjs",
     "check:environment": "node tooling/environment/check-environment.mjs",
     "check:format": "biome ci . && markdownlint-cli2",
+    "check:generated": "node tooling/generation/check-generated.mjs",
+    "check:supply-chain": "pnpm check:ci && pnpm check:generated && node tooling/supply-chain/check-config.mjs",
     "check:toolchain": "node tooling/check-toolchain.mjs",
     "check:workspace": "vitest run tooling && node tooling/boundaries/check-boundaries.mjs && pnpm check:environment",
     "clean": "turbo run clean",
     "format": "biome check --write .",
-    "test": "turbo run test",
+    "test": "pnpm test:unit && pnpm test:contract",
+    "test:contract": "turbo run test:contract",
+    "test:unit": "vitest run tooling && turbo run test",
     "typecheck": "pnpm typecheck:tooling && turbo run typecheck",
     "typecheck:tooling": "tsc --project tooling/tsconfig.json",
     "validate": "pnpm check && pnpm typecheck"
@@ -29,6 +34,7 @@
     "markdownlint-cli2": "0.23.1",
     "turbo": "2.10.5",
     "typescript": "6.0.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.10",
+    "yaml": "2.9.0"
   }
 }
