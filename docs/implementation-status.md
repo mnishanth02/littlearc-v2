@@ -42,10 +42,10 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | Scope | Tag | Owner | Next action or completion evidence |
 | --- | --- | --- | --- |
 | M0. Readiness and evidence | `COMPLETE` | Founder/product + engineering | Gate 0A closed on 18 July 2026; see the M0 dossier |
-| M1. Engineering foundation | `IN PROGRESS` | Engineering | Complete local `FND-02` controls, then obtain the first hosted CI evidence |
+| M1. Engineering foundation | `IN PROGRESS` | Engineering | Close the `FND-02` pull-request acceptance run, then start `FND-03` |
 | `FND-01` Monorepo and toolchain | `COMPLETE` | Engineering | Root workspace, boundaries, exact pins, and clean-checkout proof accepted; see [evidence](./fnd-01-implementation-evidence.md) |
 | `FND-03` Application skeletons | `READY` | Engineering | Write the package brief, then scaffold the four application runtimes |
-| `FND-02` CI and supply-chain baseline | `IN PROGRESS` | Engineering | Local controls pass; obtain hosted Actions and repository-settings acceptance recorded in the [evidence](./fnd-02-implementation-evidence.md) |
+| `FND-02` CI and supply-chain baseline | `IN PROGRESS` | Engineering | Local, hosted push, scheduled audit, and repository controls pass; close the required pull-request run in the [evidence](./fnd-02-implementation-evidence.md) |
 | `FND-04` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order |
 | M2 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
@@ -74,7 +74,7 @@ workflow baseline can be established against the stable root commands from
 
 | Started | Item | Tag | Owner | Immediate next action |
 | --- | --- | --- | --- | --- |
-| 18 Jul 2026 | [`FND-02` CI and supply-chain baseline](./fnd-02-ci-and-supply-chain-plan.md) | `IN PROGRESS` | Engineering | Local [evidence](./fnd-02-implementation-evidence.md) passes; run the workflows on GitHub and activate required repository rules |
+| 18 Jul 2026 | [`FND-02` CI and supply-chain baseline](./fnd-02-ci-and-supply-chain-plan.md) | `IN PROGRESS` | Engineering | Local and hosted controls pass; validate the three required jobs on the `development` to `main` pull request |
 
 ## 6. Ready Queue
 
