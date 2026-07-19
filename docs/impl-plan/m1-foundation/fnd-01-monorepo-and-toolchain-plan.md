@@ -1,17 +1,29 @@
 # FND-01 Monorepo and Toolchain Implementation Plan
 
-> **Status:** Implemented and accepted
+> **Status:** Completed
 > **Version:** 1.0
-> **Prepared:** 18 July 2026
+> **Started date:** 18 July 2026
+> **Last updated:** 19 July 2026
+> **Completion date:** 18 July 2026
 > **Work package:** `FND-01`
 > **Owner:** Engineering
 > **Delivery status:** `COMPLETE`; see [implementation evidence](./fnd-01-implementation-evidence.md)
-> **Inputs:** [Architecture and tech stack](./littlearc-architecture-and-tech-stack.md),
-> [implementation roadmap](./littlearc-implementation-plan-and-roadmap.md),
-> [M0 evidence](./m0-readiness-and-evidence.md), and
-> [delivery register](./implementation-status.md)
+> **Inputs:** [Architecture and tech stack](../../core/littlearc-architecture-and-tech-stack.md),
+> [implementation roadmap](../roadmap.md),
+> [M0 evidence](../../core/m0-readiness-and-evidence.md), and
+> [delivery register](../../IMPLEMENTATION_STATUS.md)
 
 ---
+
+## Status Summary
+
+| Module | Status | Evidence |
+| --- | --- | --- |
+| Root workspace and lockfile | Completed | See implementation evidence |
+| Toolchain pins and root validation | Completed | See implementation evidence |
+| Workspace package registration | Completed | See implementation evidence |
+| Boundaries, environment policy, and generated-output checks | Completed | See implementation evidence |
+| Documentation and local setup | Completed | See implementation evidence |
 
 ## 1. Decision Summary
 
@@ -395,8 +407,8 @@ builds or tests passed.
 
 1. Implement and test the repository-owned package-graph policy.
 2. Add the four `.env.example` files with blank secrets.
-3. Add `docs/local-development.md` with prerequisites and commands.
-4. Add `docs/environment-variable-catalog.md` with classification and owners.
+3. Add `docs/reference/local-development.md` with prerequisites and commands.
+4. Add `docs/reference/environment-variable-catalog.md` with classification and owners.
 5. Document the spike's isolation and later transfer trigger.
 
 **Review point:** Every forbidden synthetic edge fails with an actionable error,
@@ -419,7 +431,7 @@ pre-existing module store, generated native project, or untracked config file.
 ### Slice 6 — Evidence and handoff
 
 1. Record commands, versions, expected results, observed results, and any
-   deviations in `docs/fnd-01-implementation-evidence.md`.
+   deviations in `docs/impl-plan/m1-foundation/fnd-01-implementation-evidence.md`.
 2. Update `AGENTS.md` with the new root commands and keep the spike commands.
 3. Change `FND-01` to `IN PROGRESS` when implementation starts.
 4. Change it to `COMPLETE` only after every acceptance criterion passes.
@@ -487,7 +499,7 @@ The acceptance suite must deliberately prove rejection of:
 - [x] The retained spike is unchanged or any unavoidable isolation edit is
   separately justified and revalidated.
 - [x] Local prerequisite and root-command documentation is current.
-- [x] FND-01 evidence is recorded and `docs/implementation-status.md` is updated.
+- [x] FND-01 evidence is recorded and `docs/IMPLEMENTATION_STATUS.md` is updated.
 
 Passing `FND-01` does not mean that any application runs, any native build has
 been transferred, or Gate 1 has passed. It means `FND-03` and then `FND-02` can

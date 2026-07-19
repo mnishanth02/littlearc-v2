@@ -5,6 +5,7 @@
       "**/*.{css,js,jsx,json,jsonc,ts,tsx}",
       "!**/node_modules",
       "!**/.turbo",
+      "!**/.next",
       "!**/.expo",
       "!**/coverage",
       "!**/dist",

@@ -1,5 +1,9 @@
 # LittleArc — Complete Product Plan
 
+> **Status:** Accepted product strategy
+> **Date:** 17 July 2026
+> **Owner:** Founder/product lead
+
 **Product:** LittleArc mobile application  
 **Market:** India-first  
 **Business model:** B2C-first, B2B2C-ready  

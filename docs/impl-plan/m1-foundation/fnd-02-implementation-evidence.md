@@ -1,8 +1,9 @@
 # FND-02 Implementation Evidence
 
 > **Work package:** `FND-02`
-> **Status:** Complete
+> **Status:** Completed
 > **Evidence date:** 18 July 2026
+> **Last updated:** 19 July 2026
 > **Toolchain:** Node.js 24.18.0, pnpm 11.14.0
 > **Plan:** [FND-02 package plan](./fnd-02-ci-and-supply-chain-plan.md)
 

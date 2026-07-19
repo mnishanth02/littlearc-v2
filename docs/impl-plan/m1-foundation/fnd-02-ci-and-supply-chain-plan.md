@@ -1,12 +1,23 @@
 # FND-02 Continuous Integration and Supply-Chain Baseline
 
-> **Status:** Complete
+> **Status:** Completed
 > **Owner:** Engineering
-> **Started:** 18 July 2026
-> **Completed:** 18 July 2026
+> **Started date:** 18 July 2026
+> **Last updated:** 19 July 2026
+> **Completion date:** 18 July 2026
 > **Work package:** `FND-02`
 > **Depends on:** `FND-01`
-> **Acceptance evidence:** `docs/fnd-02-implementation-evidence.md`
+> **Acceptance evidence:** [FND-02 evidence](./fnd-02-implementation-evidence.md)
+
+## Status Summary
+
+| Module | Status | Evidence |
+| --- | --- | --- |
+| Deterministic GitHub Actions validation | Completed | See implementation evidence |
+| Supply-chain and dependency controls | Completed | See implementation evidence |
+| Secret scanning and workflow policy | Completed | See implementation evidence |
+| Build metadata and source traceability | Completed | See implementation evidence |
+| Hosted PR validation | Completed | See implementation evidence |
 
 ## 1. Problem and outcome
 
@@ -121,7 +132,7 @@ entitlement to be confirmed, GitHub secret scanning/push protection to be
 enabled where the plan permits, and uploaded build metadata to match the run's
 source SHA.
 
-Evidence belongs in `docs/fnd-02-implementation-evidence.md`. Engineering owns
+Evidence belongs in `docs/impl-plan/m1-foundation/fnd-02-implementation-evidence.md`. Engineering owns
 local acceptance; a repository administrator owns hosted settings evidence.
 
 ## 7. Delivery slices

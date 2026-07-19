@@ -1,12 +1,12 @@
 # LittleArc Implementation Plan and Roadmap
 
-> **Status:** Accepted execution baseline — see the [Implementation Status Tracker](./implementation-status.md) for live delivery state
+> **Status:** Accepted execution baseline — see the [Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) for live delivery state
 > **Version:** 1.2
 > **Last updated:** 18 July 2026
-> **Product source:** [LittleArc Complete Product Plan](./littlearc-complete-product-plan.md)
-> **Architecture source:** [LittleArc Architecture and Technology Stack](./littlearc-architecture-and-tech-stack.md)
-> **Design-system source:** [LittleArc Design System](./design-system.md)
-> **Delivery-status source:** [LittleArc Implementation Status Tracker](./implementation-status.md)
+> **Product source:** [LittleArc Complete Product Plan](../core/littlearc-complete-product-plan.md)
+> **Architecture source:** [LittleArc Architecture and Technology Stack](../core/littlearc-architecture-and-tech-stack.md)
+> **Design-system source:** [LittleArc Design System](../core/design-system.md)
+> **Delivery-status source:** [LittleArc Implementation Status Tracker](../IMPLEMENTATION_STATUS.md)
 > **Audience:** Product, design, engineering, security, operations, QA, and implementation agents
 
 ---
@@ -287,7 +287,7 @@ tracker.
 targets evidence-backed product behavior.
 
 M0 decisions, status, evidence, and blockers are maintained in the
-[M0 Readiness and Evidence Dossier](./m0-readiness-and-evidence.md). M0 uses two
+[M0 Readiness and Evidence Dossier](../core/m0-readiness-and-evidence.md). M0 uses two
 gates so technical preparation cannot be mistaken for complete product
 validation:
 
@@ -1410,7 +1410,7 @@ The recommended M1 implementation sequence is:
 12. `OFF-05` — plan the emergency-card walking skeleton and Gate 2 scenarios.
 
 This section expresses dependency order, not current delivery state. Use the
-[Implementation Status Tracker](./implementation-status.md) to select the next
+[Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) to select the next
 `READY` item and to see completed, active, blocked, or deferred work.
 
 The first implementation commit should not be a feature screen. It should follow

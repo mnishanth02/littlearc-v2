@@ -14,11 +14,11 @@
     },
     "test": {
       "dependsOn": ["^typecheck"],
-      "outputs": ["coverage/**"]
+      "outputs": []
     },
     "test:contract": {
       "dependsOn": ["^typecheck"],
-      "outputs": ["coverage/**"]
+      "outputs": []
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],

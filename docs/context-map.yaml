@@ -1,0 +1,244 @@
+domains:
+  foundation:
+    keywords:
+      - fnd
+      - foundation
+      - monorepo
+      - toolchain
+      - ci
+      - supply-chain
+      - roadmap
+      - fnd-03
+      - application
+      - skeleton
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/impl-plan/roadmap.md
+      - docs/impl-plan/m1-foundation/README.md
+      - docs/impl-plan/m1-foundation/fnd-01-monorepo-and-toolchain-plan.md
+      - docs/impl-plan/m1-foundation/fnd-01-implementation-evidence.md
+      - docs/impl-plan/m1-foundation/fnd-02-ci-and-supply-chain-plan.md
+      - docs/impl-plan/m1-foundation/fnd-02-implementation-evidence.md
+    code:
+      - package.json
+      - pnpm-workspace.yaml
+      - turbo.json
+      - tooling/**
+      - .github/**
+      - apps/api/**
+      - apps/mobile/**
+      - apps/ops-web/**
+      - apps/worker/**
+    tests:
+      - tooling/**/*.test.ts
+    validation:
+      - pnpm validate
+
+  mobile:
+    keywords:
+      - mobile
+      - expo
+      - react native
+      - app skeleton
+      - fnd-03
+      - unistyles
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/design-system.md
+      - docs/core/m0-readiness-and-evidence.md
+      - docs/impl-plan/roadmap.md
+    code:
+      - apps/mobile/**
+      - packages/design-tokens/**
+      - tooling/typescript/react-native.json
+    tests: []
+    validation:
+      - pnpm check:workspace
+      - pnpm typecheck
+
+  api:
+    keywords:
+      - api
+      - fastify
+      - endpoint
+      - contract
+      - server
+      - application
+      - skeleton
+      - fnd-03
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/reference/environment-variable-catalog.md
+      - docs/impl-plan/roadmap.md
+    code:
+      - apps/api/**
+      - packages/contracts/**
+      - packages/auth/**
+      - packages/database/**
+      - packages/observability/**
+    tests: []
+    validation:
+      - pnpm test:contract
+      - pnpm typecheck
+
+  worker:
+    keywords:
+      - worker
+      - queue
+      - background
+      - jobs
+      - pg-boss
+      - application
+      - skeleton
+      - fnd-03
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/reference/environment-variable-catalog.md
+      - docs/impl-plan/roadmap.md
+    code:
+      - apps/worker/**
+      - packages/database/**
+      - packages/observability/**
+      - packages/config/**
+    tests: []
+    validation:
+      - pnpm typecheck
+
+  ops-web:
+    keywords:
+      - ops
+      - staff
+      - web
+      - operations
+      - admin
+      - application
+      - skeleton
+      - fnd-03
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/littlearc-complete-product-plan.md
+      - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/design-system.md
+    code:
+      - apps/ops-web/**
+      - packages/auth/**
+      - packages/contracts/**
+      - packages/design-tokens/**
+    tests: []
+    validation:
+      - pnpm typecheck
+
+  auth:
+    keywords:
+      - auth
+      - authentication
+      - authorization
+      - session
+      - household
+      - caregiver
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/littlearc-complete-product-plan.md
+      - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/reference/environment-variable-catalog.md
+    code:
+      - packages/auth/**
+      - apps/api/**
+      - apps/mobile/**
+      - apps/ops-web/**
+    tests: []
+    validation:
+      - pnpm test:contract
+      - pnpm typecheck
+
+  database:
+    keywords:
+      - database
+      - drizzle
+      - postgres
+      - rls
+      - migration
+      - sqlcipher
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/m0-readiness-and-evidence.md
+      - docs/reference/environment-variable-catalog.md
+    code:
+      - packages/database/**
+      - packages/crypto/**
+      - apps/api/**
+      - apps/worker/**
+    tests: []
+    validation:
+      - pnpm test:contract
+      - pnpm typecheck
+
+  design-system:
+    keywords:
+      - design
+      - tokens
+      - typography
+      - color
+      - fnd-08
+      - accessibility
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/design-system.md
+      - docs/core/littlearc-complete-product-plan.md
+      - docs/impl-plan/roadmap.md
+    code:
+      - packages/design-tokens/**
+      - apps/mobile/**
+      - apps/ops-web/**
+    tests: []
+    validation:
+      - pnpm check:format
+      - pnpm typecheck
+
+  native-compat:
+    keywords:
+      - native
+      - harness
+      - ocr
+      - ml kit
+      - sqlcipher
+      - biometrics
+      - physical device
+      - expo doctor
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/m0-readiness-and-evidence.md
+      - spikes/native-compat/README.md
+    code:
+      - spikes/native-compat/**
+    tests: []
+    validation:
+      - cd spikes/native-compat && pnpm typecheck
+      - cd spikes/native-compat && pnpm run doctor
+
+  observability:
+    keywords:
+      - observability
+      - logging
+      - sentry
+      - posthog
+      - telemetry
+      - privacy
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/reference/environment-variable-catalog.md
+      - docs/impl-plan/roadmap.md
+    code:
+      - packages/observability/**
+      - apps/api/**
+      - apps/worker/**
+      - apps/mobile/**
+      - apps/ops-web/**
+    tests: []
+    validation:
+      - pnpm typecheck

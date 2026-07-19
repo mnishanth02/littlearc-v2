@@ -1,6 +1,7 @@
 # FND-01 Monorepo and Toolchain Implementation Evidence
 
-> **Status:** Complete
+> **Status:** Completed
+> **Last updated:** 19 July 2026
 > **Completed:** 18 July 2026
 > **Work package:** `FND-01`
 > **Owner:** Engineering
