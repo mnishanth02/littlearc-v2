@@ -1,5 +1,9 @@
 # Architecture Decision Records
 
+> **Status:** Active index
+> **Last updated:** 2026-07-19
+> **Owner:** Engineering
+
 Use ADRs for important decisions that affect system structure, quality
 attributes, operational policy, security posture, data handling, or choices that
 are difficult to reverse.

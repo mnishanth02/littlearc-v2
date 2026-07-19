@@ -29,6 +29,7 @@ from here.
 
 | Area | Purpose | Location |
 | --- | --- | --- |
+| Context index | Repository knowledge catalogue and deterministic context map | [`docs/index.md`](./index.md), [`docs/context-map.yaml`](./context-map.yaml) |
 | Core | Foundational product, architecture, design, and readiness decisions | [`docs/core/`](./core/) |
 | Reference | Local setup, environment catalog, operations notes, troubleshooting, and migrations | [`docs/reference/`](./reference/) |
 | Implementation plans | Roadmap, work-package plans, module status, and validation evidence | [`docs/impl-plan/`](./impl-plan/) |
@@ -83,6 +84,7 @@ adds them.
 | 18 Jul 2026 | OCR peer-dependency blocker | `COMPLETE` | ML Kit core is narrowly overridden to corrected version 5.0.0; obsolete React 17-era test dependencies are absent from the runtime graph |
 | 18 Jul 2026 | Native harness accessibility baseline | `COMPLETE` | Large text, dark appearance, and increased contrast rendered without fixed-height or navigation failure; physical assistive-technology testing remains deferred |
 | 18 Jul 2026 | M0 spike generated-output cleanup | `COMPLETE` | Removed regenerable `node_modules/`, `android/`, `ios/`, `dist/`, and `.expo/`; retained source, lockfile, configuration, and evidence instructions |
+| 19 Jul 2026 | Codex context structure rollout | `COMPLETE` | Global working agreements, repository context index, context map/search, documentation validation, selective module guides, reusable project template, and repo-local skills are installed; full validation and clean-checkout proof passed |
 
 ## 6. In-Progress Register
 
@@ -130,12 +132,15 @@ roadmap. This table should show only the next few actionable packages.
 ## 11. Agent Workflow
 
 1. Open this dashboard first.
-2. Select the next `READY` or `IN PROGRESS` work package.
-3. Open the linked implementation plan and confirm its status header.
-4. Update the implementation plan's module-status table as module-level progress changes.
-5. Add or update evidence only after validation passes.
-6. Return here last and update the snapshot, registers, blockers, and plan links.
-7. Create an ADR only for important decisions that affect structure, quality attributes, operational policy, or difficult-to-reverse choices.
+2. Open [docs/index.md](./index.md) and select only task-relevant context.
+3. Use [docs/context-map.yaml](./context-map.yaml) or
+   `./scripts/context/find-context.sh "<query>"` for focused context discovery.
+4. Select the next `READY` or `IN PROGRESS` work package.
+5. Open the linked implementation plan and confirm its status header.
+6. Update the implementation plan's module-status table as module-level progress changes.
+7. Add or update evidence only after validation passes.
+8. Return here last and update the snapshot, registers, blockers, and plan links.
+9. Create an ADR only for important decisions that affect structure, quality attributes, operational policy, or difficult-to-reverse choices.
 
 ## 12. Update Protocol
 

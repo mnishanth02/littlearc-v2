@@ -1,5 +1,9 @@
 # Core Documents
 
+> **Status:** Active index
+> **Last updated:** 2026-07-19
+> **Owner:** Engineering
+
 Core documents define LittleArc's project foundation. They are source-of-truth
 inputs for product behavior, architecture, design direction, and readiness
 decisions.

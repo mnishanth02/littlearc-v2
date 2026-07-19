@@ -1,5 +1,9 @@
 # Implementation Plans
 
+> **Status:** Active index
+> **Last updated:** 2026-07-19
+> **Owner:** Engineering
+
 Implementation documents live here under stable milestone folders. Do not move a
 plan between lifecycle folders when its status changes; update its status header,
 module-status table, evidence links, and

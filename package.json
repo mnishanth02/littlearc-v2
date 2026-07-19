@@ -11,8 +11,9 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "check": "pnpm check:toolchain && pnpm check:workspace && pnpm check:supply-chain && pnpm check:format",
+    "check": "pnpm check:toolchain && pnpm check:workspace && pnpm check:supply-chain && pnpm check:format && pnpm check:docs",
     "check:ci": "node tooling/ci/check-workflows.mjs",
+    "check:docs": "./scripts/context/validate-docs.sh",
     "check:environment": "node tooling/environment/check-environment.mjs",
     "check:format": "biome ci . && markdownlint-cli2",
     "check:generated": "node tooling/generation/check-generated.mjs",

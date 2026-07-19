@@ -1,4 +1,38 @@
-# Repository Guidelines
+# Repository Guide for Codex
+
+## Purpose
+
+LittleArc is a mobile-first pediatric history platform. This repository is in
+the M1 foundation stage: root tooling and CI are accepted, application runtimes
+arrive in `FND-03`, and existing mobile/design-token source remains quarantined
+prototype input until `FND-08`.
+
+## Context Loading Protocol
+
+For every non-trivial task:
+
+1. Open `docs/IMPLEMENTATION_STATUS.md` first to confirm the current delivery
+   state, next package, blockers, and evidence links.
+2. Open `docs/index.md` to choose the smallest relevant set of documents.
+3. Read the nearest module-level `AGENTS.md` when working under `apps/`,
+   `packages/`, or `spikes/native-compat/`.
+4. Use `docs/context-map.yaml` or `./scripts/context/find-context.sh "<query>"`
+   for focused context discovery.
+5. Read only relevant core docs, implementation plans, ADRs, references, source
+   files, and tests. Do not load all of `docs/` by default.
+6. Inspect current code and tests before adding patterns or dependencies.
+
+## Source-Of-Truth Hierarchy
+
+When sources conflict, report the conflict instead of silently choosing.
+
+1. Current executable behavior, tests, and committed configuration
+2. Accepted ADRs in `docs/adr/`
+3. Live delivery state in `docs/IMPLEMENTATION_STATUS.md`
+4. Active implementation plans and evidence in `docs/impl-plan/`
+5. Core product, architecture, design, and readiness docs in `docs/core/`
+6. Reference docs in `docs/reference/`
+7. Templates and archived or superseded material
 
 ## Project Structure & Module Organization
 
@@ -17,6 +51,10 @@
 - `spikes/native-compat/` is the retained M0 Expo development-client harness.
   It is evidence, not production application code. Its generated `ios/`,
   `android/`, `.expo/`, `dist/`, and `node_modules/` directories stay ignored.
+- `.agents/skills/` contains repo-local Codex workflows. Use them when their
+  task descriptions match the work.
+- `scripts/context/` contains deterministic context lookup and documentation
+  governance checks.
 
 The M1 root workspace is scaffolded. Existing mobile and design-token source
 files remain quarantined prototypes until their adopt/adapt/discard review in
@@ -31,6 +69,7 @@ pnpm install --frozen-lockfile
 pnpm validate
 pnpm check:workspace
 pnpm check:format
+pnpm check:docs
 pnpm typecheck
 ./tooling/validate-clean-checkout.sh
 ```
@@ -82,3 +121,14 @@ credentials, tokens, participant information, child data, or unredacted medical
 documents. Update `docs/IMPLEMENTATION_STATUS.md` whenever work becomes ready,
 in progress, complete, blocked, deferred, or retained. Keep each implementation
 plan's status header and module-status table aligned with the dashboard.
+
+## Documentation Governance
+
+- `docs/IMPLEMENTATION_STATUS.md` is the live delivery dashboard. Update the
+  roadmap only when scope, order, dependency, or gate definitions change.
+- Create ADRs for important structure, data-handling, security, operational, or
+  difficult-to-reverse decisions.
+- Store future-session decisions in repository docs, ADRs, or implementation
+  plans instead of relying on chat history.
+- Keep root and module `AGENTS.md` files as maps and durable constraints, not
+  complete project manuals.

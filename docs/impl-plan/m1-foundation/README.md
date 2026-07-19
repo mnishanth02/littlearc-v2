@@ -1,5 +1,9 @@
 # M1 Foundation Plans
 
+> **Status:** Active index
+> **Last updated:** 2026-07-19
+> **Owner:** Engineering
+
 This folder contains implementation plans and validation evidence for M1
 engineering foundation work packages.
 
