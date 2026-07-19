@@ -1,7 +1,7 @@
 # LittleArc Environment Variable Catalog
 
-> **Status:** FND-01 foundation contract
-> **Last updated:** 18 July 2026
+> **Status:** FND-06 staging contract
+> **Last updated:** 19 July 2026
 > **Machine-readable source:** `tooling/environment/variables.mjs`
 
 ## Rules
@@ -61,3 +61,11 @@
 
 Runtime schema validation, required/optional behavior, and provider wiring belong
 to the package listed in the Owner column.
+
+## Railway Staging
+
+The staging-only Railway service and resource manifest lives at
+`infra/railway/staging/variables.manifest.json`. It records variable ownership,
+classification, service/resource placement, and source type without committing
+values. Production Railway variables are intentionally absent from FND-06 and
+must be planned separately before real-data gates.

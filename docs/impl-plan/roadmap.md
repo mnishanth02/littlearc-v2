@@ -193,20 +193,20 @@ time. Calendar dates should be assigned only after owners and capacity are known
 
 ## 6. Workstreams
 
-| Workstream | Responsibility | Primary outputs |
-| --- | --- | --- |
-| Product discovery | Problem, usability, activation, pricing, and pilot evidence | Interview synthesis, prototype results, decision gates |
-| Product design | Journeys, interaction states, copy, accessibility, design system | Approved flows, tokens, components, reference screens |
-| Repository and developer experience | Monorepo, toolchain, CI, code generation, local setup | Reproducible workspace and quality commands |
-| Mobile platform | Expo app, routing, native modules, local data, app lifecycle | Installable iOS/Android development clients |
-| Identity and authorization | Better Auth, household roles, sessions, RLS, audit | Tenant-safe authentication and access control |
-| Domain and contracts | Domain rules, Zod/OpenAPI, errors, client generation | Versioned API contract and framework-free rules |
-| Data and synchronization | PostgreSQL, SQLCipher, outbox, change feed, conflicts | Offline-capable server-authoritative data path |
-| Capture and records | Scanner/import, encryption, upload, record models, OCR | Reliable Vault and Smart Capture workflow |
-| Utility loops | Today, reminders, tasks, Timeline, family, memories | Recurring household value loops |
-| Trust and lifecycle | Consent, export, deletion, retention, keys, backups | Verifiable privacy and recoverability operations |
-| Operations and support | Worker, staff console, runbooks, support workflows | Auditable operating surface and response procedures |
-| Quality and release | Automated tests, performance, security, stores, pilot | Reproducible, monitored beta releases |
+| Workstream                          | Responsibility                                                   | Primary outputs                                        |
+| ----------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------ |
+| Product discovery                   | Problem, usability, activation, pricing, and pilot evidence      | Interview synthesis, prototype results, decision gates |
+| Product design                      | Journeys, interaction states, copy, accessibility, design system | Approved flows, tokens, components, reference screens  |
+| Repository and developer experience | Monorepo, toolchain, CI, code generation, local setup            | Reproducible workspace and quality commands            |
+| Mobile platform                     | Expo app, routing, native modules, local data, app lifecycle     | Installable iOS/Android development clients            |
+| Identity and authorization          | Better Auth, household roles, sessions, RLS, audit               | Tenant-safe authentication and access control          |
+| Domain and contracts                | Domain rules, Zod/OpenAPI, errors, client generation             | Versioned API contract and framework-free rules        |
+| Data and synchronization            | PostgreSQL, SQLCipher, outbox, change feed, conflicts            | Offline-capable server-authoritative data path         |
+| Capture and records                 | Scanner/import, encryption, upload, record models, OCR           | Reliable Vault and Smart Capture workflow              |
+| Utility loops                       | Today, reminders, tasks, Timeline, family, memories              | Recurring household value loops                        |
+| Trust and lifecycle                 | Consent, export, deletion, retention, keys, backups              | Verifiable privacy and recoverability operations       |
+| Operations and support              | Worker, staff console, runbooks, support workflows               | Auditable operating surface and response procedures    |
+| Quality and release                 | Automated tests, performance, security, stores, pilot            | Reproducible, monitored beta releases                  |
 
 Every milestone has one accountable delivery owner even when several
 workstreams contribute.
@@ -234,17 +234,17 @@ The shortest safe path to a private beta is:
 
 ### 7.2 Work that may proceed in parallel
 
-| Parallel track A | Parallel track B | Coordination point |
-| --- | --- | --- |
-| Parent and clinic research | Native compatibility spikes | Record categories and capture feasibility review |
-| Monorepo/tooling | Privacy data map and threat model | Package boundaries and logging policy |
-| Mobile shell | API/worker skeleton | Generated contract integration |
-| Design-system primitives | Auth and household backend | Onboarding and error-state integration |
-| Local repositories | Change-feed API | First end-to-end synchronization |
-| Capture UI | Upload/validation pipeline | Encrypted document round trip |
-| Today/Timeline designs | Reminder/task domain | Integrated utility-loop review |
-| Staff-console shell | Export/deletion workers | Masked status and audited action review |
-| Test automation | Feature implementation | Milestone gate execution |
+| Parallel track A           | Parallel track B                  | Coordination point                               |
+| -------------------------- | --------------------------------- | ------------------------------------------------ |
+| Parent and clinic research | Native compatibility spikes       | Record categories and capture feasibility review |
+| Monorepo/tooling           | Privacy data map and threat model | Package boundaries and logging policy            |
+| Mobile shell               | API/worker skeleton               | Generated contract integration                   |
+| Design-system primitives   | Auth and household backend        | Onboarding and error-state integration           |
+| Local repositories         | Change-feed API                   | First end-to-end synchronization                 |
+| Capture UI                 | Upload/validation pipeline        | Encrypted document round trip                    |
+| Today/Timeline designs     | Reminder/task domain              | Integrated utility-loop review                   |
+| Staff-console shell        | Export/deletion workers           | Masked status and audited action review          |
+| Test automation            | Feature implementation            | Milestone gate execution                         |
 
 ### 7.3 Dependencies that must not be inverted
 
@@ -263,16 +263,16 @@ The shortest safe path to a private beta is:
 
 ## 8. Milestone Roadmap
 
-| Milestone | Indicative window | Product outcome | Exit gate |
-| --- | ---: | --- | --- |
-| M0. Readiness and evidence | Weeks 1–4 | Technical baseline, decisions, and later-gate obligations recorded | Gate 0A closes M0; pre-pilot work continues in parallel |
-| M1. Engineering foundation | Weeks 2–6 | Reproducible, deployable system skeleton | Gate 1 |
-| M2. Offline trust slice | Weeks 5–9 | Secure enrollment and offline emergency card | Gate 2 |
-| M3. Vault wedge | Weeks 8–13 | Capture, store, find, and confirm core records | Gate 3 |
-| M4. Household utility loops | Weeks 12–17 | Today, reminders, tasks, Timeline, family, memory | Gate 4 |
-| M5. Trust operations and beta hardening | Weeks 16–21 | Lifecycle operations and production-ready pilot build | Gate 5 |
-| M6. Invited pilot and public-beta decision | Weeks 20–23+ | Evidence from 10–20 real participants | Gate 6 |
-| M7. Retention-gated monetization and partners | After retention signal | Paid/sponsored entitlements without ownership compromise | Gate 7 |
+| Milestone                                     |      Indicative window | Product outcome                                                    | Exit gate                                               |
+| --------------------------------------------- | ---------------------: | ------------------------------------------------------------------ | ------------------------------------------------------- |
+| M0. Readiness and evidence                    |              Weeks 1-4 | Technical baseline, decisions, and later-gate obligations recorded | Gate 0A closes M0; pre-pilot work continues in parallel |
+| M1. Engineering foundation                    |              Weeks 2-6 | Reproducible, deployable system skeleton                           | Gate 1                                                  |
+| M2. Offline trust slice                       |              Weeks 5-9 | Secure enrollment and offline emergency card                       | Gate 2                                                  |
+| M3. Vault wedge                               |             Weeks 8-13 | Capture, store, find, and confirm core records                     | Gate 3                                                  |
+| M4. Household utility loops                   |            Weeks 12-17 | Today, reminders, tasks, Timeline, family, memory                  | Gate 4                                                  |
+| M5. Trust operations and beta hardening       |            Weeks 16-21 | Lifecycle operations and production-ready pilot build              | Gate 5                                                  |
+| M6. Invited pilot and public-beta decision    |           Weeks 20-23+ | Evidence from 10-20 real participants                              | Gate 6                                                  |
+| M7. Retention-gated monetization and partners | After retention signal | Paid/sponsored entitlements without ownership compromise           | Gate 7                                                  |
 
 The overlaps are intentional. A milestone may begin preparatory work before the
 previous gate, but it may not depend on an unverified assumption from that gate.
@@ -1124,36 +1124,36 @@ Expand only when:
 
 The following epics map the product backlog to the implementation roadmap.
 
-| Epic | Product scope | Primary milestone | Principal dependencies |
-| --- | --- | --- | --- |
-| E1. Readiness and evidence | Research, prototypes, taxonomy, decisions | M0 | None |
-| E2. Platform foundation | Monorepo, CI, apps, environments, ADRs | M1 | M0 technical spikes |
-| E3. Design system | Tokens, themes, primitives, domain components | M0–M5 | Scaffold, Unistyles spike |
-| E4. Identity and household | Auth, consent, child, membership, sessions | M2 | Contracts, database, RLS |
-| E5. Emergency and offline | App lock, SQLCipher, sync, emergency card | M2 | Identity, local security |
-| E6. Vault and records | Manual records, versions, search, provenance | M3 | Offline core, contracts |
-| E7. Capture and Smart Capture | Scanner, upload, OCR, review, optional AI | M3–M4 | Crypto, worker, records |
-| E8. Vaccination and reminders | States, confirmed dates, scheduler, push | M3–M4 | Records, worker, consent |
-| E9. Today | Priority cards and next useful action | M4 | Reminders, tasks, review queue |
-| E10. Timeline | Age feed, source links, notes, filters | M3–M4 | Records, child age rules |
-| E11. Family handover | Invite, capabilities, tasks, revocation | M4 | Household authorization, sync |
-| E12. Memory capsule | Prompt, limited media, Timeline entry | M4 | Files, Timeline, caregiver |
-| E13. Trust lifecycle | Export, deletion, retention, keys, recovery | M2–M5 | Every data-bearing module |
-| E14. Operations | Staff console, support, runbooks, observability | M1–M5 | Staff auth, worker, audit |
-| E15. Quality and release | E2E, performance, security, stores, pilot | M0–M6 | Continuous across all epics |
-| E16. Monetization and partners | Billing, sponsorship, attribution | M7 | Retention gate, entitlements |
+| Epic                           | Product scope                                   | Primary milestone | Principal dependencies         |
+| ------------------------------ | ----------------------------------------------- | ----------------- | ------------------------------ |
+| E1. Readiness and evidence     | Research, prototypes, taxonomy, decisions       | M0                | None                           |
+| E2. Platform foundation        | Monorepo, CI, apps, environments, ADRs          | M1                | M0 technical spikes            |
+| E3. Design system              | Tokens, themes, primitives, domain components   | M0-M5             | Scaffold, Unistyles spike      |
+| E4. Identity and household     | Auth, consent, child, membership, sessions      | M2                | Contracts, database, RLS       |
+| E5. Emergency and offline      | App lock, SQLCipher, sync, emergency card       | M2                | Identity, local security       |
+| E6. Vault and records          | Manual records, versions, search, provenance    | M3                | Offline core, contracts        |
+| E7. Capture and Smart Capture  | Scanner, upload, OCR, review, optional AI       | M3-M4             | Crypto, worker, records        |
+| E8. Vaccination and reminders  | States, confirmed dates, scheduler, push        | M3-M4             | Records, worker, consent       |
+| E9. Today                      | Priority cards and next useful action           | M4                | Reminders, tasks, review queue |
+| E10. Timeline                  | Age feed, source links, notes, filters          | M3-M4             | Records, child age rules       |
+| E11. Family handover           | Invite, capabilities, tasks, revocation         | M4                | Household authorization, sync  |
+| E12. Memory capsule            | Prompt, limited media, Timeline entry           | M4                | Files, Timeline, caregiver     |
+| E13. Trust lifecycle           | Export, deletion, retention, keys, recovery     | M2-M5             | Every data-bearing module      |
+| E14. Operations                | Staff console, support, runbooks, observability | M1-M5             | Staff auth, worker, audit      |
+| E15. Quality and release       | E2E, performance, security, stores, pilot       | M0-M6             | Continuous across all epics    |
+| E16. Monetization and partners | Billing, sponsorship, attribution               | M7                | Retention gate, entitlements   |
 
 ### 17.1 Design-system rollout within the epics
 
-| Layer | First consumers | Required verification |
-| --- | --- | --- |
-| Semantic tokens | App shell and reference gallery | No literal UI colors, contrast matrix |
-| Typography/layout | Onboarding and emergency card | 200% type, safe areas, tablet width |
-| Inputs/buttons/feedback | Auth and child profile | Screen readers, focus, loading/errors |
-| Record/provenance components | Manual records and OCR review | Non-color states, source clarity |
-| Lists/search/cards | Vault and Timeline | Large datasets, reduced motion |
-| Sheets/dialogs/destructive flows | Permissions, correction, deletion | Focus, confirmation, recovery copy |
-| Domain compositions | Today, emergency, capture review | Physical-device usability tests |
+| Layer                            | First consumers                   | Required verification                 |
+| -------------------------------- | --------------------------------- | ------------------------------------- |
+| Semantic tokens                  | App shell and reference gallery   | No literal UI colors, contrast matrix |
+| Typography/layout                | Onboarding and emergency card     | 200% type, safe areas, tablet width   |
+| Inputs/buttons/feedback          | Auth and child profile            | Screen readers, focus, loading/errors |
+| Record/provenance components     | Manual records and OCR review     | Non-color states, source clarity      |
+| Lists/search/cards               | Vault and Timeline                | Large datasets, reduced motion        |
+| Sheets/dialogs/destructive flows | Permissions, correction, deletion | Focus, confirmation, recovery copy    |
+| Domain compositions              | Today, emergency, capture review  | Physical-device usability tests       |
 
 The design system evolves with real product slices. Do not attempt to finish a
 large abstract component library before its first consumers exist.
@@ -1258,19 +1258,19 @@ A work package is done when:
 
 ## 20. Quality Gate Matrix
 
-| Gate | Required evidence | Blocks |
-| --- | --- | --- |
-| Contract | OpenAPI diff reviewed; generated clients compile | Integration/release |
-| Database | Migration forward test; RLS integration tests | Staging deploy |
-| Mobile | iOS/Android physical-device smoke | Package completion |
-| Offline | Restart, airplane mode, retry, cursor reset, conflict | Milestone exit |
-| Security | BOLA/RLS, session, upload, consent, leakage cases | Real data/public beta |
-| Privacy | Data map, consent, retention, analytics allowlist | Feature enablement |
-| Accessibility | Screen reader, 200% type, contrast, motion, target size | Milestone exit |
-| Performance | Target-device and dataset measurements | Public beta |
-| Recovery | PITR/object/key/runbook exercise | Real-data pilot |
-| Release | Clean build, signing recovery, store install/upgrade | Pilot release |
-| Product | Usability/activation/retention evidence | Scope expansion |
+| Gate          | Required evidence                                       | Blocks                |
+| ------------- | ------------------------------------------------------- | --------------------- |
+| Contract      | OpenAPI diff reviewed; generated clients compile        | Integration/release   |
+| Database      | Migration forward test; RLS integration tests           | Staging deploy        |
+| Mobile        | iOS/Android physical-device smoke                       | Package completion    |
+| Offline       | Restart, airplane mode, retry, cursor reset, conflict   | Milestone exit        |
+| Security      | BOLA/RLS, session, upload, consent, leakage cases       | Real data/public beta |
+| Privacy       | Data map, consent, retention, analytics allowlist       | Feature enablement    |
+| Accessibility | Screen reader, 200% type, contrast, motion, target size | Milestone exit        |
+| Performance   | Target-device and dataset measurements                  | Public beta           |
+| Recovery      | PITR/object/key/runbook exercise                        | Real-data pilot       |
+| Release       | Clean build, signing recovery, store install/upgrade    | Pilot release         |
+| Product       | Usability/activation/retention evidence                 | Scope expansion       |
 
 ## 21. Test Portfolio by System Boundary
 
@@ -1351,14 +1351,14 @@ At every gate ask:
 
 ## 23. Operating Cadence
 
-| Cadence | Review |
-| --- | --- |
-| Daily during implementation | Delivery blockers, production-shaped risks, security incidents |
-| Weekly | User research, milestone evidence, product metrics, quality trends |
-| Fortnightly during beta | Native release train and regression gate |
-| Monthly | Privacy/security, dependency updates, recovery readiness |
-| Monthly after partner work starts | Partner pipeline and data-boundary review |
-| Quarterly | Product-scope reset, architecture triggers, provider/cost review |
+| Cadence                           | Review                                                             |
+| --------------------------------- | ------------------------------------------------------------------ |
+| Daily during implementation       | Delivery blockers, production-shaped risks, security incidents     |
+| Weekly                            | User research, milestone evidence, product metrics, quality trends |
+| Fortnightly during beta           | Native release train and regression gate                           |
+| Monthly                           | Privacy/security, dependency updates, recovery readiness           |
+| Monthly after partner work starts | Partner pipeline and data-boundary review                          |
+| Quarterly                         | Product-scope reset, architecture triggers, provider/cost review   |
 
 Recommended working sessions:
 
@@ -1371,21 +1371,21 @@ Recommended working sessions:
 
 ## 24. Risk Register and Contingencies
 
-| Risk | Early signal | Contingency |
-| --- | --- | --- |
-| Native module incompatibility | Spike fails on one platform | Build local Expo module; extend M0/M1 |
-| Product breadth expands | Work enters without gate linkage | Apply scope precedence; move to later milestone |
-| Design prototypes become accidental architecture | Imports depend on loose paths/APIs | Quarantine until `FND-08`; adopt file by file |
-| Offline sync complexity grows | Feature-specific sync code appears | Centralize repository/outbox patterns before M3 |
-| Authorization drift | Route-specific role checks diverge | Capability policy + RLS + shared adversarial tests |
-| OCR slows capture | High correction/abandonment | Default to manual flow; narrow extraction categories |
-| Reminder safety issue | Incorrect or unconfirmed date drives alert | Disable category; require confirmation; audit source |
-| Sensitive telemetry leak | Canary or payload review fails | Disable provider at wrapper; block release |
-| Railway recovery/custody rejected | Security/partner review objects | Trigger off-provider backup/KMS migration plan |
-| Store/pilot delay | Account/tester/review constraint appears | Start verification in M0; keep tracks explicit |
-| One-Mac build dependency fails | Recovery build cannot be reproduced | Restore toolchain/credentials; add second builder trigger |
-| Low activation or retention | Pilot misses thresholds | Narrow workflow; do not add billing/acquisition spend |
-| Partner pressure changes ownership | Requests for record access/white label | Reject partner per product gate |
+| Risk                                             | Early signal                               | Contingency                                               |
+| ------------------------------------------------ | ------------------------------------------ | --------------------------------------------------------- |
+| Native module incompatibility                    | Spike fails on one platform                | Build local Expo module; extend M0/M1                     |
+| Product breadth expands                          | Work enters without gate linkage           | Apply scope precedence; move to later milestone           |
+| Design prototypes become accidental architecture | Imports depend on loose paths/APIs         | Quarantine until `FND-08`; adopt file by file             |
+| Offline sync complexity grows                    | Feature-specific sync code appears         | Centralize repository/outbox patterns before M3           |
+| Authorization drift                              | Route-specific role checks diverge         | Capability policy + RLS + shared adversarial tests        |
+| OCR slows capture                                | High correction/abandonment                | Default to manual flow; narrow extraction categories      |
+| Reminder safety issue                            | Incorrect or unconfirmed date drives alert | Disable category; require confirmation; audit source      |
+| Sensitive telemetry leak                         | Canary or payload review fails             | Disable provider at wrapper; block release                |
+| Railway recovery/custody rejected                | Security/partner review objects            | Trigger off-provider backup/KMS migration plan            |
+| Store/pilot delay                                | Account/tester/review constraint appears   | Start verification in M0; keep tracks explicit            |
+| One-Mac build dependency fails                   | Recovery build cannot be reproduced        | Restore toolchain/credentials; add second builder trigger |
+| Low activation or retention                      | Pilot misses thresholds                    | Narrow workflow; do not add billing/acquisition spend     |
+| Partner pressure changes ownership               | Requests for record access/white label     | Reject partner per product gate                           |
 
 ## 25. First Planning Queue
 

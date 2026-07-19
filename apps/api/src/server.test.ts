@@ -20,6 +20,23 @@ describe("API skeleton", () => {
     expect(response.json().requestId).toEqual(expect.any(String));
   });
 
+  it("serves Railway health liveness with request IDs", async () => {
+    const server = await createApiServer(loadApiConfig({ APP_ENV: "staging" }));
+
+    const response = await server.inject({
+      method: "GET",
+      url: "/health/live",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      appEnv: "staging",
+      service: "api",
+      status: "ok",
+    });
+    expect(response.json().requestId).toEqual(expect.any(String));
+  });
+
   it("reports deferred dependency readiness without claiming connectivity", async () => {
     const server = await createApiServer(loadApiConfig({ APP_ENV: "local" }));
 
@@ -37,6 +54,28 @@ describe("API skeleton", () => {
         migrationVersion: "0001_fnd_05_database_foundation",
         rlsHarness: "policy-source-reviewed",
       },
+      checks: [
+        { name: "auth", owner: "OFF-01", status: "deferred" },
+        { name: "database", owner: "FND-05", status: "foundation-ready" },
+        { name: "queue", owner: "FND-05", status: "outbox-foundation-ready" },
+        { name: "object-storage", owner: "FND-06", status: "deferred" },
+      ],
+      ready: true,
+      service: "api",
+    });
+  });
+
+  it("serves Railway readiness health with staging metadata", async () => {
+    const server = await createApiServer(loadApiConfig({ APP_ENV: "staging" }));
+
+    const response = await server.inject({
+      method: "GET",
+      url: "/health/ready",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      appEnv: "staging",
       checks: [
         { name: "auth", owner: "OFF-01", status: "deferred" },
         { name: "database", owner: "FND-05", status: "foundation-ready" },

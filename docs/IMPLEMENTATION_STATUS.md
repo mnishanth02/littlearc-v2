@@ -57,14 +57,15 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | Scope | Tag | Owner | Next action or completion evidence |
 | --- | --- | --- | --- |
 | M0. Readiness and evidence | `COMPLETE` | Founder/product + engineering | Gate 0A closed on 18 July 2026; see the M0 dossier |
-| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-06` Railway environment skeleton after accepted database foundation |
+| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-07` observability and privacy guards after accepted staging Railway skeleton |
 | `FND-01` Monorepo and toolchain | `COMPLETE` | Engineering | Root workspace, boundaries, exact pins, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
 | `FND-02` CI and supply-chain baseline | `COMPLETE` | Engineering | Local and hosted validation, required PR checks, source traceability, and repository controls accepted; see [evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |
 | `FND-03` Application skeletons | `COMPLETE` | Engineering | Mobile, API, worker, and staff shells accepted; see [evidence](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) |
 | `FND-04` Contracts and domain kernel | `COMPLETE` | Engineering | `/v1` metadata, OpenAPI generation, generated clients, domain primitives, and contract guards accepted; see [evidence](./impl-plan/m1-foundation/fnd-04-implementation-evidence.md) |
 | `FND-05` Database and migration foundation | `COMPLETE` | Engineering | Drizzle schema, reviewed SQL migration, tenant context, RLS policy source, audit/idempotency/outbox/change primitives, metadata integration, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) |
-| `FND-06` Railway environment skeleton | `READY` | Engineering | Write package brief, then establish isolated staging/production placeholders and release path |
-| `FND-07` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order |
+| `FND-06` Railway environment skeleton | `COMPLETE` | Engineering | Staging-only Railway descriptors, manifest, health checks, live Railway staging deploys, hosted migration evidence, and validation accepted; production setup deferred by founder direction; see [evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
+| `FND-07` Observability and privacy guards | `READY` | Engineering | Write package brief, then add safe logging, analytics/feature-flag wrappers, Sentry scrubbing, and leakage canaries |
+| `FND-08` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order |
 | M2 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
@@ -80,6 +81,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 19 Jul 2026 | [`FND-03` application skeletons](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) | `COMPLETE` | Mobile Expo development-client shell, API Fastify shell, worker heartbeat shell, staff Next.js shell, native configuration transfer, 28 tests, clean Expo Doctor/prebuild/export, root validation, and clean-checkout proof passed |
 | 19 Jul 2026 | [`FND-04` contracts and domain kernel](./impl-plan/m1-foundation/fnd-04-implementation-evidence.md) | `COMPLETE` | Zod/OpenAPI source, generated clients, `/v1` metadata routes, framework-independent domain primitives, generated-output drift, breaking-contract guard, 45 tests, root validation, and clean-checkout proof passed |
 | 19 Jul 2026 | [`FND-05` database and migration foundation](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) | `COMPLETE` | Drizzle schema, reviewed SQL migration, tenant context, RLS policy source, audit/idempotency/outbox/change primitives, generated migration drift, API/worker metadata integration, 55 tests, root validation, and clean-checkout proof passed |
+| 19 Jul 2026 | [`FND-06` Railway environment skeleton](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) | `COMPLETE` | Staging-only Railway service descriptors, classified variable/resource manifest, API/staff health checks, live staging project, hosted FND-05 migration, API/worker/staff deployments, production deferral, tests, root validation, and clean-checkout proof passed |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -99,7 +101,7 @@ No implementation item is currently tagged `IN PROGRESS`.
 
 | Priority | Item | Tag | Entry condition | Definition of done |
 | ---: | --- | --- | --- | --- |
-| 1 | `FND-06` Railway environment skeleton | `READY` | `FND-05` database and migration foundation complete | Isolated staging/production environment placeholders and release path are ready |
+| 1 | `FND-07` Observability and privacy guards | `READY` | `FND-06` staging-only Railway skeleton complete | Safe logging, analytics, feature flags, Sentry scrubbing, and sensitive canary checks exist |
 
 The complete dependency order remains in Section 25 of the implementation
 roadmap. This table should show only the next few actionable packages.
@@ -125,6 +127,7 @@ roadmap. This table should show only the next few actionable packages.
 | Long probe-screen title wrapping | `DEFERRED` | Structural accessibility passed; visual wrapping needs product UI treatment | Resolve during `FND-08` component and typography reconciliation |
 | Moderate `uuid` advisory in retained M0 harness | `DEFERRED` | The alert remains visible; automatic update returned `security_update_not_possible` because the transitive major is constrained, while the root production audit is clean | Reassess during `FND-03` transfer and remove with harness retirement |
 | Renovate GitHub App authorization | `DEFERRED` | Validated configuration is committed; interactive App authorization was unavailable in this session and is not a CI baseline blocker | Install from the Renovate GitHub App page and confirm its dependency dashboard |
+| Production Railway environment skeleton | `DEFERRED` | Founder directed `FND-06` to staging only for now | Reopen a separate production setup package before real-data gates |
 
 ## 10. Implementation Plans
 
@@ -136,6 +139,7 @@ roadmap. This table should show only the next few actionable packages.
 | [`FND-03` Application skeletons](./impl-plan/m1-foundation/fnd-03-application-skeletons-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) |
 | [`FND-04` Contracts and domain kernel](./impl-plan/m1-foundation/fnd-04-contracts-and-domain-kernel-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-04-implementation-evidence.md) |
 | [`FND-05` Database and migration foundation](./impl-plan/m1-foundation/fnd-05-database-and-migration-foundation-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) |
+| [`FND-06` Railway environment skeleton](./impl-plan/m1-foundation/fnd-06-railway-environment-skeleton-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
 
 ## 11. Agent Workflow
 
@@ -165,5 +169,5 @@ For every status change:
 7. Keep the matching implementation plan's status header and module-status
    table in sync with this dashboard.
 
-The next status change should be `FND-06`: `READY` to `IN PROGRESS` when
-its package brief and implementation begin.
+The next status change should be `FND-07`: `READY` to `IN PROGRESS` when its
+package brief and implementation begin.

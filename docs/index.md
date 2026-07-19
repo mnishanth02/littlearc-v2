@@ -35,6 +35,7 @@
 | `FND-03` application skeletons | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-03-application-skeletons-plan.md), [evidence](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) |
 | `FND-04` contracts and domain kernel | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-04-contracts-and-domain-kernel-plan.md), [evidence](./impl-plan/m1-foundation/fnd-04-implementation-evidence.md) |
 | `FND-05` database and migration foundation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-05-database-and-migration-foundation-plan.md), [evidence](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) |
+| `FND-06` Railway environment skeleton | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-06-railway-environment-skeleton-plan.md), [evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
 
 ## Module Context
 

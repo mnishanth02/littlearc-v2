@@ -19,6 +19,8 @@ Current package documents:
 - [`FND-04` Implementation Evidence](./fnd-04-implementation-evidence.md)
 - [`FND-05` Database and Migration Foundation Plan](./fnd-05-database-and-migration-foundation-plan.md)
 - [`FND-05` Implementation Evidence](./fnd-05-implementation-evidence.md)
+- [`FND-06` Railway Environment Skeleton Plan](./fnd-06-railway-environment-skeleton-plan.md)
+- [`FND-06` Implementation Evidence](./fnd-06-implementation-evidence.md)
 
 The live status for these work packages remains in
 [IMPLEMENTATION_STATUS.md](../../IMPLEMENTATION_STATUS.md).
