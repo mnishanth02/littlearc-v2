@@ -1,4 +1,5 @@
 import { getTableName } from "drizzle-orm";
+import { getTableConfig } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 import {
   auditEvents,
@@ -33,5 +34,11 @@ describe("database schema", () => {
       "change_events",
       "outbox_events",
     ]);
+  });
+
+  it("keeps the children revision constraint aligned with the reviewed migration", () => {
+    expect(getTableConfig(children).checks.map((constraint) => constraint.name)).toContain(
+      "children_revision_check",
+    );
   });
 });

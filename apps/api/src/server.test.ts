@@ -36,13 +36,6 @@ describe("API skeleton", () => {
         migrationExecution: "explicit-release-step",
         migrationVersion: "0001_fnd_05_database_foundation",
         rlsHarness: "policy-source-reviewed",
-        roles: {
-          application: "littlearc_app",
-          migration: "littlearc_migration",
-          operationsReadOnly: "littlearc_ops_readonly",
-          worker: "littlearc_worker",
-        },
-        schemaName: "littlearc",
       },
       checks: [
         { name: "auth", owner: "OFF-01", status: "deferred" },

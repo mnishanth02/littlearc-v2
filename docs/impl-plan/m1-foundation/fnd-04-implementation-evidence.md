@@ -112,4 +112,4 @@ generated clients, API `/v1` metadata routes, generated-output drift check, and
 initial breaking-contract guard are implemented and validated in the local
 synthetic M1 environment.
 
-`FND-05` is the next ready package: database and migration foundation.
+`FND-06` is the next ready package: Railway environment skeleton.

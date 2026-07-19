@@ -19,7 +19,13 @@ export function createChangeFeedCursor(sequence: number): Cursor {
 }
 
 export function parseChangeFeedCursor(cursor: Cursor): ChangeFeedCursorPayload {
-  const decoded = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")) as unknown;
+  let decoded: unknown;
+
+  try {
+    decoded = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")) as unknown;
+  } catch {
+    throw new Error("Change-feed cursor payload is invalid.");
+  }
 
   if (
     !decoded ||

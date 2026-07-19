@@ -16,12 +16,28 @@ describe("database migration foundation", () => {
 
   it("declares separate roles and explicit tenant context settings", () => {
     expect(foundation.sql).toContain("create role littlearc_migration");
+    expect(foundation.sql).toContain("create role littlearc_migration noinherit");
+    expect(foundation.sql).not.toContain("create role littlearc_migration login");
     expect(foundation.sql).toContain("create role littlearc_app");
     expect(foundation.sql).toContain("create role littlearc_worker");
     expect(foundation.sql).toContain("create role littlearc_ops_readonly");
     expect(foundation.sql).toContain("current_setting('littlearc.current_household_id', true)");
     expect(foundation.sql).toContain("current_setting('littlearc.current_actor_id', true)");
     expect(foundation.sql).toContain("current_setting('littlearc.current_actor_role', true)");
+  });
+
+  it("grants current and future objects without broadening worker table access", () => {
+    expect(foundation.sql).toContain(
+      "alter default privileges for role littlearc_migration in schema littlearc",
+    );
+    expect(foundation.sql).toContain("grant select, insert, update on tables to littlearc_app");
+    expect(foundation.sql).toContain("grant select on tables to littlearc_ops_readonly");
+    expect(foundation.sql).toContain(
+      "grant usage, select on sequences to littlearc_app, littlearc_worker",
+    );
+    expect(foundation.sql).not.toContain(
+      "grant select, insert, update on tables to littlearc_worker",
+    );
   });
 
   it("enables and forces RLS on every tenant-scoped foundation table", () => {

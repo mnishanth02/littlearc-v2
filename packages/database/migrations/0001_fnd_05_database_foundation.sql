@@ -215,9 +215,15 @@ grant select, insert, update on all tables in schema littlearc to littlearc_app;
 grant select, insert, update on littlearc.outbox_events to littlearc_worker;
 grant select on all tables in schema littlearc to littlearc_ops_readonly;
 grant usage, select on all sequences in schema littlearc to littlearc_app, littlearc_worker;
+alter default privileges for role littlearc_migration in schema littlearc
+  grant select, insert, update on tables to littlearc_app;
+alter default privileges for role littlearc_migration in schema littlearc
+  grant select on tables to littlearc_ops_readonly;
+alter default privileges for role littlearc_migration in schema littlearc
+  grant usage, select on sequences to littlearc_app, littlearc_worker;
 
 insert into littlearc.schema_migrations (version, checksum_sha256)
-values ('0001_fnd_05_database_foundation', '74b4199204708f0e2e77a1c62293de81b0ac82359020fe17f58cb34c2d89f83b')
+values ('0001_fnd_05_database_foundation', 'ed4ad8fd41cd96a1ef1862bd462b5a25f9b07b7cce7ee73fb7c720d40a579f82')
 on conflict (version) do nothing;
 
 commit;

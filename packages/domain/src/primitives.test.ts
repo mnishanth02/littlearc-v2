@@ -16,6 +16,7 @@ const validUuidV7 = "019f742b-de82-7292-86cd-5475a1388313";
 describe("domain primitives", () => {
   it("accepts normalized UUIDv7 identifiers", () => {
     expect(parseUuidV7(validUuidV7)).toBe(validUuidV7);
+    expect(parseUuidV7(validUuidV7.toUpperCase())).toBe(validUuidV7);
     expect(parseIdempotencyKey(validUuidV7)).toBe(validUuidV7);
   });
 

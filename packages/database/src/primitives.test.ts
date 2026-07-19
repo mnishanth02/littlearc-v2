@@ -1,6 +1,7 @@
 import {
   type IdempotencyKey,
   type MutationId,
+  parseCursor,
   parseIdempotencyKey,
   parseMutationId,
   parseUuidV7,
@@ -83,6 +84,9 @@ describe("database primitives", () => {
     const cursor = createChangeFeedCursor(42);
 
     expect(parseChangeFeedCursor(cursor)).toEqual({ sequence: 42, version: 1 });
+    expect(() => parseChangeFeedCursor(parseCursor("not-json-value"))).toThrow(
+      "Change-feed cursor payload is invalid.",
+    );
     expect(() => createChangeFeedCursor(-1)).toThrow("non-negative safe integer");
   });
 

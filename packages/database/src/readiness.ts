@@ -1,5 +1,4 @@
 import { databaseMigrations } from "./migrations/metadata.js";
-import { databaseRoles } from "./roles.js";
 
 const [foundationMigration] = databaseMigrations();
 if (!foundationMigration) {
@@ -10,9 +9,7 @@ export const databaseFoundationReadiness = {
   connection: "deferred" as const,
   migrationExecution: "explicit-release-step" as const,
   migrationVersion: foundationMigration.version,
-  roles: databaseRoles,
   rlsHarness: "policy-source-reviewed" as const,
-  schemaName: "littlearc",
 } as const;
 
 export const databaseReadinessChecks = [

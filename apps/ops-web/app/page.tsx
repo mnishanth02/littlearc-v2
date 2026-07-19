@@ -1,7 +1,6 @@
 import { staffContractBoundary } from "./contracts";
 
-const appEnv = process.env.APP_ENV || "local";
-const staffApiBaseUrl = process.env.STAFF_API_BASE_URL || "http://127.0.0.1:3000";
+export const dynamic = "force-dynamic";
 
 const readinessRows = [
   { label: "Staff auth", status: "placeholder", owner: "FND-03" },
@@ -11,6 +10,9 @@ const readinessRows = [
 ] as const;
 
 export default function StaffShellPage() {
+  const appEnv = process.env.APP_ENV || "local";
+  const staffApiBaseUrl = process.env.STAFF_API_BASE_URL || "http://127.0.0.1:3000";
+
   return (
     <main className="shell">
       <section className="content" aria-labelledby="page-title">

@@ -29,12 +29,12 @@ export function tenantContextSetSql(context: TenantContext): {
   readonly sql: string;
   readonly params: readonly string[];
 } {
+  const values = tenantContextValues(context);
+
   return {
-    params: tenantContextValues(context).flatMap(({ key, value }) => [key, value]),
-    sql: [
-      "select set_config($1, $2, true);",
-      "select set_config($3, $4, true);",
-      "select set_config($5, $6, true);",
-    ].join("\n"),
+    params: values.flatMap(({ key, value }) => [key, value]),
+    sql: values
+      .map((_, index) => `select set_config($${index * 2 + 1}, $${index * 2 + 2}, true);`)
+      .join("\n"),
   };
 }

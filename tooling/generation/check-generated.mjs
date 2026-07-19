@@ -87,6 +87,7 @@ for (const generator of manifest.generators) {
 
   execFileSync(generator.command[0], generator.command.slice(1), {
     cwd: process.cwd(),
+    shell: process.platform === "win32",
     stdio: "inherit",
   });
 

@@ -3,13 +3,20 @@ import { describe, expect, it } from "vitest";
 import { openApiDocument } from "../generated/openapi-document.js";
 import { detectBreakingContractChanges } from "./compatibility.js";
 
-const baseline = JSON.parse(
-  readFileSync(new URL("../../baseline/openapi-v1-baseline.json", import.meta.url), "utf8"),
+const baselineJson = readFileSync(
+  new URL("../../baseline/openapi-v1-baseline.json", import.meta.url),
+  "utf8",
 );
+const baseline = JSON.parse(baselineJson);
 
 describe("contract compatibility guard", () => {
   it("accepts the committed baseline", () => {
     expect(detectBreakingContractChanges(baseline, openApiDocument)).toEqual([]);
+  });
+
+  it("keeps UUIDv7 patterns compatible with OpenAPI regex syntax", () => {
+    expect(baselineJson).not.toContain("$/i");
+    expect(JSON.stringify(openApiDocument)).not.toContain("$/i");
   });
 
   it("detects removed paths, methods, and responses", () => {

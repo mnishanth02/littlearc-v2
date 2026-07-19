@@ -50,7 +50,7 @@ describe("LittleArc API contract", () => {
     expect(
       syncMutationSchema.parse({
         baseRevision: 1,
-        entityId: validUuidV7,
+        entityId: validUuidV7.toUpperCase(),
         entityType: "record",
         localDependencyIds: [],
         mutationId: validUuidV7,

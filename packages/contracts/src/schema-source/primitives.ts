@@ -9,7 +9,7 @@ import { z } from "./openapi-zod.js";
 
 export const uuidV7Schema = z
   .string()
-  .regex(new RegExp(uuidV7Pattern, "i"))
+  .regex(new RegExp(uuidV7Pattern))
   .describe("UUIDv7 identifier");
 
 export const utcTimestampSchema = z

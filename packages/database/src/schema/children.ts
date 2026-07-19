@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index } from "drizzle-orm/pg-core";
+import { check, index } from "drizzle-orm/pg-core";
 import {
   createdAtColumn,
   deletedAtColumn,
@@ -30,6 +30,7 @@ export const children = littlearcSchema.table(
   (table) => [
     index("children_household_idx").on(table.householdId),
     index("children_household_updated_idx").on(table.householdId, table.updatedAt),
+    check("children_revision_check", sql`${table.revision} > 0`),
   ],
 );
 

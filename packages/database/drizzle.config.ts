@@ -1,12 +1,14 @@
 import { defineConfig } from "drizzle-kit";
 
+const drizzleKitMigrationOutput = "./migrations/drizzle";
+const localAdminDatabaseUrl = "postgres://postgres:postgres@localhost:5432/littlearc";
+
 export default defineConfig({
   dialect: "postgresql",
   dbCredentials: {
-    url:
-      process.env.DATABASE_URL ?? "postgres://littlearc_migration:unused@localhost:5432/littlearc",
+    url: process.env.DATABASE_URL ?? localAdminDatabaseUrl,
   },
-  out: "./migrations/drizzle",
+  out: drizzleKitMigrationOutput,
   schema: "./src/schema/index.ts",
   strict: true,
   verbose: true,
