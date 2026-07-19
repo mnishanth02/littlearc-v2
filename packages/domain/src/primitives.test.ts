@@ -1,0 +1,50 @@
+import { describe, expect, it } from "vitest";
+import {
+  createUtcTimestamp,
+  DomainValidationError,
+  initialRevision,
+  nextRevision,
+  parseCursor,
+  parseIdempotencyKey,
+  parseRevision,
+  parseUtcTimestamp,
+  parseUuidV7,
+} from "./index.js";
+
+const validUuidV7 = "019f742b-de82-7292-86cd-5475a1388313";
+
+describe("domain primitives", () => {
+  it("accepts normalized UUIDv7 identifiers", () => {
+    expect(parseUuidV7(validUuidV7)).toBe(validUuidV7);
+    expect(parseIdempotencyKey(validUuidV7)).toBe(validUuidV7);
+  });
+
+  it("rejects non-v7 UUIDs and malformed idempotency keys", () => {
+    expect(() => parseUuidV7("019f742b-de82-4292-86cd-5475a1388313")).toThrow(
+      DomainValidationError,
+    );
+    expect(() => parseIdempotencyKey("retry-key")).toThrow(DomainValidationError);
+  });
+
+  it("accepts normalized UTC timestamps and rejects ambiguous offsets", () => {
+    expect(parseUtcTimestamp("2026-07-19T12:30:15.000Z")).toBe("2026-07-19T12:30:15.000Z");
+    expect(createUtcTimestamp(new Date("2026-07-19T12:30:15.000Z"))).toBe(
+      "2026-07-19T12:30:15.000Z",
+    );
+    expect(() => parseUtcTimestamp("2026-07-19T12:30:15+05:30")).toThrow(DomainValidationError);
+  });
+
+  it("increments positive integer revisions", () => {
+    const first = initialRevision();
+
+    expect(first).toBe(1);
+    expect(nextRevision(first)).toBe(2);
+    expect(() => parseRevision(0)).toThrow(DomainValidationError);
+    expect(() => parseRevision(1.5)).toThrow(DomainValidationError);
+  });
+
+  it("treats cursors as opaque base64url tokens", () => {
+    expect(parseCursor("cursor_019f742b")).toBe("cursor_019f742b");
+    expect(() => parseCursor("short")).toThrow(DomainValidationError);
+  });
+});

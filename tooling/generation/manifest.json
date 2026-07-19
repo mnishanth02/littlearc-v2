@@ -1,4 +1,15 @@
 {
   "schemaVersion": 1,
-  "generators": []
+  "generators": [
+    {
+      "name": "contracts-openapi",
+      "command": ["pnpm", "--filter", "@littlearc/contracts", "generate"],
+      "outputs": [
+        "packages/contracts/baseline/openapi-v1-baseline.json",
+        "packages/contracts/src/generated/openapi-document.ts",
+        "packages/contracts/src/generated/openapi-types.ts",
+        "packages/contracts/src/generated/openapi.json"
+      ]
+    }
+  ]
 }

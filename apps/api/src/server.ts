@@ -1,5 +1,6 @@
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import { contractMetadata, openApiDocument } from "@littlearc/contracts";
 import Fastify, { type FastifyInstance } from "fastify";
 import type { ApiConfig } from "./config.js";
 import { registerProblemDetails } from "./problem.js";
@@ -34,6 +35,10 @@ export async function createApiServer(config: ApiConfig): Promise<FastifyInstanc
   await server.register(cors, {
     origin: [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/],
   });
+
+  server.get("/v1", async () => contractMetadata);
+
+  server.get("/v1/openapi.json", async () => openApiDocument);
 
   server.get(
     "/live",

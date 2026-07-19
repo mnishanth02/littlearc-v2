@@ -2,5 +2,39 @@
   "name": "@littlearc/contracts",
   "version": "0.0.0",
   "private": true,
-  "description": "LittleArc API contracts; implementation begins in FND-04"
+  "description": "LittleArc API contracts and generated clients",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./client/mobile": {
+      "types": "./src/client/mobile.ts",
+      "default": "./dist/client/mobile.js"
+    },
+    "./client/staff": {
+      "types": "./src/client/staff.ts",
+      "default": "./dist/client/staff.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm --filter @littlearc/domain build && tsc --project tsconfig.build.json",
+    "clean": "rm -rf dist coverage",
+    "generate": "pnpm --filter @littlearc/domain build && tsx src/openapi/write-generated.ts",
+    "test:contract": "pnpm --filter @littlearc/domain build && vitest run src",
+    "typecheck": "tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "9.1.0",
+    "@littlearc/domain": "workspace:*",
+    "openapi-fetch": "0.17.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "tsx": "4.23.1"
+  }
 }

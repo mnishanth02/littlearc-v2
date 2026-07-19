@@ -42,6 +42,34 @@ describe("API skeleton", () => {
     });
   });
 
+  it("serves shared /v1 contract metadata and OpenAPI", async () => {
+    const server = await createApiServer(loadApiConfig({ APP_ENV: "local" }));
+
+    const metadataResponse = await server.inject({
+      method: "GET",
+      url: "/v1",
+    });
+    const openApiResponse = await server.inject({
+      method: "GET",
+      url: "/v1/openapi.json",
+    });
+
+    expect(metadataResponse.statusCode).toBe(200);
+    expect(metadataResponse.json()).toMatchObject({
+      basePath: "/v1",
+      name: "littlearc-api",
+      version: "0.1.0",
+    });
+    expect(
+      metadataResponse.json().resourceGroups.map((group: { prefix: string }) => group.prefix),
+    ).toContain("/v1/sync");
+    expect(openApiResponse.statusCode).toBe(200);
+    expect(openApiResponse.json()).toMatchObject({
+      info: { title: "LittleArc API", version: "0.1.0" },
+      openapi: "3.1.0",
+    });
+  });
+
   it("returns Problem Details for missing routes", async () => {
     const server = await createApiServer(loadApiConfig({ APP_ENV: "local" }));
 

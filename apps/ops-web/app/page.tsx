@@ -1,9 +1,11 @@
+import { staffContractBoundary } from "./contracts";
+
 const appEnv = process.env.APP_ENV || "local";
 const staffApiBaseUrl = process.env.STAFF_API_BASE_URL || "http://127.0.0.1:3000";
 
 const readinessRows = [
   { label: "Staff auth", status: "placeholder", owner: "FND-03" },
-  { label: "Staff API contract", status: "deferred", owner: "FND-04" },
+  { label: "Staff API contract", status: staffContractBoundary.client, owner: "FND-04" },
   { label: "Database access", status: "forbidden", owner: "Architecture" },
   { label: "Purpose-code audit", status: "deferred", owner: "FND-07" },
 ] as const;

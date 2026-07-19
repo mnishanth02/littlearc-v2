@@ -15,6 +15,8 @@ Current package documents:
 - [`FND-02` Implementation Evidence](./fnd-02-implementation-evidence.md)
 - [`FND-03` Application Skeletons Plan](./fnd-03-application-skeletons-plan.md)
 - [`FND-03` Implementation Evidence](./fnd-03-implementation-evidence.md)
+- [`FND-04` Contracts and Domain Kernel Plan](./fnd-04-contracts-and-domain-kernel-plan.md)
+- [`FND-04` Implementation Evidence](./fnd-04-implementation-evidence.md)
 
 The live status for these work packages remains in
 [IMPLEMENTATION_STATUS.md](../../IMPLEMENTATION_STATUS.md).
