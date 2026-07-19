@@ -10,6 +10,11 @@
         "packages/contracts/src/generated/openapi-types.ts",
         "packages/contracts/src/generated/openapi.json"
       ]
+    },
+    {
+      "name": "database-migrations",
+      "command": ["pnpm", "--filter", "@littlearc/database", "generate"],
+      "outputs": ["packages/database/migrations/0001_fnd_05_database_foundation.sql"]
     }
   ]
 }

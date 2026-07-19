@@ -31,11 +31,24 @@ describe("API skeleton", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       appEnv: "local",
+      databaseFoundation: {
+        connection: "deferred",
+        migrationExecution: "explicit-release-step",
+        migrationVersion: "0001_fnd_05_database_foundation",
+        rlsHarness: "policy-source-reviewed",
+        roles: {
+          application: "littlearc_app",
+          migration: "littlearc_migration",
+          operationsReadOnly: "littlearc_ops_readonly",
+          worker: "littlearc_worker",
+        },
+        schemaName: "littlearc",
+      },
       checks: [
         { name: "auth", owner: "OFF-01", status: "deferred" },
-        { name: "database", owner: "FND-05", status: "deferred" },
+        { name: "database", owner: "FND-05", status: "foundation-ready" },
+        { name: "queue", owner: "FND-05", status: "outbox-foundation-ready" },
         { name: "object-storage", owner: "FND-06", status: "deferred" },
-        { name: "queue", owner: "FND-05", status: "deferred" },
       ],
       ready: true,
       service: "api",

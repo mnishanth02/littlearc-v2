@@ -1,3 +1,4 @@
+import { databaseFoundationReadiness } from "@littlearc/database/readiness";
 import type { WorkerConfig } from "./config.js";
 
 export type WorkerLogger = {
@@ -7,9 +8,10 @@ export type WorkerLogger = {
 export type WorkerLogEvent = {
   readonly code: "worker_started" | "worker_heartbeat" | "worker_stopped";
   readonly appEnv: WorkerConfig["appEnv"];
+  readonly databaseMigrationVersion: typeof databaseFoundationReadiness.migrationVersion;
   readonly queue: WorkerConfig["queueConnectionMode"];
-  readonly retryPolicy: "fnd_05";
-  readonly deadLetterPolicy: "fnd_05";
+  readonly retryPolicy: "fnd_05_outbox_foundation";
+  readonly deadLetterPolicy: "fnd_05_outbox_foundation";
 };
 
 export type WorkerRuntime = {
@@ -24,9 +26,10 @@ export function createWorkerRuntime(config: WorkerConfig, logger: WorkerLogger):
 
   const eventBase = {
     appEnv: config.appEnv,
-    deadLetterPolicy: "fnd_05",
+    databaseMigrationVersion: databaseFoundationReadiness.migrationVersion,
+    deadLetterPolicy: "fnd_05_outbox_foundation",
     queue: config.queueConnectionMode,
-    retryPolicy: "fnd_05",
+    retryPolicy: "fnd_05_outbox_foundation",
   } as const;
 
   return {

@@ -10,13 +10,14 @@
     "clean": "rm -rf dist coverage",
     "dev": "pnpm build --watch",
     "start": "node dist/index.js",
-    "test": "pnpm --filter @littlearc/contracts build && vitest run src",
+    "test": "pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && vitest run src",
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
-    "@littlearc/contracts": "workspace:*",
     "@fastify/cors": "11.3.0",
     "@fastify/helmet": "13.1.0",
+    "@littlearc/contracts": "workspace:*",
+    "@littlearc/database": "workspace:*",
     "fastify": "5.10.0"
   }
 }

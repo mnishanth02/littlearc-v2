@@ -1,6 +1,10 @@
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import { contractMetadata, openApiDocument } from "@littlearc/contracts";
+import {
+  databaseFoundationReadiness,
+  databaseReadinessChecks,
+} from "@littlearc/database/readiness";
 import Fastify, { type FastifyInstance } from "fastify";
 import type { ApiConfig } from "./config.js";
 import { registerProblemDetails } from "./problem.js";
@@ -16,9 +20,10 @@ export type ReadinessResponse = {
   readonly ready: true;
   readonly service: "api";
   readonly appEnv: ApiConfig["appEnv"];
+  readonly databaseFoundation: typeof databaseFoundationReadiness;
   readonly checks: ReadonlyArray<{
     readonly name: "auth" | "database" | "object-storage" | "queue";
-    readonly status: "deferred";
+    readonly status: "deferred" | "foundation-ready" | "outbox-foundation-ready";
     readonly owner: string;
   }>;
 };
@@ -56,11 +61,11 @@ export async function createApiServer(config: ApiConfig): Promise<FastifyInstanc
       ready: true,
       service: "api",
       appEnv: config.appEnv,
+      databaseFoundation: databaseFoundationReadiness,
       checks: [
         { name: "auth", status: "deferred", owner: "OFF-01" },
-        { name: "database", status: "deferred", owner: "FND-05" },
+        ...databaseReadinessChecks,
         { name: "object-storage", status: "deferred", owner: "FND-06" },
-        { name: "queue", status: "deferred", owner: "FND-05" },
       ],
     }),
   );

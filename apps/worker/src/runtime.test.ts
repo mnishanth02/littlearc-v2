@@ -28,23 +28,26 @@ describe("worker skeleton", () => {
       {
         appEnv: "local",
         code: "worker_started",
-        deadLetterPolicy: "fnd_05",
+        databaseMigrationVersion: "0001_fnd_05_database_foundation",
+        deadLetterPolicy: "fnd_05_outbox_foundation",
         queue: "deferred",
-        retryPolicy: "fnd_05",
+        retryPolicy: "fnd_05_outbox_foundation",
       },
       {
         appEnv: "local",
         code: "worker_heartbeat",
-        deadLetterPolicy: "fnd_05",
+        databaseMigrationVersion: "0001_fnd_05_database_foundation",
+        deadLetterPolicy: "fnd_05_outbox_foundation",
         queue: "deferred",
-        retryPolicy: "fnd_05",
+        retryPolicy: "fnd_05_outbox_foundation",
       },
       {
         appEnv: "local",
         code: "worker_stopped",
-        deadLetterPolicy: "fnd_05",
+        databaseMigrationVersion: "0001_fnd_05_database_foundation",
+        deadLetterPolicy: "fnd_05_outbox_foundation",
         queue: "deferred",
-        retryPolicy: "fnd_05",
+        retryPolicy: "fnd_05_outbox_foundation",
       },
     ]);
 
