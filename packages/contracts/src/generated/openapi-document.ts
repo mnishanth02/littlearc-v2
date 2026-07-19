@@ -130,7 +130,7 @@ export const openApiDocument = {
           },
           "generatedAt": {
             "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
             "description": "Normalized UTC ISO 8601 timestamp"
           },
           "resourceGroups": {
@@ -181,7 +181,7 @@ export const openApiDocument = {
               "string",
               "null"
             ],
-            "pattern": "^[A-Za-z0-9_-]{12,512}$",
+            "pattern": "^[A-Za-z0-9_-]{12,512}$(?![\\s\\S])",
             "description": "Opaque pagination or synchronization cursor"
           }
         },
@@ -195,7 +195,7 @@ export const openApiDocument = {
         "properties": {
           "householdId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           }
         },
@@ -208,12 +208,12 @@ export const openApiDocument = {
         "properties": {
           "householdId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "childId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           }
         },
@@ -227,12 +227,12 @@ export const openApiDocument = {
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "householdId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "revision": {
@@ -242,12 +242,12 @@ export const openApiDocument = {
           },
           "createdAt": {
             "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
             "description": "Normalized UTC ISO 8601 timestamp"
           },
           "updatedAt": {
             "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
             "description": "Normalized UTC ISO 8601 timestamp"
           },
           "deletedAt": {
@@ -255,12 +255,12 @@ export const openApiDocument = {
               "string",
               "null"
             ],
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
             "description": "Normalized UTC ISO 8601 timestamp"
           },
           "actorId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "childId": {
@@ -268,7 +268,7 @@ export const openApiDocument = {
               "string",
               "null"
             ],
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "purpose": {
@@ -311,17 +311,17 @@ export const openApiDocument = {
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "householdId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "actorId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "action": {
@@ -343,17 +343,17 @@ export const openApiDocument = {
           },
           "targetId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "requestId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "occurredAt": {
             "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
             "description": "Normalized UTC ISO 8601 timestamp"
           },
           "purposeCode": {
@@ -382,12 +382,12 @@ export const openApiDocument = {
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "householdId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "revision": {
@@ -397,12 +397,12 @@ export const openApiDocument = {
           },
           "createdAt": {
             "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
             "description": "Normalized UTC ISO 8601 timestamp"
           },
           "updatedAt": {
             "type": "string",
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
             "description": "Normalized UTC ISO 8601 timestamp"
           },
           "deletedAt": {
@@ -410,12 +410,12 @@ export const openApiDocument = {
               "string",
               "null"
             ],
-            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
             "description": "Normalized UTC ISO 8601 timestamp"
           },
           "childId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "category": {
@@ -506,7 +506,7 @@ export const openApiDocument = {
         "properties": {
           "mutationId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "entityType": {
@@ -520,7 +520,7 @@ export const openApiDocument = {
           },
           "entityId": {
             "type": "string",
-            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
             "description": "UUIDv7 identifier"
           },
           "operation": {
@@ -543,7 +543,7 @@ export const openApiDocument = {
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
               "description": "UUIDv7 identifier"
             }
           }
@@ -593,7 +593,7 @@ export const openApiDocument = {
                     },
                     "generatedAt": {
                       "type": "string",
-                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
                       "description": "Normalized UTC ISO 8601 timestamp"
                     },
                     "resourceGroups": {

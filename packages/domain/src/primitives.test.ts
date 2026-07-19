@@ -27,6 +27,14 @@ describe("domain primitives", () => {
     expect(() => parseIdempotencyKey("retry-key")).toThrow(DomainValidationError);
   });
 
+  it.each(["\n", "\r\n"])("rejects a %j suffix on shared string primitives", (suffix) => {
+    expect(() => parseUuidV7(`${validUuidV7}${suffix}`)).toThrow(DomainValidationError);
+    expect(() => parseUtcTimestamp(`2026-07-19T12:30:15.000Z${suffix}`)).toThrow(
+      DomainValidationError,
+    );
+    expect(() => parseCursor(`cursor_019f742b${suffix}`)).toThrow(DomainValidationError);
+  });
+
   it("accepts normalized UTC timestamps and rejects ambiguous offsets", () => {
     expect(parseUtcTimestamp("2026-07-19T12:30:15.000Z")).toBe("2026-07-19T12:30:15.000Z");
     expect(createUtcTimestamp(new Date("2026-07-19T12:30:15.000Z"))).toBe(

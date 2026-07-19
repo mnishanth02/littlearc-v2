@@ -4,9 +4,12 @@ import {
   contractMetadataSchema,
   createMobileApiClient,
   createStaffApiClient,
+  cursorSchema,
   openApiDocument,
   problemDetailsSchema,
   syncMutationSchema,
+  utcTimestampSchema,
+  uuidV7Schema,
 } from "./index.js";
 
 const validUuidV7 = "019f742b-de82-7292-86cd-5475a1388313";
@@ -70,6 +73,12 @@ describe("LittleArc API contract", () => {
         operation: "update",
       }),
     ).toThrow();
+  });
+
+  it.each(["\n", "\r\n"])("rejects a %j suffix in shared contract primitives", (suffix) => {
+    expect(() => uuidV7Schema.parse(`${validUuidV7}${suffix}`)).toThrow();
+    expect(() => utcTimestampSchema.parse(`2026-07-19T12:30:15.000Z${suffix}`)).toThrow();
+    expect(() => cursorSchema.parse(`cursor_019f742b${suffix}`)).toThrow();
   });
 
   it("exports generated mobile and staff client factories", () => {

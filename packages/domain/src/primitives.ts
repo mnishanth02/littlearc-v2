@@ -19,9 +19,10 @@ export type IdempotencyKey = Brand<string, "IdempotencyKey">;
 export type MutationId = Brand<string, "MutationId">;
 
 export const uuidV7Pattern =
-  "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$";
-export const utcTimestampPattern = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$";
-export const cursorPattern = "^[A-Za-z0-9_-]{12,512}$";
+  "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])";
+export const utcTimestampPattern =
+  "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])";
+export const cursorPattern = "^[A-Za-z0-9_-]{12,512}$(?![\\s\\S])";
 
 const uuidV7Regex = new RegExp(uuidV7Pattern);
 const utcTimestampRegex = new RegExp(utcTimestampPattern);
