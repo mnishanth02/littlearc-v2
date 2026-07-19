@@ -57,16 +57,16 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | Scope | Tag | Owner | Next action or completion evidence |
 | --- | --- | --- | --- |
 | M0. Readiness and evidence | `COMPLETE` | Founder/product + engineering | Gate 0A closed on 18 July 2026; see the M0 dossier |
-| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-03` on the accepted repository and CI foundation |
+| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-04` contracts and domain kernel on the accepted app skeletons |
 | `FND-01` Monorepo and toolchain | `COMPLETE` | Engineering | Root workspace, boundaries, exact pins, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
-| `FND-03` Application skeletons | `READY` | Engineering | Write the package brief, then scaffold the four application runtimes |
 | `FND-02` CI and supply-chain baseline | `COMPLETE` | Engineering | Local and hosted validation, required PR checks, source traceability, and repository controls accepted; see [evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |
-| `FND-04` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order |
+| `FND-03` Application skeletons | `COMPLETE` | Engineering | Mobile, API, worker, and staff shells accepted; see [evidence](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) |
+| `FND-04` Contracts and domain kernel | `READY` | Engineering | Write the package brief, then establish `/v1` contracts and framework-independent domain primitives |
+| `FND-05` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order |
 | M2 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
-Application-specific jobs will enter the accepted task graph when `FND-03`
-adds them.
+`FND-03` added the first application-specific jobs to the accepted task graph.
 
 ## 5. Completed Register
 
@@ -75,6 +75,7 @@ adds them.
 | 18 Jul 2026 | M0 Gate 0A and engineering close-out | `COMPLETE` | Proceed decision, accepted dependency baseline, decisions `M0-D01` through `M0-D10`, and later-gate obligations are recorded in the M0 dossier |
 | 18 Jul 2026 | [`FND-01` monorepo and toolchain](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) | `COMPLETE` | Root pnpm/Turborepo workspace, 13 package nodes, exact pins, shared configuration, boundary/environment policy, 18 tests, and temporary clean-checkout validation pass |
 | 18 Jul 2026 | [`FND-02` CI and supply-chain baseline](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) | `COMPLETE` | Deterministic GitHub Actions, 23 tooling tests, dependency review, dual secret scanning, scheduled audit, main ruleset, immutable action pins, and source/lockfile traceability pass locally and on pull request #1 |
+| 19 Jul 2026 | [`FND-03` application skeletons](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) | `COMPLETE` | Mobile Expo development-client shell, API Fastify shell, worker heartbeat shell, staff Next.js shell, native configuration transfer, 28 tests, clean Expo Doctor/prebuild/export, root validation, and clean-checkout proof passed |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -94,7 +95,7 @@ No implementation item is currently tagged `IN PROGRESS`.
 
 | Priority | Item | Tag | Entry condition | Definition of done |
 | ---: | --- | --- | --- | --- |
-| 1 | `FND-03` Application skeletons | `READY` | `FND-01` foundation available | Mobile, API, worker, and staff shells run; accepted native configuration is transferred into `apps/mobile` |
+| 1 | `FND-04` Contracts and domain kernel | `READY` | `FND-03` application skeletons complete | Zod/OpenAPI conventions, generated clients, and framework-independent domain primitives compile |
 
 The complete dependency order remains in Section 25 of the implementation
 roadmap. This table should show only the next few actionable packages.
@@ -128,6 +129,7 @@ roadmap. This table should show only the next few actionable packages.
 | [Roadmap](./impl-plan/roadmap.md) | `ACCEPTED` | Live status tracked in this dashboard |
 | [`FND-01` Monorepo and toolchain](./impl-plan/m1-foundation/fnd-01-monorepo-and-toolchain-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
 | [`FND-02` CI and supply-chain baseline](./impl-plan/m1-foundation/fnd-02-ci-and-supply-chain-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |
+| [`FND-03` Application skeletons](./impl-plan/m1-foundation/fnd-03-application-skeletons-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) |
 
 ## 11. Agent Workflow
 
@@ -157,5 +159,5 @@ For every status change:
 7. Keep the matching implementation plan's status header and module-status
    table in sync with this dashboard.
 
-The next status change should be `FND-03`: `READY` to `IN PROGRESS` when
+The next status change should be `FND-04`: `READY` to `IN PROGRESS` when
 its package brief and implementation begin.

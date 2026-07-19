@@ -2,5 +2,21 @@
   "name": "@littlearc/ops-web",
   "version": "0.0.0",
   "private": true,
-  "description": "LittleArc staff operations web application; runtime scaffold begins in FND-03"
+  "description": "LittleArc staff operations web application",
+  "scripts": {
+    "build": "next build",
+    "clean": "rm -rf .next",
+    "dev": "next dev",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3"
+  }
 }
