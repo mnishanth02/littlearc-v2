@@ -47,6 +47,9 @@ importers:
       '@littlearc/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@littlearc/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       fastify:
         specifier: 5.10.0
         version: 5.10.0
@@ -62,6 +65,9 @@ importers:
       '@littlearc/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@littlearc/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       '@react-native/normalize-colors':
         specifier: 0.86.0
         version: 0.86.0
@@ -162,6 +168,9 @@ importers:
       '@littlearc/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@littlearc/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       next:
         specifier: 16.2.10
         version: 16.2.10(@babel/core@7.29.7)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -184,6 +193,9 @@ importers:
       '@littlearc/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@littlearc/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
       pg-boss:
         specifier: 12.26.1
         version: 12.26.1

@@ -1,18 +1,5 @@
-import { databaseFoundationReadiness } from "@littlearc/database/readiness";
+import { logCodes, type SafeLogger } from "@littlearc/observability";
 import type { WorkerConfig } from "./config.js";
-
-export type WorkerLogger = {
-  readonly info: (event: WorkerLogEvent) => void;
-};
-
-export type WorkerLogEvent = {
-  readonly code: "worker_started" | "worker_heartbeat" | "worker_stopped";
-  readonly appEnv: WorkerConfig["appEnv"];
-  readonly databaseMigrationVersion: typeof databaseFoundationReadiness.migrationVersion;
-  readonly queue: WorkerConfig["queueConnectionMode"];
-  readonly retryPolicy: "fnd_05_outbox_foundation";
-  readonly deadLetterPolicy: "fnd_05_outbox_foundation";
-};
 
 export type WorkerRuntime = {
   readonly start: () => void;
@@ -21,29 +8,15 @@ export type WorkerRuntime = {
 
 type Timer = ReturnType<typeof setInterval>;
 
-export function createWorkerRuntime(config: WorkerConfig, logger: WorkerLogger): WorkerRuntime {
+export function createWorkerRuntime(config: WorkerConfig, logger: SafeLogger): WorkerRuntime {
   let heartbeatTimer: Timer | undefined;
-
-  const eventBase = {
-    appEnv: config.appEnv,
-    databaseMigrationVersion: databaseFoundationReadiness.migrationVersion,
-    deadLetterPolicy: "fnd_05_outbox_foundation",
-    queue: config.queueConnectionMode,
-    retryPolicy: "fnd_05_outbox_foundation",
-  } as const;
 
   return {
     start() {
-      logger.info({
-        ...eventBase,
-        code: "worker_started",
-      });
+      logger.info(logCodes.workerStarted, { outcome: "started" });
 
       heartbeatTimer = setInterval(() => {
-        logger.info({
-          ...eventBase,
-          code: "worker_heartbeat",
-        });
+        logger.info(logCodes.workerHeartbeat, { outcome: "heartbeat" });
       }, config.heartbeatIntervalMs);
     },
     stop() {
@@ -52,10 +25,7 @@ export function createWorkerRuntime(config: WorkerConfig, logger: WorkerLogger):
         heartbeatTimer = undefined;
       }
 
-      logger.info({
-        ...eventBase,
-        code: "worker_stopped",
-      });
+      logger.info(logCodes.workerStopped, { outcome: "stopped" });
     },
   };
 }

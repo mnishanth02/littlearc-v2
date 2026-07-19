@@ -1,3 +1,4 @@
+import { createSafeLogger, type SafeLogRecord } from "@littlearc/observability";
 import { describe, expect, it } from "vitest";
 import { loadApiConfig } from "./config.js";
 import { createApiServer } from "./server.js";
@@ -131,5 +132,34 @@ describe("API skeleton", () => {
       title: "Not Found",
       type: "https://littlearc.app/problems/not-found",
     });
+  });
+
+  it("logs request completion through the shared bounded logger", async () => {
+    const records: SafeLogRecord[] = [];
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "staging" }),
+      createSafeLogger({
+        environment: "staging",
+        service: "api",
+        sink: (record) => records.push(record),
+        version: "0.0.0",
+      }),
+    );
+
+    await server.inject({ method: "GET", url: "/v1?childName=CANARY_CHILD_AMARA" });
+
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      code: "api.request.completed",
+      environment: "staging",
+      outcome: "success",
+      service: "api",
+      severity: "info",
+      version: "0.0.0",
+    });
+    expect(records[0]?.requestId).toEqual(expect.any(String));
+    expect(records[0]?.durationMs).toEqual(expect.any(Number));
+    expect(JSON.stringify(records)).not.toContain("childName");
+    expect(JSON.stringify(records)).not.toContain("CANARY_CHILD_AMARA");
   });
 });

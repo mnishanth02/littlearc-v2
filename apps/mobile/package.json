@@ -21,6 +21,7 @@
     "@better-auth/expo": "1.6.23",
     "@infinitered/react-native-mlkit-text-recognition": "5.0.1",
     "@littlearc/contracts": "workspace:*",
+    "@littlearc/observability": "workspace:*",
     "@react-native/normalize-colors": "0.86.0",
     "better-auth": "1.6.23",
     "expo": "57.0.7",

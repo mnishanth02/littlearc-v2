@@ -1,9 +1,11 @@
 import "react-native-gesture-handler";
 
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { Button, StyleSheet, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { mobileObservability } from "../src/bootstrap/observability";
 
 type RouteErrorBoundaryProps = {
   readonly error: Error;
@@ -11,13 +13,20 @@ type RouteErrorBoundaryProps = {
 };
 
 export function ErrorBoundary({ error, retry }: RouteErrorBoundaryProps) {
+  useEffect(() => {
+    void error;
+    mobileObservability.errors.capture("mobile.runtime.unhandled");
+  }, [error]);
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.errorShell}>
         <Text accessibilityRole="header" style={styles.errorTitle}>
           LittleArc could not open this screen
         </Text>
-        <Text style={styles.errorBody}>{error.message}</Text>
+        <Text style={styles.errorBody}>
+          Try again. If the problem continues, report code LA-MOBILE-UNHANDLED.
+        </Text>
         <Button
           accessibilityLabel="Try opening this screen again"
           title="Try again"

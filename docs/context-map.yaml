@@ -19,6 +19,8 @@ domains:
       - docs/impl-plan/m1-foundation/fnd-01-implementation-evidence.md
       - docs/impl-plan/m1-foundation/fnd-02-ci-and-supply-chain-plan.md
       - docs/impl-plan/m1-foundation/fnd-02-implementation-evidence.md
+      - docs/impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md
+      - docs/impl-plan/m1-foundation/fnd-07-implementation-evidence.md
     code:
       - package.json
       - pnpm-workspace.yaml
@@ -233,12 +235,18 @@ domains:
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/reference/environment-variable-catalog.md
       - docs/impl-plan/roadmap.md
+      - docs/impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md
+      - docs/impl-plan/m1-foundation/fnd-07-implementation-evidence.md
     code:
       - packages/observability/**
       - apps/api/**
       - apps/worker/**
       - apps/mobile/**
       - apps/ops-web/**
-    tests: []
+    tests:
+      - packages/observability/src/**/*.test.ts
+      - apps/api/src/server.test.ts
+      - apps/worker/src/runtime.test.ts
     validation:
+      - pnpm --filter @littlearc/observability test
       - pnpm typecheck

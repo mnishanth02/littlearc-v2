@@ -10,11 +10,12 @@
     "clean": "rm -rf dist coverage",
     "dev": "pnpm build --watch",
     "start": "node dist/index.js",
-    "test": "pnpm --filter @littlearc/database build && vitest run src",
+    "test": "pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && vitest run src",
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
     "@littlearc/database": "workspace:*",
+    "@littlearc/observability": "workspace:*",
     "pg-boss": "12.26.1"
   }
 }
