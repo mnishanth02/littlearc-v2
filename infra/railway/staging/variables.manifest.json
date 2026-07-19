@@ -1,0 +1,161 @@
+{
+  "dataPolicy": "synthetic-only",
+  "environment": "staging",
+  "productionProvisioning": "deferred",
+  "region": "asia-southeast1-eqsg3a",
+  "services": [
+    {
+      "configFile": "infra/railway/staging/api.railway.json",
+      "kind": "web",
+      "name": "littlearc-api-staging",
+      "requiredVariables": [
+        {
+          "classification": "public",
+          "name": "APP_ENV",
+          "source": "literal:staging"
+        },
+        {
+          "classification": "public",
+          "name": "HOST",
+          "source": "literal:0.0.0.0"
+        },
+        {
+          "classification": "public",
+          "name": "PORT",
+          "source": "railway-injected"
+        },
+        {
+          "classification": "secret",
+          "name": "DATABASE_URL",
+          "source": "railway-postgres-reference"
+        },
+        {
+          "classification": "secret",
+          "name": "BETTER_AUTH_SECRET",
+          "source": "railway-secret"
+        },
+        {
+          "classification": "sensitive",
+          "name": "S3_ENDPOINT",
+          "source": "railway-bucket-reference"
+        },
+        {
+          "classification": "secret",
+          "name": "S3_ACCESS_KEY_ID",
+          "source": "railway-secret"
+        },
+        {
+          "classification": "secret",
+          "name": "S3_SECRET_ACCESS_KEY",
+          "source": "railway-secret"
+        },
+        {
+          "classification": "sensitive",
+          "name": "S3_BUCKET_NAME",
+          "source": "railway-bucket-reference"
+        },
+        {
+          "classification": "secret",
+          "name": "KEY_WRAPPING_SECRET_V1",
+          "source": "railway-secret"
+        }
+      ]
+    },
+    {
+      "configFile": "infra/railway/staging/worker.railway.json",
+      "kind": "worker",
+      "name": "littlearc-worker-staging",
+      "requiredVariables": [
+        {
+          "classification": "public",
+          "name": "APP_ENV",
+          "source": "literal:staging"
+        },
+        {
+          "classification": "secret",
+          "name": "DATABASE_URL",
+          "source": "railway-postgres-reference"
+        },
+        {
+          "classification": "sensitive",
+          "name": "S3_ENDPOINT",
+          "source": "railway-bucket-reference"
+        },
+        {
+          "classification": "secret",
+          "name": "S3_ACCESS_KEY_ID",
+          "source": "railway-secret"
+        },
+        {
+          "classification": "secret",
+          "name": "S3_SECRET_ACCESS_KEY",
+          "source": "railway-secret"
+        },
+        {
+          "classification": "sensitive",
+          "name": "S3_BUCKET_NAME",
+          "source": "railway-bucket-reference"
+        },
+        {
+          "classification": "secret",
+          "name": "KEY_WRAPPING_SECRET_V1",
+          "source": "railway-secret"
+        }
+      ]
+    },
+    {
+      "configFile": "infra/railway/staging/ops-web.railway.json",
+      "kind": "web",
+      "name": "littlearc-ops-web-staging",
+      "requiredVariables": [
+        {
+          "classification": "public",
+          "name": "APP_ENV",
+          "source": "literal:staging"
+        },
+        {
+          "classification": "public",
+          "name": "NEXT_PUBLIC_APP_URL",
+          "source": "railway-domain"
+        },
+        {
+          "classification": "sensitive",
+          "name": "STAFF_API_BASE_URL",
+          "source": "railway-api-domain"
+        },
+        {
+          "classification": "secret",
+          "name": "BETTER_AUTH_SECRET",
+          "source": "railway-secret"
+        }
+      ]
+    },
+    {
+      "kind": "postgresql",
+      "name": "Postgres",
+      "requiredVariables": [
+        {
+          "classification": "secret",
+          "name": "DATABASE_URL",
+          "source": "railway-postgres-reference"
+        }
+      ]
+    },
+    {
+      "kind": "bucket",
+      "name": "littlearc-documents-staging",
+      "requiredVariables": [
+        {
+          "classification": "sensitive",
+          "name": "S3_BUCKET_NAME",
+          "source": "railway-bucket-reference"
+        }
+      ]
+    },
+    {
+      "kind": "bucket",
+      "name": "littlearc-recovery-staging",
+      "requiredVariables": []
+    }
+  ]
+}

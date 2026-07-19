@@ -56,7 +56,32 @@ export async function createApiServer(config: ApiConfig): Promise<FastifyInstanc
   );
 
   server.get(
+    "/health/live",
+    async (request): Promise<HealthResponse> => ({
+      status: "ok",
+      service: "api",
+      appEnv: config.appEnv,
+      requestId: request.id,
+    }),
+  );
+
+  server.get(
     "/ready",
+    async (): Promise<ReadinessResponse> => ({
+      ready: true,
+      service: "api",
+      appEnv: config.appEnv,
+      databaseFoundation: databaseFoundationReadiness,
+      checks: [
+        { name: "auth", status: "deferred", owner: "OFF-01" },
+        ...databaseReadinessChecks,
+        { name: "object-storage", status: "deferred", owner: "FND-06" },
+      ],
+    }),
+  );
+
+  server.get(
+    "/health/ready",
     async (): Promise<ReadinessResponse> => ({
       ready: true,
       service: "api",
