@@ -3,9 +3,8 @@
 ## Purpose
 
 LittleArc is a mobile-first pediatric history platform. This repository is in
-the M1 foundation stage: root tooling and CI are accepted, application runtimes
-arrive in `FND-03`, and existing mobile/design-token source remains quarantined
-prototype input until `FND-08`.
+the M1 foundation stage: root tooling, application runtimes, and the initial
+design-system foundation are accepted; `FND-09` is the next package.
 
 ## Context Loading Protocol
 
@@ -36,9 +35,11 @@ When sources conflict, report the conflict instead of silently choosing.
 
 ## Project Structure & Module Organization
 
-- `apps/mobile/src/app/` contains Expo Router screen prototypes; reusable UI and
-  domain components live under `apps/mobile/src/components/`.
-- `apps/mobile/src/theme/` contains the provisional Unistyles setup.
+- `apps/mobile/app/` contains the accepted Expo Router shell and routes;
+  reusable foundation UI lives under `apps/mobile/src/components/ui/`, while
+  domain components arrive with their first production consumer.
+- `apps/mobile/src/theme/` contains the accepted Unistyles 3 registration and
+  accessibility-preference boundary.
 - `packages/design-tokens/src/` contains shared color, spacing, and typography
   tokens. Export public APIs through `src/index.ts`.
 - `docs/IMPLEMENTATION_STATUS.md` is the project delivery dashboard and AI-agent
@@ -56,9 +57,9 @@ When sources conflict, report the conflict instead of silently choosing.
 - `scripts/context/` contains deterministic context lookup and documentation
   governance checks.
 
-The M1 root workspace is scaffolded. Existing mobile and design-token source
-files remain quarantined prototypes until their adopt/adapt/discard review in
-`FND-08`; do not import them into production application code before that review.
+The M1 root workspace is scaffolded. `FND-08` reconciled the loose design-system
+prototype file by file. Accepted tokens and foundation primitives are production
+source; domain components still arrive with their first production consumer.
 
 ## Build, Test, and Development Commands
 

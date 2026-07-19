@@ -1,119 +1,115 @@
-import React from 'react';
-import { Pressable, PressableProps, ActivityIndicator, View } from 'react-native';
-import { createStyleSheet, useStyles } from 'react-native-unistyles';
-import { Typography } from './Typography';
+import type { ReactNode } from "react";
+import { ActivityIndicator, Pressable, type PressableProps, View } from "react-native";
+import { StyleSheet, useUnistyles } from "react-native-unistyles";
+import { Typography, type TypographyTone } from "./Typography";
 
-interface ButtonProps extends PressableProps {
-  label: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
-  isLoading?: boolean;
-  leftIcon?: React.ReactNode;
-}
+export type ButtonVariant = "primary" | "secondary" | "quiet" | "destructive";
 
-export function Button({ 
-  label, 
-  variant = 'primary', 
-  isLoading = false, 
-  disabled,
-  leftIcon,
-  ...props 
+export type ButtonProps = Omit<PressableProps, "children"> & {
+  readonly label: string;
+  readonly variant?: ButtonVariant;
+  readonly loading?: boolean;
+  readonly leading?: ReactNode;
+};
+
+const labelTones: Record<ButtonVariant, TypographyTone> = {
+  primary: "inverse",
+  secondary: "primary",
+  quiet: "primary",
+  destructive: "inverse",
+};
+
+export function Button({
+  label,
+  variant = "primary",
+  loading = false,
+  disabled = false,
+  leading,
+  accessibilityLabel,
+  ...props
 }: ButtonProps) {
-  const { styles, theme } = useStyles(stylesheet);
-  
-  const isDisabled = disabled || isLoading;
-
-  // Determine text color for the button
-  const getTextColor = () => {
-    if (isDisabled) return 'disabled';
-    if (variant === 'primary' || variant === 'destructive') return 'inverse';
-    if (variant === 'secondary' || variant === 'outline' || variant === 'ghost') return 'primary';
-    return 'primary';
-  };
+  const { theme } = useUnistyles();
+  const inactive = disabled || loading;
+  const indicatorColor =
+    variant === "primary" || variant === "destructive"
+      ? theme.colors.text.inverse
+      : theme.colors.text.primary;
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.container(variant, isDisabled),
-        pressed && !isDisabled && styles.pressed(variant),
-      ]}
-      disabled={isDisabled}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: isDisabled, busy: isLoading }}
       {...props}
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityRole="button"
+      accessibilityState={{ busy: loading, disabled: inactive }}
+      disabled={inactive}
+      style={({ pressed }) => [
+        styles.base,
+        styles[variant],
+        pressed && !inactive && styles[`${variant}Pressed`],
+        inactive && styles.disabled,
+      ]}
     >
       <View style={styles.content}>
-        {isLoading ? (
-          <ActivityIndicator 
-            color={variant === 'primary' || variant === 'destructive' ? theme.colors.text.inverse : theme.colors.text.primary} 
-            size="small" 
-          />
-        ) : (
-          <>
-            {leftIcon && <View style={styles.iconContainer}>{leftIcon}</View>}
-            <Typography role="buttonLabel" color={getTextColor()} align="center">
-              {label}
-            </Typography>
-          </>
-        )}
+        {loading ? <ActivityIndicator color={indicatorColor} size="small" /> : leading}
+        <Typography textRole="label" tone={inactive ? "disabled" : labelTones[variant]}>
+          {loading ? `${label}, in progress` : label}
+        </Typography>
       </View>
     </Pressable>
   );
 }
 
-const stylesheet = createStyleSheet(theme => ({
-  container: (variant: string, disabled: boolean) => ({
-    minHeight: theme.touchTargets.min,
-    borderRadius: theme.radii.lg,
-    paddingHorizontal: theme.spacing[4],
-    paddingVertical: theme.spacing[3],
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-    opacity: disabled ? 0.6 : 1,
-    ...getVariantStyles(variant, theme),
-  }),
+const styles = StyleSheet.create((theme) => ({
+  base: {
+    alignItems: "center",
+    borderCurve: "continuous",
+    borderRadius: theme.radii.control,
+    borderWidth: 2,
+    justifyContent: "center",
+    minHeight: theme.touchTargets.minimum,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+  },
   content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    gap: theme.spacing.xs,
+    justifyContent: "center",
   },
-  iconContainer: {
-    marginRight: theme.spacing[2],
+  primary: {
+    backgroundColor: theme.colors.action.primary,
+    borderColor: theme.colors.action.primary,
   },
-  pressed: (variant: string) => ({
-    ...getPressedStyles(variant, theme),
-  })
+  primaryPressed: {
+    backgroundColor: theme.colors.action.primaryPressed,
+    borderColor: theme.colors.action.primaryPressed,
+  },
+  secondary: {
+    backgroundColor: theme.colors.action.secondary,
+    borderColor: theme.colors.border.default,
+  },
+  secondaryPressed: {
+    backgroundColor: theme.colors.action.secondaryPressed,
+    borderColor: theme.colors.border.strong,
+  },
+  quiet: {
+    backgroundColor: theme.colors.background.elevated,
+    borderColor: theme.colors.border.strong,
+  },
+  quietPressed: {
+    backgroundColor: theme.colors.background.secondary,
+    borderColor: theme.colors.border.focus,
+  },
+  destructive: {
+    backgroundColor: theme.colors.action.destructive,
+    borderColor: theme.colors.action.destructive,
+  },
+  destructivePressed: {
+    backgroundColor: theme.colors.action.destructivePressed,
+    borderColor: theme.colors.action.destructivePressed,
+  },
+  disabled: {
+    backgroundColor: theme.colors.action.disabled,
+    borderColor: theme.colors.border.subtle,
+  },
 }));
-
-function getVariantStyles(variant: string, theme: any) {
-  switch (variant) {
-    case 'primary':
-      return { backgroundColor: theme.colors.action.primary };
-    case 'secondary':
-      return { backgroundColor: theme.colors.action.secondary };
-    case 'outline':
-      return { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.border.strong };
-    case 'ghost':
-      return { backgroundColor: 'transparent' };
-    case 'destructive':
-      return { backgroundColor: theme.colors.status.overdue };
-    default:
-      return { backgroundColor: theme.colors.action.primary };
-  }
-}
-
-function getPressedStyles(variant: string, theme: any) {
-  switch (variant) {
-    case 'primary':
-      return { backgroundColor: theme.colors.action.primaryPressed };
-    case 'secondary':
-      return { backgroundColor: theme.colors.action.secondaryPressed };
-    case 'outline':
-    case 'ghost':
-      return { backgroundColor: theme.colors.action.secondary };
-    case 'destructive':
-      return { opacity: 0.8 };
-    default:
-      return { backgroundColor: theme.colors.action.primaryPressed };
-  }
-}

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "LittleArc Expo mobile application",
-  "main": "expo-router/entry",
+  "main": "index.ts",
   "scripts": {
     "android": "EXPO_ROUTER_APP_ROOT=app expo run:android",
     "build": "pnpm run build:android && pnpm run build:ios",
@@ -21,6 +21,7 @@
     "@better-auth/expo": "1.6.23",
     "@infinitered/react-native-mlkit-text-recognition": "5.0.1",
     "@littlearc/contracts": "workspace:*",
+    "@littlearc/design-tokens": "workspace:*",
     "@littlearc/observability": "workspace:*",
     "@react-native/normalize-colors": "0.86.0",
     "better-auth": "1.6.23",

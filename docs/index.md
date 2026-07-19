@@ -37,6 +37,7 @@
 | `FND-05` database and migration foundation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-05-database-and-migration-foundation-plan.md), [evidence](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) |
 | `FND-06` Railway environment skeleton | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-06-railway-environment-skeleton-plan.md), [evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
 | `FND-07` observability and privacy guards | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md), [evidence](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) |
+| `FND-08` design-system prototype reconciliation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-08-design-system-prototype-reconciliation-plan.md), [evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
 
 ## Module Context
 

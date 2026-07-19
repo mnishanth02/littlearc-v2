@@ -1,54 +1,39 @@
-import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native-unistyles";
+import { Button } from "../src/components/ui/Button";
+import { Typography } from "../src/components/ui/Typography";
 
 export default function NotFoundScreen() {
+  const router = useRouter();
+
   return (
     <SafeAreaView style={styles.shell}>
       <View style={styles.content}>
-        <Text accessibilityRole="header" style={styles.title}>
+        <Typography accessibilityRole="header" textRole="screenTitle">
           Screen unavailable
-        </Text>
-        <Text style={styles.body}>
+        </Typography>
+        <Typography tone="secondary">
           This route is not part of the current synthetic application skeleton.
-        </Text>
-        <Link accessibilityRole="link" href="/" style={styles.link}>
-          Return to LittleArc
-        </Link>
+        </Typography>
+        <Button label="Return to LittleArc" onPress={() => router.replace("/")} />
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  body: {
-    color: "#3f463d",
-    fontSize: 16,
-    lineHeight: 24,
-  },
+const styles = StyleSheet.create((theme) => ({
   content: {
-    gap: 16,
-    maxWidth: 520,
+    gap: theme.spacing.md,
+    maxWidth: theme.layout.contentMaxWidth,
     width: "100%",
-  },
-  link: {
-    color: "#1e5d4e",
-    fontSize: 16,
-    fontWeight: "700",
-    minHeight: 44,
-    paddingVertical: 10,
   },
   shell: {
     alignItems: "center",
-    backgroundColor: "#f7f4ec",
+    backgroundColor: theme.colors.background.primary,
     flex: 1,
     justifyContent: "center",
-    padding: 24,
+    padding: theme.layout.screenPadding,
   },
-  title: {
-    color: "#1f2a24",
-    fontSize: 28,
-    fontWeight: "700",
-    lineHeight: 36,
-  },
-});
+}));

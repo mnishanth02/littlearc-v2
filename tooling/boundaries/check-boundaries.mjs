@@ -5,7 +5,6 @@ import {
   expectedWorkspaces,
   findEscapingRelativeImports,
   findUndeclaredWorkspaceImports,
-  quarantinedSourcePrefixes,
   validatePackageGraph,
   validateWorkspaceConfig,
 } from "./policy.mjs";
@@ -52,10 +51,6 @@ function relativeImportViolations(pkg) {
   try {
     return walk(sourceRoot).flatMap((file) => {
       const filePath = relative(repositoryRoot, file);
-      if (quarantinedSourcePrefixes.some((prefix) => filePath.startsWith(prefix))) {
-        return [];
-      }
-
       const extension = file.slice(file.lastIndexOf("."));
       if (!sourceExtensions.has(extension)) {
         return [];

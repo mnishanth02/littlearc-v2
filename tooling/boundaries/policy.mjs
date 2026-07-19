@@ -16,13 +16,6 @@ export const expectedWorkspaces = new Map([
   ["packages/test-kit", "@littlearc/test-kit"],
 ]);
 
-export const quarantinedSourcePrefixes = [
-  "apps/mobile/src/app/",
-  "apps/mobile/src/components/",
-  "apps/mobile/src/theme/",
-  "packages/design-tokens/src/",
-];
-
 const dependencySections = [
   "dependencies",
   "devDependencies",

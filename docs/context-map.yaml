@@ -192,12 +192,17 @@ domains:
       - docs/core/design-system.md
       - docs/core/littlearc-complete-product-plan.md
       - docs/impl-plan/roadmap.md
+      - docs/impl-plan/m1-foundation/fnd-08-design-system-prototype-reconciliation-plan.md
+      - docs/impl-plan/m1-foundation/fnd-08-implementation-evidence.md
     code:
       - packages/design-tokens/**
       - apps/mobile/**
       - apps/ops-web/**
-    tests: []
+    tests:
+      - packages/design-tokens/src/**/*.test.ts
+      - tooling/design-system/**/*.test.ts
     validation:
+      - pnpm test:design-system
       - pnpm check:format
       - pnpm typecheck
 

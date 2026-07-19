@@ -65,6 +65,9 @@ importers:
       '@littlearc/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@littlearc/design-tokens':
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
       '@littlearc/observability':
         specifier: workspace:*
         version: link:../../packages/observability

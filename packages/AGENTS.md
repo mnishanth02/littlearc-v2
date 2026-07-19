@@ -20,8 +20,8 @@ test helpers, and design tokens.
 - Use `workspace:*` dependencies for internal package edges.
 - Do not bypass package manifests with TypeScript path aliases that imitate
   package imports.
-- Keep `packages/design-tokens/src` provisional until `FND-08`; do not treat its
-  current source shape as accepted design-system API.
+- Keep `packages/design-tokens` platform neutral and export the accepted semantic
+  contract through `src/index.ts`; application code maps it through platform UI.
 - Keep synthetic fixture support in `packages/test-kit`; do not mix fixtures
   with production data paths.
 

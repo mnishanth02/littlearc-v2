@@ -14,10 +14,6 @@
       "!**/ios",
       "!packages/contracts/baseline",
       "!packages/contracts/src/generated",
-      "!apps/mobile/src/app",
-      "!apps/mobile/src/components",
-      "!apps/mobile/src/theme",
-      "!packages/design-tokens/src",
       "!spikes/native-compat"
     ]
   },

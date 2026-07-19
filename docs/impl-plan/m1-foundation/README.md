@@ -23,6 +23,8 @@ Current package documents:
 - [`FND-06` Implementation Evidence](./fnd-06-implementation-evidence.md)
 - [`FND-07` Observability and Privacy Guards Plan](./fnd-07-observability-and-privacy-guards-plan.md)
 - [`FND-07` Implementation Evidence](./fnd-07-implementation-evidence.md)
+- [`FND-08` Design-System Prototype Reconciliation Plan](./fnd-08-design-system-prototype-reconciliation-plan.md)
+- [`FND-08` Implementation Evidence](./fnd-08-implementation-evidence.md)
 
 The live status for these work packages remains in
 [IMPLEMENTATION_STATUS.md](../../IMPLEMENTATION_STATUS.md).
