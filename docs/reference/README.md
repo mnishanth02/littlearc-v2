@@ -13,6 +13,7 @@ Current references:
 - [Local Development](./local-development.md)
 - [Environment Variable Catalog](./environment-variable-catalog.md)
 - [Railway Staging Release](./railway-staging-release.md)
+- [Engineering Baseline](./engineering/README.md)
 
 Add new reference material here for deployment notes, troubleshooting guides,
 migration notes, and runbooks that do not define core product or architecture

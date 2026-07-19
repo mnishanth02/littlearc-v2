@@ -1989,6 +1989,11 @@ Create individual ADR files when implementation begins. The initial ADR set is:
 16. Deferred billing and entitlement abstraction
 17. Next.js minimal support console
 
+The implemented FND-01 through FND-08 subset is reconciled in the
+[ADR index](../adr/README.md). Candidates in this list without an accepted ADR
+remain architecture direction, not implementation evidence; create them with
+their owning work package when implementation begins.
+
 An ADR must include context, decision, alternatives, consequences, review date, and superseding ADR when changed.
 
 ---

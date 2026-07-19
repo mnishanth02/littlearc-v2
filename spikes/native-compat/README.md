@@ -37,6 +37,11 @@ pnpm android
 The accepted workflow is local `expo run:ios` / `expo run:android`. Do not add
 EAS configuration to this harness during the initial pilot architecture.
 
+The production mobile application now owns this workflow. This harness remains
+only for unresolved M0 physical-device evidence and follows the retirement
+decision in
+[`ADR-0002`](../../docs/adr/0002-expo-native-development-and-spike-disposition.md).
+
 ## Evidence procedure
 
 1. Use only synthetic fixtures approved for the probe.

@@ -136,6 +136,36 @@ function validateAdrStatus(relativePath, text) {
   if (!status || !validStatuses.has(status)) {
     errors.push(`${relativePath} must have ADR status Proposed, Accepted, or Superseded.`);
   }
+
+  const requiredMetadata = ["Date", "Owner", "Review date", "Supersedes", "Superseded by"];
+  for (const field of requiredMetadata) {
+    const pattern = new RegExp(`^>\\s+\\*\\*${field}:\\*\\*\\s+\\S`, "mu");
+    if (!pattern.test(text)) {
+      errors.push(`${relativePath} is missing ADR metadata: ${field}.`);
+    }
+  }
+
+  const requiredSections = [
+    "Context",
+    "Decision",
+    "Alternatives Considered",
+    "Consequences",
+    "Validation",
+    "Review Triggers",
+  ];
+  for (const section of requiredSections) {
+    const pattern = new RegExp(`^## ${section}$`, "mu");
+    if (!pattern.test(text)) {
+      errors.push(`${relativePath} is missing ADR section: ${section}.`);
+    }
+  }
+
+  if (status === "Superseded") {
+    const successor = text.match(/^>\s+\*\*Superseded by:\*\*\s+(.+)$/mu)?.[1]?.trim();
+    if (!successor || successor === "None") {
+      errors.push(`${relativePath} is Superseded but does not identify its superseding ADR.`);
+    }
+  }
 }
 
 function validateMarkdownLinks(relativePath, text) {

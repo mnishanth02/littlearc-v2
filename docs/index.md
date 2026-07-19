@@ -38,6 +38,14 @@
 | `FND-06` Railway environment skeleton | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-06-railway-environment-skeleton-plan.md), [evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
 | `FND-07` observability and privacy guards | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md), [evidence](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) |
 | `FND-08` design-system prototype reconciliation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-08-design-system-prototype-reconciliation-plan.md), [evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
+| `FND-09` ADR and engineering documentation baseline | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-09-adr-and-engineering-documentation-baseline-plan.md), [evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
+
+## Engineering Baseline
+
+- Implemented architecture decisions: [ADR index](./adr/README.md)
+- Engineering workflows: [engineering reference index](./reference/engineering/README.md)
+- Repository boundaries, data classification, environments, migrations,
+  testing, and development/release notes are linked from the engineering index.
 
 ## Module Context
 

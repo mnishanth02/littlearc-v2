@@ -43,7 +43,9 @@ It does not remove the current checkout's modules, caches, or native projects.
 | `pnpm validate` | Run the complete current root validation contract |
 | `pnpm format` | Explicitly apply supported Biome formatting |
 
-Application development commands are intentionally absent until `FND-03`.
+Application development commands are available as `pnpm dev:mobile`,
+`pnpm dev:api`, `pnpm dev:worker`, and `pnpm dev:ops-web`. Mobile uses a custom
+development client, not Expo Go.
 
 Markdownlint covers maintained repository guidance and engineering documents.
 The accepted long-form product-plan source is explicitly excluded because its
@@ -57,7 +59,8 @@ does not rewrite product content to satisfy a new formatter.
 - Applications never depend on other application implementations.
 - Do not add TypeScript path aliases that bypass a package manifest.
 - Declare an external dependency exactly where it is imported, using an exact version.
-- The native M0 harness under `spikes/native-compat` remains an independent workspace.
+- The native M0 harness under `spikes/native-compat` remains outside the root
+  workspace as retained evidence.
 
 ## Environment Files
 
@@ -78,5 +81,7 @@ pnpm typecheck
 pnpm run doctor
 ```
 
-Do not import the harness as production code or move its ML Kit override to the
-root until `FND-03` transfers and validates the accepted native dependency graph.
+Do not import the harness as production code. The real mobile application now
+owns the accepted native dependency graph and the root owns the narrow ML Kit
+override. [ADR-0002](../adr/0002-expo-native-development-and-spike-disposition.md)
+defines the remaining device-evidence and retirement trigger.

@@ -2,9 +2,9 @@
 
 ## Purpose
 
-LittleArc is a mobile-first pediatric history platform. This repository is in
-the M1 foundation stage: root tooling, application runtimes, and the initial
-design-system foundation are accepted; `FND-09` is the next package.
+LittleArc is a mobile-first pediatric history platform. All M1 foundation work
+packages are accepted. Gate 1 still requires its named physical-device and
+accessibility evidence before M2 implementation begins.
 
 ## Context Loading Protocol
 

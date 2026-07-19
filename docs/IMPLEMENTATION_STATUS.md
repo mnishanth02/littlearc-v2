@@ -57,7 +57,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | Scope | Tag | Owner | Next action or completion evidence |
 | --- | --- | --- | --- |
 | M0. Readiness and evidence | `COMPLETE` | Founder/product + engineering | Gate 0A closed on 18 July 2026; see the M0 dossier |
-| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-09` ADR and engineering documentation baseline |
+| M1. Engineering foundation | `IN PROGRESS` | Engineering | Complete the remaining Gate 1 physical-device and accessible reference-state evidence before M2 implementation |
 | `FND-01` Monorepo and toolchain | `COMPLETE` | Engineering | Root workspace, boundaries, exact pins, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
 | `FND-02` CI and supply-chain baseline | `COMPLETE` | Engineering | Local and hosted validation, required PR checks, source traceability, and repository controls accepted; see [evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |
 | `FND-03` Application skeletons | `COMPLETE` | Engineering | Mobile, API, worker, and staff shells accepted; see [evidence](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) |
@@ -66,7 +66,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | `FND-06` Railway environment skeleton | `COMPLETE` | Engineering | Staging-only Railway descriptors, manifest, health checks, live Railway staging deploys, hosted migration evidence, and validation accepted; production setup deferred by founder direction; see [evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
 | `FND-07` Observability and privacy guards | `COMPLETE` | Engineering | Safe logger, allowlisted analytics/flags, Sentry scrubbing, kill switches, and leakage canaries accepted; see [evidence](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) |
 | `FND-08` Design-system prototype reconciliation | `COMPLETE` | Engineering | Semantic tokens, three themes, accessible primitives, dev gallery, enforcement, exports, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
-| `FND-09` ADR and engineering documentation baseline | `READY` | Engineering | Write the package brief and reconcile foundation decisions into the ADR baseline |
+| `FND-09` ADR and engineering documentation baseline | `COMPLETE` | Engineering | Eight foundation ADRs, six engineering notes, structural enforcement, context lookup, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
 | M2 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
@@ -85,6 +85,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 19 Jul 2026 | [`FND-06` Railway environment skeleton](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) | `COMPLETE` | Staging-only Railway service descriptors, classified variable/resource manifest, API/staff health checks, live staging project, hosted FND-05 migration, API/worker/staff deployments, production deferral, tests, root validation, and clean-checkout proof passed |
 | 19 Jul 2026 | [`FND-07` observability and privacy guards](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) | `COMPLETE` | Stable safe logs, allowlisted analytics and feature flags, false-default kill switches, Sentry-compatible positive scrubbing, seeded leakage canaries, app adoption, and clean-checkout proof passed |
 | 19 Jul 2026 | [`FND-08` design-system prototype reconciliation](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) | `COMPLETE` | File-by-file disposition, platform-neutral semantic tokens, light/dark/high-contrast Unistyles 3 themes, Typography/Button/Banner, development gallery, 10 focused tests, release exports, root validation, and clean-checkout proof passed |
+| 19 Jul 2026 | [`FND-09` ADR and engineering documentation baseline](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) | `COMPLETE` | Eight accepted foundation ADRs, six task-oriented engineering notes, ADR structure enforcement, context discovery, 95 tests, root validation, and clean-checkout proof passed |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -102,12 +103,10 @@ No implementation item is currently tagged `IN PROGRESS`.
 
 ## 7. Ready Queue
 
-| Priority | Item | Tag | Entry condition | Definition of done |
-| ---: | --- | --- | --- | --- |
-| 1 | `FND-09` ADR and engineering documentation baseline | `READY` | `FND-08` accepted | Implemented foundation choices, alternatives, review dates, and spike-retirement decision are recorded and validated |
+No implementation item is currently tagged `READY`.
 
 The complete dependency order remains in Section 25 of the implementation
-roadmap. This table should show only the next few actionable packages.
+roadmap. This section should show only the next few actionable packages.
 
 ## 8. Blockers and Later-Gate Obligations
 
@@ -119,15 +118,15 @@ roadmap. This table should show only the next few actionable packages.
 | Physical iOS and Android device matrix | `DEFERRED` | Pilot distribution and Gate 1 physical-device criterion; not initial synthetic scaffold work | Engineering | Scanner, OCR, biometrics, imports, notifications, accessibility gestures, install, and upgrade evidence passes on required devices |
 | Organization-owned provider, store, signing, and custody setup (`RDY-09`) | `BLOCKED` | Account-bound authentication, signed pilot distribution, and live recovery verification | Founder + engineering | Entity/accounts, credentials, signing access, live cost/capability checks, and recovery ownership are available and verified |
 | Real child or participant data | `BLOCKED` | Any real-data collection, storage, processing, or pilot use | Founder/product | Every named pre-real-data privacy, safety, security, provider, deletion, backup, and incident gate passes |
-| Native compatibility harness retirement | `BLOCKED` | Deletion of `spikes/native-compat`; does not block M1 | Engineering | `FND-03` transfers the accepted native configuration, real `apps/mobile` passes clean iOS/Android builds, any OCR override moves to the root workspace, and an ADR records the final dependency decision |
+| Native compatibility harness retirement | `DEFERRED` | Harness source retirement only; does not block accepted M1 packages | Engineering | Transfer or close its remaining physical-device evidence and review the root OCR override under [ADR-0002](./adr/0002-expo-native-development-and-spike-disposition.md) |
 
 ## 9. Retained Artifacts and Follow-Up Debt
 
 | Artifact or debt | Tag | Reason retained | Retirement or resolution condition |
 | --- | --- | --- | --- |
-| `spikes/native-compat` source harness | `RETAINED` | Reproducible M0 native configuration and OCR workaround evidence | Meet the harness-retirement trigger in Section 8 |
+| `spikes/native-compat` source harness | `RETAINED` | Reproducible M0 evidence for unresolved physical-device scenarios; production configuration now belongs to `apps/mobile` | Meet the ADR-0002 harness-retirement trigger in Section 8 |
 | ML Kit core 5.0.0 pnpm override | `RETAINED` | Resolves the OCR wrapper's invalid React 17-era runtime dependency graph | Remove only when the wrapper publishes a compatible core dependency and all native checks remain green |
-| Moderate `uuid` advisory in retained M0 harness | `DEFERRED` | The alert remains visible; automatic update returned `security_update_not_possible` because the transitive major is constrained, while the root production audit is clean | Reassess during `FND-03` transfer and remove with harness retirement |
+| Moderate `uuid` advisory in retained M0 harness | `DEFERRED` | The alert remains visible; automatic update returned `security_update_not_possible` because the transitive major is constrained, while the root production audit is clean | Reassess at the next harness dependency review and remove with harness retirement |
 | Renovate GitHub App authorization | `DEFERRED` | Validated configuration is committed; interactive App authorization was unavailable in this session and is not a CI baseline blocker | Install from the Renovate GitHub App page and confirm its dependency dashboard |
 | Production Railway environment skeleton | `DEFERRED` | Founder directed `FND-06` to staging only for now | Reopen a separate production setup package before real-data gates |
 
@@ -144,6 +143,7 @@ roadmap. This table should show only the next few actionable packages.
 | [`FND-06` Railway environment skeleton](./impl-plan/m1-foundation/fnd-06-railway-environment-skeleton-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
 | [`FND-07` Observability and privacy guards](./impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) |
 | [`FND-08` Design-system prototype reconciliation](./impl-plan/m1-foundation/fnd-08-design-system-prototype-reconciliation-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
+| [`FND-09` ADR and engineering documentation baseline](./impl-plan/m1-foundation/fnd-09-adr-and-engineering-documentation-baseline-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
 
 ## 11. Agent Workflow
 
@@ -173,5 +173,6 @@ For every status change:
 7. Keep the matching implementation plan's status header and module-status
    table in sync with this dashboard.
 
-The next status change should be `FND-09`: `READY` to `IN PROGRESS` when its
-package brief and foundation-decision inventory begin.
+The next status change should record the remaining Gate 1 evidence or a new
+roadmap-approved package. M2 implementation must not start until every Gate 1
+criterion is satisfied or formally replanned.

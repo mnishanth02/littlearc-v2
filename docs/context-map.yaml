@@ -9,6 +9,9 @@ domains:
       - supply-chain
       - roadmap
       - fnd-03
+      - fnd-09
+      - adr
+      - engineering documentation
       - application
       - skeleton
     docs:
@@ -21,6 +24,10 @@ domains:
       - docs/impl-plan/m1-foundation/fnd-02-implementation-evidence.md
       - docs/impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md
       - docs/impl-plan/m1-foundation/fnd-07-implementation-evidence.md
+      - docs/impl-plan/m1-foundation/fnd-09-adr-and-engineering-documentation-baseline-plan.md
+      - docs/impl-plan/m1-foundation/fnd-09-implementation-evidence.md
+      - docs/adr/README.md
+      - docs/reference/engineering/README.md
     code:
       - package.json
       - pnpm-workspace.yaml
@@ -34,6 +41,43 @@ domains:
     tests:
       - tooling/**/*.test.ts
     validation:
+      - pnpm validate
+
+  engineering-docs:
+    keywords:
+      - adr
+      - architecture decision
+      - repository boundary
+      - data classification
+      - environment
+      - migration
+      - testing
+      - release development
+      - spike retirement
+      - fnd-09
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/adr/README.md
+      - docs/reference/engineering/README.md
+      - docs/reference/engineering/repository-boundaries.md
+      - docs/reference/engineering/data-classification.md
+      - docs/reference/engineering/environments.md
+      - docs/reference/engineering/database-migrations.md
+      - docs/reference/engineering/testing-strategy.md
+      - docs/reference/engineering/development-and-release.md
+      - docs/impl-plan/m1-foundation/fnd-09-adr-and-engineering-documentation-baseline-plan.md
+      - docs/impl-plan/m1-foundation/fnd-09-implementation-evidence.md
+    code:
+      - package.json
+      - pnpm-workspace.yaml
+      - turbo.json
+      - tooling/**
+      - scripts/context/**
+    tests:
+      - tooling/**/*.test.ts
+    validation:
+      - pnpm check:docs
+      - pnpm check:format
       - pnpm validate
 
   mobile:

@@ -25,6 +25,8 @@ Current package documents:
 - [`FND-07` Implementation Evidence](./fnd-07-implementation-evidence.md)
 - [`FND-08` Design-System Prototype Reconciliation Plan](./fnd-08-design-system-prototype-reconciliation-plan.md)
 - [`FND-08` Implementation Evidence](./fnd-08-implementation-evidence.md)
+- [`FND-09` ADR and Engineering Documentation Baseline Plan](./fnd-09-adr-and-engineering-documentation-baseline-plan.md)
+- [`FND-09` Implementation Evidence](./fnd-09-implementation-evidence.md)
 
 The live status for these work packages remains in
 [IMPLEMENTATION_STATUS.md](../../IMPLEMENTATION_STATUS.md).
