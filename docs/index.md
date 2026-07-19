@@ -32,7 +32,9 @@
 | M1 foundation queue | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [impl-plan/roadmap.md](./impl-plan/roadmap.md) |
 | `FND-01` monorepo and toolchain | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-01-monorepo-and-toolchain-plan.md), [evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
 | `FND-02` CI and supply-chain baseline | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-02-ci-and-supply-chain-plan.md), [evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |
-| `FND-03` application skeletons | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | Create package brief before implementation |
+| `FND-03` application skeletons | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-03-application-skeletons-plan.md), [evidence](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) |
+| `FND-04` contracts and domain kernel | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-04-contracts-and-domain-kernel-plan.md), [evidence](./impl-plan/m1-foundation/fnd-04-implementation-evidence.md) |
+| `FND-05` database and migration foundation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-05-database-and-migration-foundation-plan.md), [evidence](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) |
 
 ## Module Context
 

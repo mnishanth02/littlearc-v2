@@ -21,6 +21,10 @@ minimumReleaseAgeExclude:
   - expo-modules-core@57.0.6
   - expo-notifications@57.0.6
   - expo@57.0.7
+  - "@asteasolutions/zod-to-openapi@9.1.0"
+  - drizzle-kit@0.31.10
+  - drizzle-orm@0.45.2
 
 allowBuilds:
+  esbuild: true
   sharp: true

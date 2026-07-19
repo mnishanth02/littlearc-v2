@@ -1,0 +1,9 @@
+{
+  "extends": "../../tooling/typescript/node.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "src",
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src/**/*.ts"]
+}

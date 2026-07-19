@@ -1,4 +1,15 @@
 {
   "schemaVersion": 1,
-  "generators": []
+  "generators": [
+    {
+      "name": "contracts-openapi",
+      "command": ["pnpm", "--filter", "@littlearc/contracts", "generate"],
+      "outputs": ["packages/contracts/baseline", "packages/contracts/src/generated"]
+    },
+    {
+      "name": "database-migrations",
+      "command": ["pnpm", "--filter", "@littlearc/database", "generate"],
+      "outputs": ["packages/database/migrations"]
+    }
+  ]
 }

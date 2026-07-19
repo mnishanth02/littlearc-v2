@@ -2,5 +2,20 @@
   "name": "@littlearc/domain",
   "version": "0.0.0",
   "private": true,
-  "description": "Framework-independent LittleArc domain rules; implementation begins in FND-04"
+  "description": "Framework-independent LittleArc domain rules",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "clean": "rm -rf dist coverage",
+    "test": "vitest run src",
+    "typecheck": "tsc --project tsconfig.json"
+  }
 }
