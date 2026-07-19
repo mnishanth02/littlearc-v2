@@ -7,7 +7,7 @@
 > **Technical execution:** Codex
 > **Source documents:** [Product plan](./littlearc-complete-product-plan.md),
 > [architecture](./littlearc-architecture-and-tech-stack.md),
-> [implementation roadmap](./littlearc-implementation-plan-and-roadmap.md), and
+> [implementation roadmap](../impl-plan/roadmap.md), and
 > [design system](./design-system.md)
 
 ---

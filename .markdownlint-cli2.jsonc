@@ -11,6 +11,6 @@
     "**/.expo/**",
     "**/android/**",
     "**/ios/**",
-    "docs/littlearc-complete-product-plan.md"
+    "docs/core/littlearc-complete-product-plan.md"
   ]
 }

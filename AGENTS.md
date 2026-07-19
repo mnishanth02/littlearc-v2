@@ -7,8 +7,13 @@
 - `apps/mobile/src/theme/` contains the provisional Unistyles setup.
 - `packages/design-tokens/src/` contains shared color, spacing, and typography
   tokens. Export public APIs through `src/index.ts`.
-- `docs/` contains the product plan, architecture, roadmap, M0 evidence, and the
-  live `implementation-status.md` delivery register.
+- `docs/IMPLEMENTATION_STATUS.md` is the project delivery dashboard and AI-agent
+  entry point.
+- `docs/core/` contains foundational product, architecture, design-system, and
+  readiness documents.
+- `docs/reference/` contains operational and occasional-use reference material.
+- `docs/impl-plan/` contains the roadmap, implementation plans, and their
+  validation evidence, grouped by milestone.
 - `spikes/native-compat/` is the retained M0 Expo development-client harness.
   It is evidence, not production application code. Its generated `ios/`,
   `android/`, `.expo/`, `dist/`, and `node_modules/` directories stay ignored.
@@ -74,5 +79,6 @@ device/build evidence for native changes.
 
 Use synthetic fixtures only until the pre-real-data gates pass. Never commit
 credentials, tokens, participant information, child data, or unredacted medical
-documents. Update `docs/implementation-status.md` whenever work becomes ready,
-in progress, complete, blocked, deferred, or retained.
+documents. Update `docs/IMPLEMENTATION_STATUS.md` whenever work becomes ready,
+in progress, complete, blocked, deferred, or retained. Keep each implementation
+plan's status header and module-status table aligned with the dashboard.
