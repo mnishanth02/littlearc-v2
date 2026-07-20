@@ -548,14 +548,22 @@ This is the first package allowed to change the loose design-system artifacts.
 M2 begins when:
 
 - A clean checkout installs and passes the root validation command.
-- Development clients build on physical iOS and Android devices.
+- Development clients build on the accepted Gate 1 matrix: an iOS simulator on
+  the designated Mac and a physical Android device. Physical iOS remains a
+  parallel pre-pilot obligation.
 - API, worker, and staff shells deploy to staging with correct readiness.
 - OpenAPI generation and both clients compile without manual edits.
 - A test migration runs forward against a fresh PostgreSQL instance.
 - RLS test harness proves a seeded cross-household query is blocked.
 - Logging, analytics, and error-reporting canaries show no sensitive leakage.
-- Theme and core primitive reference states render accessibly on both platforms.
+- Theme and core primitive reference states render accessibly on the accepted
+  iOS-simulator and physical-Android matrix.
 - Repository boundaries and implemented architecture choices have ADR coverage.
+
+The founder accepted this Gate 1 matrix replan on 20 July 2026. It narrows only
+the M1 entry evidence; it does not change the physical-device, assistive-
+technology, store-distribution, or upgrade obligations in the parallel
+pre-pilot gate.
 
 ## 11. M2 — Offline Trust Slice
 

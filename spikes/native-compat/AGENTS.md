@@ -17,11 +17,14 @@ viability. It is not production application code.
 - Preserve source, lockfile, configuration, README, and evidence instructions.
 - Generated `node_modules`, `android`, `ios`, `.expo`, and `dist` directories
   remain disposable and ignored.
-- Keep the narrow ML Kit override until an ADR-backed replacement passes native
-  checks in the real mobile app.
+- Treat the root ML Kit override and real mobile dependency graph as
+  authoritative; keep the harness-local resolution only while this retained
+  evidence remains reproducible.
 - Do not import harness code into production application packages.
-- Retirement requires `FND-03` native configuration transfer, clean app builds,
-  any required root override, and an ADR.
+- Retirement follows
+  [`ADR-0002`](../../docs/adr/0002-expo-native-development-and-spike-disposition.md):
+  transfer or close the remaining physical-device evidence and review the OCR
+  override first.
 
 ## Validation
 

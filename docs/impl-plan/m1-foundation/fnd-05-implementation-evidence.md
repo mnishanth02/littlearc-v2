@@ -3,7 +3,7 @@
 > **Work package:** `FND-05`
 > **Status:** Completed
 > **Evidence date:** 19 July 2026
-> **Last updated:** 19 July 2026
+> **Last updated:** 20 July 2026
 > **Toolchain:** Node.js 24.18.0, pnpm 11.14.0
 > **Plan:** [FND-05 package plan](./fnd-05-database-and-migration-foundation-plan.md)
 
@@ -108,3 +108,11 @@ validation, and clean-checkout proof are implemented and accepted for the local
 synthetic M1 environment.
 
 `FND-06` is the next ready package: Railway environment skeleton.
+
+## 6. Gate 1 Follow-Up
+
+The later [Gate 1 Aiven PostgreSQL RLS evidence](./gate-1-aiven-rls-evidence.md)
+applied this package's reviewed migration to a fresh temporary database and
+proved seeded cross-household read/write isolation as the real
+`littlearc_app` role. That follow-up closes the runtime RLS evidence boundary
+recorded above without changing the original FND-05 completion decision.

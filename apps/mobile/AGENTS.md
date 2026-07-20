@@ -2,9 +2,10 @@
 
 ## Responsibility
 
-`apps/mobile` will contain the Expo React Native parent/caregiver application
-after `FND-03`. Current source under `src/app`, `src/components`, and `src/theme`
-is quarantined prototype material until `FND-08`.
+`apps/mobile` contains the Expo React Native parent/caregiver application.
+`FND-08` accepts the semantic theme and foundation primitives under
+`src/components/ui` and `src/theme`; domain UI should arrive with its first
+production feature consumer.
 
 ## Read Before Modifying
 
@@ -17,8 +18,9 @@ is quarantined prototype material until `FND-08`.
 
 ## Architecture Rules
 
-- Do not treat existing prototype screens, components, or theme files as
-  accepted production APIs before `FND-08`.
+- Use `@littlearc/design-tokens` semantic roles and Unistyles 3 for product UI.
+- Do not introduce literal UI colors outside the design-token definitions.
+- Keep the component gallery development-only and use synthetic examples.
 - Use Expo development/custom clients for native-module work; do not rely on
   Expo Go for accepted native evidence.
 - Use synthetic fixtures only. Do not introduce real child, participant, or
@@ -29,5 +31,6 @@ is quarantined prototype material until `FND-08`.
 ## Validation
 
 - Root checks: `pnpm check:workspace`, `pnpm typecheck`, and `pnpm validate`.
-- Native checks arrive with `FND-03`; physical-device acceptance remains a later
-  gate and cannot be replaced by simulator success.
+- Gate 1 uses the founder-approved iOS-simulator plus physical-Android matrix.
+  Do not generalize that narrow acceptance to physical iOS, store distribution,
+  upgrades, native capability checks, or the broader pre-pilot device matrix.

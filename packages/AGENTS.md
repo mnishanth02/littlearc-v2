@@ -11,6 +11,8 @@ test helpers, and design tokens.
 - `docs/IMPLEMENTATION_STATUS.md`
 - `docs/index.md`
 - `docs/core/littlearc-architecture-and-tech-stack.md`
+- `docs/core/backend-data-model-and-database-schema.md` for domain, contracts,
+  database, authentication, cryptography, or synchronization work
 - Relevant implementation plan under `docs/impl-plan/`
 - Relevant ADR when a package decision is difficult to reverse
 
@@ -20,8 +22,8 @@ test helpers, and design tokens.
 - Use `workspace:*` dependencies for internal package edges.
 - Do not bypass package manifests with TypeScript path aliases that imitate
   package imports.
-- Keep `packages/design-tokens/src` provisional until `FND-08`; do not treat its
-  current source shape as accepted design-system API.
+- Keep `packages/design-tokens` platform neutral and export the accepted semantic
+  contract through `src/index.ts`; application code maps it through platform UI.
 - Keep synthetic fixture support in `packages/test-kit`; do not mix fixtures
   with production data paths.
 

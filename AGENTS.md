@@ -2,10 +2,9 @@
 
 ## Purpose
 
-LittleArc is a mobile-first pediatric history platform. This repository is in
-the M1 foundation stage: root tooling and CI are accepted, application runtimes
-arrive in `FND-03`, and existing mobile/design-token source remains quarantined
-prototype input until `FND-08`.
+LittleArc is a mobile-first pediatric history platform. All M1 foundation work
+packages are accepted. Gate 1 still requires its named physical-device and
+accessibility evidence before M2 implementation begins.
 
 ## Context Loading Protocol
 
@@ -30,21 +29,23 @@ When sources conflict, report the conflict instead of silently choosing.
 2. Accepted ADRs in `docs/adr/`
 3. Live delivery state in `docs/IMPLEMENTATION_STATUS.md`
 4. Active implementation plans and evidence in `docs/impl-plan/`
-5. Core product, architecture, design, and readiness docs in `docs/core/`
+5. Core product, architecture, data-model, design, and readiness docs in `docs/core/`
 6. Reference docs in `docs/reference/`
 7. Templates and archived or superseded material
 
 ## Project Structure & Module Organization
 
-- `apps/mobile/src/app/` contains Expo Router screen prototypes; reusable UI and
-  domain components live under `apps/mobile/src/components/`.
-- `apps/mobile/src/theme/` contains the provisional Unistyles setup.
+- `apps/mobile/app/` contains the accepted Expo Router shell and routes;
+  reusable foundation UI lives under `apps/mobile/src/components/ui/`, while
+  domain components arrive with their first production consumer.
+- `apps/mobile/src/theme/` contains the accepted Unistyles 3 registration and
+  accessibility-preference boundary.
 - `packages/design-tokens/src/` contains shared color, spacing, and typography
   tokens. Export public APIs through `src/index.ts`.
 - `docs/IMPLEMENTATION_STATUS.md` is the project delivery dashboard and AI-agent
   entry point.
-- `docs/core/` contains foundational product, architecture, design-system, and
-  readiness documents.
+- `docs/core/` contains foundational product, architecture, backend data-model,
+  design-system, and readiness documents.
 - `docs/reference/` contains operational and occasional-use reference material.
 - `docs/impl-plan/` contains the roadmap, implementation plans, and their
   validation evidence, grouped by milestone.
@@ -56,9 +57,9 @@ When sources conflict, report the conflict instead of silently choosing.
 - `scripts/context/` contains deterministic context lookup and documentation
   governance checks.
 
-The M1 root workspace is scaffolded. Existing mobile and design-token source
-files remain quarantined prototypes until their adopt/adapt/discard review in
-`FND-08`; do not import them into production application code before that review.
+The M1 root workspace is scaffolded. `FND-08` reconciled the loose design-system
+prototype file by file. Accepted tokens and foundation primitives are production
+source; domain components still arrive with their first production consumer.
 
 ## Build, Test, and Development Commands
 

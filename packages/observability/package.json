@@ -2,5 +2,20 @@
   "name": "@littlearc/observability",
   "version": "0.0.0",
   "private": true,
-  "description": "Privacy-safe LittleArc observability contracts"
+  "description": "Privacy-safe LittleArc observability contracts",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "clean": "rm -rf dist coverage",
+    "test": "vitest run src",
+    "typecheck": "tsc --project tsconfig.json"
+  }
 }

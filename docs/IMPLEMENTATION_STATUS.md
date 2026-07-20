@@ -2,10 +2,11 @@
 
 > **Status:** Active delivery dashboard
 > **Version:** 1.0
-> **Last updated:** 19 July 2026
+> **Last updated:** 20 July 2026
 > **Execution plan:** [Implementation Plan and Roadmap](./impl-plan/roadmap.md)
 > **Core documents:** [Product plan](./core/littlearc-complete-product-plan.md),
 > [architecture](./core/littlearc-architecture-and-tech-stack.md),
+> [backend data model](./core/backend-data-model-and-database-schema.md),
 > [design system](./core/design-system.md), and
 > [M0 evidence](./core/m0-readiness-and-evidence.md)
 > **Accountable owner:** Founder/product lead
@@ -30,7 +31,7 @@ from here.
 | Area | Purpose | Location |
 | --- | --- | --- |
 | Context index | Repository knowledge catalogue and deterministic context map | [`docs/index.md`](./index.md), [`docs/context-map.yaml`](./context-map.yaml) |
-| Core | Foundational product, architecture, design, and readiness decisions | [`docs/core/`](./core/) |
+| Core | Foundational product, architecture, data-model, design, and readiness decisions | [`docs/core/`](./core/) |
 | Reference | Local setup, environment catalog, operations notes, troubleshooting, and migrations | [`docs/reference/`](./reference/) |
 | Implementation plans | Roadmap, work-package plans, module status, and validation evidence | [`docs/impl-plan/`](./impl-plan/) |
 | ADRs | Important architecture or process decisions that are difficult to reverse | [`docs/adr/`](./adr/) |
@@ -57,16 +58,18 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | Scope | Tag | Owner | Next action or completion evidence |
 | --- | --- | --- | --- |
 | M0. Readiness and evidence | `COMPLETE` | Founder/product + engineering | Gate 0A closed on 18 July 2026; see the M0 dossier |
-| M1. Engineering foundation | `IN PROGRESS` | Engineering | Start `FND-07` observability and privacy guards after accepted staging Railway skeleton |
+| M1. Engineering foundation | `COMPLETE` | Engineering | Gate 1 closed on 20 July 2026; all nine foundation packages plus device/accessibility and Aiven PostgreSQL RLS evidence accepted |
 | `FND-01` Monorepo and toolchain | `COMPLETE` | Engineering | Root workspace, boundaries, exact pins, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
 | `FND-02` CI and supply-chain baseline | `COMPLETE` | Engineering | Local and hosted validation, required PR checks, source traceability, and repository controls accepted; see [evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |
 | `FND-03` Application skeletons | `COMPLETE` | Engineering | Mobile, API, worker, and staff shells accepted; see [evidence](./impl-plan/m1-foundation/fnd-03-implementation-evidence.md) |
 | `FND-04` Contracts and domain kernel | `COMPLETE` | Engineering | `/v1` metadata, OpenAPI generation, generated clients, domain primitives, and contract guards accepted; see [evidence](./impl-plan/m1-foundation/fnd-04-implementation-evidence.md) |
 | `FND-05` Database and migration foundation | `COMPLETE` | Engineering | Drizzle schema, reviewed SQL migration, tenant context, RLS policy source, audit/idempotency/outbox/change primitives, metadata integration, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) |
 | `FND-06` Railway environment skeleton | `COMPLETE` | Engineering | Staging-only Railway descriptors, manifest, health checks, live Railway staging deploys, hosted migration evidence, and validation accepted; production setup deferred by founder direction; see [evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
-| `FND-07` Observability and privacy guards | `READY` | Engineering | Write package brief, then add safe logging, analytics/feature-flag wrappers, Sentry scrubbing, and leakage canaries |
-| `FND-08` through `FND-09` | `NOT STARTED` | See roadmap | Pull in dependency order |
-| M2 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
+| `FND-07` Observability and privacy guards | `COMPLETE` | Engineering | Safe logger, allowlisted analytics/flags, Sentry scrubbing, kill switches, and leakage canaries accepted; see [evidence](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) |
+| `FND-08` Design-system prototype reconciliation | `COMPLETE` | Engineering | Semantic tokens, three themes, accessible primitives, dev gallery, enforcement, exports, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
+| `FND-09` ADR and engineering documentation baseline | `COMPLETE` | Engineering | Eight foundation ADRs, six engineering notes, structural enforcement, context lookup, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
+| M2. Offline trust slice | `READY` | Engineering | Write, review, and accept standalone `OFF-01` and `OFF-02` plans before implementation |
+| M3 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
 `FND-03` added the first application-specific jobs to the accepted task graph.
@@ -82,6 +85,12 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 19 Jul 2026 | [`FND-04` contracts and domain kernel](./impl-plan/m1-foundation/fnd-04-implementation-evidence.md) | `COMPLETE` | Zod/OpenAPI source, generated clients, `/v1` metadata routes, framework-independent domain primitives, generated-output drift, breaking-contract guard, 45 tests, root validation, and clean-checkout proof passed |
 | 19 Jul 2026 | [`FND-05` database and migration foundation](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) | `COMPLETE` | Drizzle schema, reviewed SQL migration, tenant context, RLS policy source, audit/idempotency/outbox/change primitives, generated migration drift, API/worker metadata integration, 55 tests, root validation, and clean-checkout proof passed |
 | 19 Jul 2026 | [`FND-06` Railway environment skeleton](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) | `COMPLETE` | Staging-only Railway service descriptors, classified variable/resource manifest, API/staff health checks, live staging project, hosted FND-05 migration, API/worker/staff deployments, production deferral, tests, root validation, and clean-checkout proof passed |
+| 19 Jul 2026 | [`FND-07` observability and privacy guards](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) | `COMPLETE` | Stable safe logs, allowlisted analytics and feature flags, false-default kill switches, Sentry-compatible positive scrubbing, seeded leakage canaries, app adoption, and clean-checkout proof passed |
+| 19 Jul 2026 | [`FND-08` design-system prototype reconciliation](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) | `COMPLETE` | File-by-file disposition, platform-neutral semantic tokens, light/dark/high-contrast Unistyles 3 themes, Typography/Button/Banner, development gallery, 10 focused tests, release exports, root validation, and clean-checkout proof passed |
+| 19 Jul 2026 | [`FND-09` ADR and engineering documentation baseline](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) | `COMPLETE` | Eight accepted foundation ADRs, six task-oriented engineering notes, ADR structure enforcement, context discovery, 95 tests, root validation, and clean-checkout proof passed |
+| 20 Jul 2026 | [Gate 1 mobile device and accessibility matrix](./impl-plan/m1-foundation/gate-1-mobile-device-and-accessibility-evidence.md) | `COMPLETE` | Founder-approved iOS-simulator plus physical-Android development clients built, launched, and rendered; foundation reference states passed large-text, contrast, scroll, TalkBack-attachment, and native-semantic checks within the recorded evidence boundaries |
+| 20 Jul 2026 | [Gate 1 Aiven PostgreSQL RLS isolation](./impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md) | `COMPLETE` | Fresh temporary database, reviewed migration, two synthetic households, real `littlearc_app` execution, fail-closed no-context reads, cross-household filtering, blocked update, and SQLSTATE `42501` insert rejection passed |
+| 20 Jul 2026 | M1 Gate 1 close-out | `COMPLETE` | All Gate 1 criteria have linked passing evidence; M2 work-package planning is ready while real-data and pre-pilot gates remain unchanged |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -99,12 +108,12 @@ No implementation item is currently tagged `IN PROGRESS`.
 
 ## 7. Ready Queue
 
-| Priority | Item | Tag | Entry condition | Definition of done |
-| ---: | --- | --- | --- | --- |
-| 1 | `FND-07` Observability and privacy guards | `READY` | `FND-06` staging-only Railway skeleton complete | Safe logging, analytics, feature flags, Sentry scrubbing, and sensitive canary checks exist |
+| Item | Tag | Owner | Next action |
+| --- | --- | --- | --- |
+| `OFF-01` + `OFF-02` standalone planning | `READY` | Engineering | Plan authentication/session and household/consent together, resolve their shared schema and role decisions, then review before implementation |
 
 The complete dependency order remains in Section 25 of the implementation
-roadmap. This table should show only the next few actionable packages.
+roadmap. This section should show only the next few actionable packages.
 
 ## 8. Blockers and Later-Gate Obligations
 
@@ -113,19 +122,19 @@ roadmap. This table should show only the next few actionable packages.
 | Representative-parent research and five-flow validation (`RDY-01`, `RDY-02`) | `DEFERRED` | Invited pilot and product-direction claims; not synthetic M1 work | Founder/product + design | Required cohorts and five critical flows meet the recorded thresholds |
 | Pediatric terminology and safety approval (`RDY-03`) | `DEFERRED` | Real-data/pilot approval for clinical terminology and schedule behavior | Product + pediatric advisor | Specialist review is recorded against the taxonomy and safety copy |
 | Privacy/legal and security specialist approval (`RDY-08`) | `DEFERRED` | Real child data and invited pilot | Founder + privacy/legal + security | Required reviews approve consent, verification, processors, retention, deletion, incident handling, and controls |
-| Physical iOS and Android device matrix | `DEFERRED` | Pilot distribution and Gate 1 physical-device criterion; not initial synthetic scaffold work | Engineering | Scanner, OCR, biometrics, imports, notifications, accessibility gestures, install, and upgrade evidence passes on required devices |
+| Pre-pilot physical-device capability matrix | `DEFERRED` | Pilot distribution and claims beyond the accepted Gate 1 iOS-simulator plus physical-Android foundation matrix | Engineering | Physical iOS plus required Android coverage passes scanner, OCR, biometrics, imports, notifications, assistive-technology, signing/install, and upgrade checks |
 | Organization-owned provider, store, signing, and custody setup (`RDY-09`) | `BLOCKED` | Account-bound authentication, signed pilot distribution, and live recovery verification | Founder + engineering | Entity/accounts, credentials, signing access, live cost/capability checks, and recovery ownership are available and verified |
 | Real child or participant data | `BLOCKED` | Any real-data collection, storage, processing, or pilot use | Founder/product | Every named pre-real-data privacy, safety, security, provider, deletion, backup, and incident gate passes |
-| Native compatibility harness retirement | `BLOCKED` | Deletion of `spikes/native-compat`; does not block M1 | Engineering | `FND-03` transfers the accepted native configuration, real `apps/mobile` passes clean iOS/Android builds, any OCR override moves to the root workspace, and an ADR records the final dependency decision |
+| Native compatibility harness retirement | `DEFERRED` | Harness source retirement only; does not block accepted M1 packages | Engineering | Transfer or close its remaining physical-device evidence and review the root OCR override under [ADR-0002](./adr/0002-expo-native-development-and-spike-disposition.md) |
+| Local Aiven PostgreSQL target-version alignment | `DEFERRED` | PostgreSQL 18-specific local-development claims; not M2 planning or the accepted Gate 1 RLS behavior | Engineering | Upgrade the Aiven development service from reported PostgreSQL 17.10 to 18 and rerun provider integration before relying on version-18-only behavior |
 
 ## 9. Retained Artifacts and Follow-Up Debt
 
 | Artifact or debt | Tag | Reason retained | Retirement or resolution condition |
 | --- | --- | --- | --- |
-| `spikes/native-compat` source harness | `RETAINED` | Reproducible M0 native configuration and OCR workaround evidence | Meet the harness-retirement trigger in Section 8 |
+| `spikes/native-compat` source harness | `RETAINED` | Reproducible M0 evidence for unresolved physical-device scenarios; production configuration now belongs to `apps/mobile` | Meet the ADR-0002 harness-retirement trigger in Section 8 |
 | ML Kit core 5.0.0 pnpm override | `RETAINED` | Resolves the OCR wrapper's invalid React 17-era runtime dependency graph | Remove only when the wrapper publishes a compatible core dependency and all native checks remain green |
-| Long probe-screen title wrapping | `DEFERRED` | Structural accessibility passed; visual wrapping needs product UI treatment | Resolve during `FND-08` component and typography reconciliation |
-| Moderate `uuid` advisory in retained M0 harness | `DEFERRED` | The alert remains visible; automatic update returned `security_update_not_possible` because the transitive major is constrained, while the root production audit is clean | Reassess during `FND-03` transfer and remove with harness retirement |
+| Moderate `uuid` advisory in retained M0 harness | `DEFERRED` | The alert remains visible; automatic update returned `security_update_not_possible` because the transitive major is constrained, while the root production audit is clean | Reassess at the next harness dependency review and remove with harness retirement |
 | Renovate GitHub App authorization | `DEFERRED` | Validated configuration is committed; interactive App authorization was unavailable in this session and is not a CI baseline blocker | Install from the Renovate GitHub App page and confirm its dependency dashboard |
 | Production Railway environment skeleton | `DEFERRED` | Founder directed `FND-06` to staging only for now | Reopen a separate production setup package before real-data gates |
 
@@ -140,6 +149,11 @@ roadmap. This table should show only the next few actionable packages.
 | [`FND-04` Contracts and domain kernel](./impl-plan/m1-foundation/fnd-04-contracts-and-domain-kernel-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-04-implementation-evidence.md) |
 | [`FND-05` Database and migration foundation](./impl-plan/m1-foundation/fnd-05-database-and-migration-foundation-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-05-implementation-evidence.md) |
 | [`FND-06` Railway environment skeleton](./impl-plan/m1-foundation/fnd-06-railway-environment-skeleton-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-06-implementation-evidence.md) |
+| [`FND-07` Observability and privacy guards](./impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) |
+| [`FND-08` Design-system prototype reconciliation](./impl-plan/m1-foundation/fnd-08-design-system-prototype-reconciliation-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
+| [`FND-09` ADR and engineering documentation baseline](./impl-plan/m1-foundation/fnd-09-adr-and-engineering-documentation-baseline-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
+| [Gate 1 mobile device and accessibility matrix](./impl-plan/m1-foundation/gate-1-mobile-device-and-accessibility-evidence.md) | `COMPLETE` | Accepted only for the recorded Gate 1 platform matrix; broader physical-device checks remain pre-pilot |
+| [Gate 1 Aiven PostgreSQL RLS isolation](./impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md) | `COMPLETE` | Real PostgreSQL execution proves the remaining seeded cross-household Gate 1 criterion |
 
 ## 11. Agent Workflow
 
@@ -169,5 +183,6 @@ For every status change:
 7. Keep the matching implementation plan's status header and module-status
    table in sync with this dashboard.
 
-The next status change should be `FND-07`: `READY` to `IN PROGRESS` when its
-package brief and implementation begin.
+The next status change should record accepted standalone plans for `OFF-01` and
+`OFF-02`. M2 implementation must not start until those plans resolve their
+shared authentication, role, schema, privacy, and provider decisions.

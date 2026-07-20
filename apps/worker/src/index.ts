@@ -1,11 +1,19 @@
+import { createSafeLogger } from "@littlearc/observability";
 import { loadWorkerConfig } from "./config.js";
 import { createWorkerRuntime } from "./runtime.js";
 
-const runtime = createWorkerRuntime(loadWorkerConfig(), {
-  info(event) {
-    console.log(JSON.stringify(event));
-  },
-});
+const config = loadWorkerConfig();
+const runtime = createWorkerRuntime(
+  config,
+  createSafeLogger({
+    environment: config.appEnv,
+    service: "worker",
+    sink(record) {
+      console.log(JSON.stringify(record));
+    },
+    version: "0.0.0",
+  }),
+);
 
 runtime.start();
 

@@ -1,129 +1,128 @@
-import { Link } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { ScrollView, View } from "react-native";
+import { StyleSheet } from "react-native-unistyles";
 import { getMobileEnvironment } from "../../src/bootstrap/environment";
+import { Banner } from "../../src/components/ui/Banner";
+import { Button } from "../../src/components/ui/Button";
+import { Typography } from "../../src/components/ui/Typography";
 
 const landingSteps = [
   "Create a parent account",
   "Add one synthetic child profile",
-  "Open emergency card offline",
+  "Open emergency information offline",
 ] as const;
 
 export default function LandingScreen() {
   const environment = getMobileEnvironment();
+  const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.shell}>
+    <ScrollView contentContainerStyle={styles.shell} contentInsetAdjustmentBehavior="automatic">
       <View style={styles.content}>
-        <Text accessibilityRole="header" style={styles.title}>
-          LittleArc
-        </Text>
-        <Text style={styles.summary}>
-          Synthetic M1 shell for proving the production-shaped app runtime.
-        </Text>
+        <View style={styles.heading}>
+          <Typography accessibilityRole="header" textRole="display">
+            LittleArc
+          </Typography>
+          <Typography textRole="bodyEmphasis" tone="secondary">
+            A calm, offline-first place for a family&apos;s pediatric history.
+          </Typography>
+        </View>
+
+        <Banner
+          message="This foundation environment uses synthetic fixtures only. Real child and participant data remains blocked."
+          title="M1 engineering workspace"
+          variant="info"
+        />
 
         <View accessibilityLabel="Synthetic landing flow" style={styles.stepList}>
           {landingSteps.map((step, index) => (
             <View key={step} style={styles.stepRow}>
-              <Text style={styles.stepNumber}>{index + 1}</Text>
-              <Text style={styles.stepText}>{step}</Text>
+              <View style={styles.stepNumber}>
+                <Typography align="center" textRole="bodyEmphasis">
+                  {index + 1}
+                </Typography>
+              </View>
+              <Typography style={styles.stepText}>{step}</Typography>
             </View>
           ))}
         </View>
 
         <View accessibilityLabel="Current runtime environment" style={styles.statusPanel}>
-          <Text style={styles.statusLabel}>Environment</Text>
-          <Text style={styles.statusValue}>{environment.appEnv}</Text>
-          <Text style={styles.statusLabel}>API origin</Text>
-          <Text style={styles.statusValue}>{environment.apiBaseUrl}</Text>
+          <Typography textRole="caption" tone="muted">
+            Environment
+          </Typography>
+          <Typography selectable textRole="bodyEmphasis">
+            {environment.appEnv}
+          </Typography>
+          <Typography textRole="caption" tone="muted">
+            API origin
+          </Typography>
+          <Typography selectable>{environment.apiBaseUrl}</Typography>
         </View>
 
-        <Link accessibilityRole="button" href="/status" style={styles.primaryAction}>
-          Open runtime status
-        </Link>
+        <View style={styles.actions}>
+          <Button label="Open runtime status" onPress={() => router.push("/status")} />
+          {__DEV__ ? (
+            <Button
+              label="Open design-system gallery"
+              onPress={() => router.push("/design-system")}
+              variant="secondary"
+            />
+          ) : null}
+        </View>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  content: {
-    gap: 20,
-    maxWidth: 560,
-    width: "100%",
-  },
-  primaryAction: {
-    backgroundColor: "#1e5d4e",
-    borderRadius: 8,
-    color: "#ffffff",
-    fontSize: 17,
-    fontWeight: "700",
-    minHeight: 48,
-    overflow: "hidden",
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    textAlign: "center",
-  },
+const styles = StyleSheet.create((theme) => ({
   shell: {
     alignItems: "center",
-    backgroundColor: "#f7f4ec",
-    flex: 1,
+    backgroundColor: theme.colors.background.primary,
+    flexGrow: 1,
     justifyContent: "center",
-    padding: 24,
+    padding: theme.layout.screenPadding,
   },
-  statusLabel: {
-    color: "#5d655a",
-    fontSize: 13,
-    fontWeight: "700",
-    textTransform: "uppercase",
+  content: {
+    gap: theme.spacing.lg,
+    maxWidth: theme.layout.contentMaxWidth,
+    paddingVertical: theme.spacing.xl,
+    width: "100%",
   },
-  statusPanel: {
-    backgroundColor: "#ffffff",
-    borderColor: "#d8d2c3",
-    borderRadius: 8,
-    borderWidth: 1,
-    gap: 6,
-    padding: 16,
-  },
-  statusValue: {
-    color: "#1f2a24",
-    fontSize: 16,
-    lineHeight: 24,
+  heading: {
+    gap: theme.spacing.xs,
   },
   stepList: {
-    gap: 10,
+    gap: theme.spacing.sm,
   },
   stepNumber: {
-    backgroundColor: "#dbe8df",
-    borderRadius: 16,
-    color: "#1e5d4e",
-    fontSize: 15,
-    fontWeight: "700",
-    height: 32,
-    lineHeight: 32,
-    textAlign: "center",
-    width: 32,
+    alignItems: "center",
+    backgroundColor: theme.colors.record.confirmed,
+    borderColor: theme.colors.border.default,
+    borderRadius: theme.radii.pill,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: theme.touchTargets.minimum,
+    minWidth: theme.touchTargets.minimum,
   },
   stepRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 12,
+    gap: theme.spacing.sm,
   },
   stepText: {
-    color: "#29332d",
     flex: 1,
-    fontSize: 17,
-    lineHeight: 24,
   },
-  summary: {
-    color: "#3f463d",
-    fontSize: 18,
-    lineHeight: 28,
+  statusPanel: {
+    backgroundColor: theme.colors.background.elevated,
+    borderColor: theme.colors.border.default,
+    borderCurve: "continuous",
+    borderRadius: theme.radii.card,
+    borderWidth: 1,
+    gap: theme.spacing.xxs,
+    padding: theme.spacing.md,
   },
-  title: {
-    color: "#1f2a24",
-    fontSize: 34,
-    fontWeight: "800",
-    lineHeight: 42,
+  actions: {
+    gap: theme.spacing.xs,
   },
-});
+}));

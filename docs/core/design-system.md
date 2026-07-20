@@ -1,8 +1,8 @@
 # LittleArc Design-System Foundation
 
-> **Status:** Accepted M0 foundation specification; prototype validation pending
+> **Status:** Accepted production foundation; physical accessibility validation deferred
 > **Version:** 1.0
-> **Last updated:** 18 July 2026
+> **Last updated:** 19 July 2026
 > **M0 source:** [M0 Readiness and Evidence Dossier](./m0-readiness-and-evidence.md)
 
 ---
@@ -14,9 +14,10 @@ warm neutral surfaces, muted sage and terracotta accents, restrained motion,
 and clear trust states. The interface must feel dependable and humane without
 becoming childish, decorative, or clinical.
 
-The current token, theme, component, and reference-screen files are prototype
-inputs. Preserve them through M0. Production adoption occurs file by file after
-the repository, Expo, TypeScript, Unistyles, and test foundations exist.
+`FND-08` completed the file-by-file prototype reconciliation. The semantic
+tokens, Unistyles 3 registration, Typography, Button, and Banner are accepted
+production foundations. Disconnected prototype screens were discarded and
+domain components remain feature-owned until their first production consumer.
 
 Hard rules:
 

@@ -9,6 +9,9 @@ domains:
       - supply-chain
       - roadmap
       - fnd-03
+      - fnd-09
+      - adr
+      - engineering documentation
       - application
       - skeleton
     docs:
@@ -19,6 +22,12 @@ domains:
       - docs/impl-plan/m1-foundation/fnd-01-implementation-evidence.md
       - docs/impl-plan/m1-foundation/fnd-02-ci-and-supply-chain-plan.md
       - docs/impl-plan/m1-foundation/fnd-02-implementation-evidence.md
+      - docs/impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md
+      - docs/impl-plan/m1-foundation/fnd-07-implementation-evidence.md
+      - docs/impl-plan/m1-foundation/fnd-09-adr-and-engineering-documentation-baseline-plan.md
+      - docs/impl-plan/m1-foundation/fnd-09-implementation-evidence.md
+      - docs/adr/README.md
+      - docs/reference/engineering/README.md
     code:
       - package.json
       - pnpm-workspace.yaml
@@ -34,16 +43,59 @@ domains:
     validation:
       - pnpm validate
 
+  engineering-docs:
+    keywords:
+      - adr
+      - architecture decision
+      - repository boundary
+      - data classification
+      - environment
+      - migration
+      - testing
+      - release development
+      - spike retirement
+      - fnd-09
+    docs:
+      - docs/IMPLEMENTATION_STATUS.md
+      - docs/adr/README.md
+      - docs/reference/engineering/README.md
+      - docs/reference/engineering/repository-boundaries.md
+      - docs/reference/engineering/data-classification.md
+      - docs/reference/engineering/environments.md
+      - docs/reference/engineering/database-migrations.md
+      - docs/reference/engineering/testing-strategy.md
+      - docs/reference/engineering/development-and-release.md
+      - docs/impl-plan/m1-foundation/fnd-09-adr-and-engineering-documentation-baseline-plan.md
+      - docs/impl-plan/m1-foundation/fnd-09-implementation-evidence.md
+    code:
+      - package.json
+      - pnpm-workspace.yaml
+      - turbo.json
+      - tooling/**
+      - scripts/context/**
+    tests:
+      - tooling/**/*.test.ts
+    validation:
+      - pnpm check:docs
+      - pnpm check:format
+      - pnpm validate
+
   mobile:
     keywords:
       - mobile
       - expo
       - react native
+      - app flow
+      - application flow
+      - user flow
+      - navigation
+      - screen inventory
       - app skeleton
       - fnd-03
       - unistyles
     docs:
       - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/mobile-application-flow.md
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/core/design-system.md
       - docs/core/m0-readiness-and-evidence.md
@@ -70,6 +122,7 @@ domains:
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/backend-data-model-and-database-schema.md
       - docs/reference/environment-variable-catalog.md
       - docs/impl-plan/roadmap.md
     code:
@@ -96,6 +149,7 @@ domains:
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/backend-data-model-and-database-schema.md
       - docs/reference/environment-variable-catalog.md
       - docs/impl-plan/roadmap.md
     code:
@@ -143,6 +197,7 @@ domains:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/littlearc-complete-product-plan.md
       - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/backend-data-model-and-database-schema.md
       - docs/reference/environment-variable-catalog.md
     code:
       - packages/auth/**
@@ -157,6 +212,9 @@ domains:
   database:
     keywords:
       - database
+      - backend schema
+      - data model
+      - entity relationship
       - drizzle
       - postgres
       - rls
@@ -165,6 +223,7 @@ domains:
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/backend-data-model-and-database-schema.md
       - docs/core/m0-readiness-and-evidence.md
       - docs/reference/environment-variable-catalog.md
     code:
@@ -190,12 +249,17 @@ domains:
       - docs/core/design-system.md
       - docs/core/littlearc-complete-product-plan.md
       - docs/impl-plan/roadmap.md
+      - docs/impl-plan/m1-foundation/fnd-08-design-system-prototype-reconciliation-plan.md
+      - docs/impl-plan/m1-foundation/fnd-08-implementation-evidence.md
     code:
       - packages/design-tokens/**
       - apps/mobile/**
       - apps/ops-web/**
-    tests: []
+    tests:
+      - packages/design-tokens/src/**/*.test.ts
+      - tooling/design-system/**/*.test.ts
     validation:
+      - pnpm test:design-system
       - pnpm check:format
       - pnpm typecheck
 
@@ -233,12 +297,18 @@ domains:
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/reference/environment-variable-catalog.md
       - docs/impl-plan/roadmap.md
+      - docs/impl-plan/m1-foundation/fnd-07-observability-and-privacy-guards-plan.md
+      - docs/impl-plan/m1-foundation/fnd-07-implementation-evidence.md
     code:
       - packages/observability/**
       - apps/api/**
       - apps/worker/**
       - apps/mobile/**
       - apps/ops-web/**
-    tests: []
+    tests:
+      - packages/observability/src/**/*.test.ts
+      - apps/api/src/server.test.ts
+      - apps/worker/src/runtime.test.ts
     validation:
+      - pnpm --filter @littlearc/observability test
       - pnpm typecheck

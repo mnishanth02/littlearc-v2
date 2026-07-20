@@ -1,88 +1,67 @@
-import { Platform } from 'react-native';
+type FontWeight = "400" | "500" | "600" | "700" | "800";
 
-const systemFont = Platform.select({
-  ios: 'System',
-  android: 'sans-serif',
-  default: 'System',
-});
+type TypographyToken = {
+  readonly fontSize: number;
+  readonly lineHeight: number;
+  readonly fontWeight: FontWeight;
+  readonly letterSpacing?: number;
+  readonly fontFamily?: "monospace";
+};
 
-// Using standard native fonts means we omit `fontFamily` or use `System` to let RN handle scaling best
 export const typography = {
-  screenTitle: {
-    fontFamily: systemFont,
-    fontSize: 32,
-    lineHeight: 40,
-    fontWeight: '700' as const,
+  display: {
+    fontSize: 36,
+    lineHeight: 44,
+    fontWeight: "800",
     letterSpacing: -0.5,
   },
-  sectionTitle: {
-    fontFamily: systemFont,
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: '600' as const,
+  screenTitle: {
+    fontSize: 30,
+    lineHeight: 38,
+    fontWeight: "700",
     letterSpacing: -0.3,
   },
-  recordTitle: {
-    fontFamily: systemFont,
+  sectionTitle: {
+    fontSize: 22,
+    lineHeight: 30,
+    fontWeight: "700",
+  },
+  cardTitle: {
     fontSize: 18,
-    lineHeight: 24,
-    fontWeight: '600' as const,
+    lineHeight: 26,
+    fontWeight: "600",
   },
   body: {
-    fontFamily: systemFont,
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: '400' as const,
+    fontWeight: "400",
   },
-  supportingText: {
-    fontFamily: systemFont,
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '400' as const,
+  bodyEmphasis: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: "600",
   },
   metadata: {
-    fontFamily: systemFont,
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '400' as const,
-    letterSpacing: 0.2,
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "400",
   },
   label: {
-    fontFamily: systemFont,
-    fontSize: 14,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: "600",
+  },
+  caption: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "400",
+  },
+  monospace: {
+    fontFamily: "monospace",
+    fontSize: 13,
     lineHeight: 20,
-    fontWeight: '500' as const,
+    fontWeight: "500",
   },
-  buttonLabel: {
-    fontFamily: systemFont,
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600' as const,
-  },
-  numericOrDate: {
-    fontFamily: systemFont, // iOS will often map this well, optionally we can use fontVariant: ['tabular-nums'] in components
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '500' as const,
-  },
-  statusText: {
-    fontFamily: systemFont,
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '600' as const,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 0.5,
-  },
-  emergencyValue: {
-    fontFamily: systemFont,
-    fontSize: 24,
-    lineHeight: 32,
-    fontWeight: '700' as const,
-  },
-  errorText: {
-    fontFamily: systemFont,
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '500' as const,
-  },
-};
+} as const satisfies Record<string, TypographyToken>;
+
+export type TypographyRole = keyof typeof typography;

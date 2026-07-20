@@ -1,7 +1,7 @@
 # M1 Foundation Plans
 
 > **Status:** Active index
-> **Last updated:** 2026-07-19
+> **Last updated:** 2026-07-20
 > **Owner:** Engineering
 
 This folder contains implementation plans and validation evidence for M1
@@ -21,6 +21,14 @@ Current package documents:
 - [`FND-05` Implementation Evidence](./fnd-05-implementation-evidence.md)
 - [`FND-06` Railway Environment Skeleton Plan](./fnd-06-railway-environment-skeleton-plan.md)
 - [`FND-06` Implementation Evidence](./fnd-06-implementation-evidence.md)
+- [`FND-07` Observability and Privacy Guards Plan](./fnd-07-observability-and-privacy-guards-plan.md)
+- [`FND-07` Implementation Evidence](./fnd-07-implementation-evidence.md)
+- [`FND-08` Design-System Prototype Reconciliation Plan](./fnd-08-design-system-prototype-reconciliation-plan.md)
+- [`FND-08` Implementation Evidence](./fnd-08-implementation-evidence.md)
+- [`FND-09` ADR and Engineering Documentation Baseline Plan](./fnd-09-adr-and-engineering-documentation-baseline-plan.md)
+- [`FND-09` Implementation Evidence](./fnd-09-implementation-evidence.md)
+- [Gate 1 Mobile Device and Accessibility Evidence](./gate-1-mobile-device-and-accessibility-evidence.md)
+- [Gate 1 Aiven PostgreSQL RLS Evidence](./gate-1-aiven-rls-evidence.md)
 
 The live status for these work packages remains in
 [IMPLEMENTATION_STATUS.md](../../IMPLEMENTATION_STATUS.md).

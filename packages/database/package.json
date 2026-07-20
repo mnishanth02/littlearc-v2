@@ -28,14 +28,17 @@
     "db:push": "drizzle-kit push --config drizzle.config.ts",
     "generate": "tsx src/migrations/write-generated.ts",
     "test": "vitest run src",
-    "typecheck": "tsc --project tsconfig.json"
+    "test:rls": "tsx integration/gate-1-rls.ts",
+    "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.integration.json"
   },
   "dependencies": {
     "@littlearc/domain": "workspace:*",
     "drizzle-orm": "0.45.2"
   },
   "devDependencies": {
+    "@types/pg": "8.16.0",
     "drizzle-kit": "0.31.10",
+    "pg": "8.22.0",
     "tsx": "4.23.1"
   }
 }

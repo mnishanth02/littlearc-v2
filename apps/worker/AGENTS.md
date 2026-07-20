@@ -10,6 +10,7 @@ and queue packages are accepted. It is currently a registered workspace shell.
 - `docs/IMPLEMENTATION_STATUS.md`
 - `docs/index.md`
 - `docs/core/littlearc-architecture-and-tech-stack.md`
+- `docs/core/backend-data-model-and-database-schema.md`
 - `docs/reference/environment-variable-catalog.md`
 - `docs/impl-plan/roadmap.md`
 

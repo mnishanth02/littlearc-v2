@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
-import { copyFileSync, mkdirSync, statSync } from "node:fs";
+import { copyFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { existingSnapshotFiles } from "./source-snapshot/policy.mjs";
 
 const destination = process.argv[2];
 if (!destination) {
@@ -13,16 +14,14 @@ const output = execFileSync(
   ["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
   { cwd: repositoryRoot },
 );
-const files = output
+const candidateFiles = output
   .toString("utf8")
   .split("\0")
   .filter(Boolean);
+const files = existingSnapshotFiles(repositoryRoot, candidateFiles);
 
 for (const file of files) {
   const source = resolve(repositoryRoot, file);
-  if (!statSync(source).isFile()) {
-    continue;
-  }
   const target = resolve(destination, file);
   mkdirSync(dirname(target), { recursive: true });
   copyFileSync(source, target);
