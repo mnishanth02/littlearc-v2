@@ -173,8 +173,8 @@ the accepted focused, broad, release-bundle, and clean-checkout results.
 | --- | --- | --- |
 | Prototype APIs become accidental architecture | File-by-file disposition and deletion of disconnected source | Rebuild domain components with their first real consumer. |
 | Theme shape drifts between modes | One typed contract plus parity tests | Add any new role to all themes in one change. |
-| Static contrast checks overstate device accessibility | Label them as deterministic token evidence only | Run VoiceOver, TalkBack, 200% type, and visual review on the physical-device matrix. |
-| High-contrast support differs by platform | Use the supported RN signal and show the current preference state in the gallery | Validate platform behavior on physical iOS and Android before Gate 1. |
+| Static contrast checks overstate device accessibility | Label them as deterministic token evidence only | Gate 1 checks the accepted platform matrix; representative-user and broader assistive-technology review remains pre-pilot. |
+| High-contrast support differs by platform | Use the supported RN signal and show the current preference state in the gallery | Preserve the accepted Gate 1 evidence and repeat it on the broader pre-pilot device matrix. |
 | Gallery leaks into production navigation | Guard route registration, route rendering, and landing link with `__DEV__` | Verify release export contains no reachable gallery path. |
 
 ## Decisions

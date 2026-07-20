@@ -1,7 +1,7 @@
 # FND-09 Implementation Evidence
 
 > **Status:** Accepted
-> **Last updated:** 19 July 2026
+> **Last updated:** 20 July 2026
 > **Owner:** Engineering
 > **Work package:** `FND-09`
 > **Plan:** [FND-09 ADR and Engineering Documentation Baseline](./fnd-09-adr-and-engineering-documentation-baseline-plan.md)
@@ -61,9 +61,12 @@ configuration and the root workspace as authoritative for the ML Kit override.
 only for unresolved physical-device evidence. Its source may be removed after
 that evidence is transferred or closed and the OCR override is reviewed.
 
-This decision does not convert simulator, prebuild, or release-export results
-into physical-device acceptance. Gate 1 and pre-pilot device obligations remain
-open.
+The 20 July 2026 founder replan accepts an iOS simulator and physical Android
+device for Gate 1 only. The resulting build/runtime and accessible-reference-
+state evidence is recorded in the
+[Gate 1 mobile dossier](./gate-1-mobile-device-and-accessibility-evidence.md).
+Physical iOS and the broader device-capability matrix remain pre-pilot
+obligations.
 
 ## 5. Validation Results
 
@@ -94,6 +97,7 @@ choices, meaningful alternatives, review dates/triggers, spike disposition, and
 the six engineering-note areas are recorded, indexed, structurally enforced,
 and reproducible from a clean checkout.
 
-M1 work packages are accepted, but Gate 1 is not declared passed. Physical
-iOS/Android development-client, accessibility/reference-state, and the other
-named later-gate evidence remain explicit obligations.
+M1 work packages are accepted, but Gate 1 is not declared passed. The accepted
+mobile development-client and accessibility/reference-state criteria now pass;
+the seeded cross-household RLS rejection criterion remains open. Physical iOS
+and the other broader device checks remain explicit pre-pilot obligations.

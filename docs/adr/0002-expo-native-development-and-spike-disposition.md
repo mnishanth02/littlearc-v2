@@ -6,7 +6,7 @@
 > **Review date:** 2026-10-19
 > **Supersedes:** None
 > **Superseded by:** None
-> **Related documents:** [FND-03 evidence](../impl-plan/m1-foundation/fnd-03-implementation-evidence.md), [FND-08 evidence](../impl-plan/m1-foundation/fnd-08-implementation-evidence.md), [M0 evidence](../core/m0-readiness-and-evidence.md)
+> **Related documents:** [FND-03 evidence](../impl-plan/m1-foundation/fnd-03-implementation-evidence.md), [FND-08 evidence](../impl-plan/m1-foundation/fnd-08-implementation-evidence.md), [Gate 1 mobile evidence](../impl-plan/m1-foundation/gate-1-mobile-device-and-accessibility-evidence.md), [M0 evidence](../core/m0-readiness-and-evidence.md)
 
 ---
 
@@ -31,6 +31,11 @@ independent architecture authority. Remove its remaining source after required
 device evidence is transferred to the real app and the OCR override is reviewed;
 Git history and the M0 dossier then retain the historical decision record.
 
+For Gate 1, accept an iOS simulator on the designated Mac and a physical Android
+device as the development-client and foundation-accessibility matrix. This
+20 July 2026 founder replan does not replace physical iOS, store, signing,
+upgrade, or broader native-capability evidence required before pilot use.
+
 ## Alternatives Considered
 
 - Expo Go: rejected because required custom native modules are unsupported.
@@ -51,8 +56,10 @@ its retirement has an explicit evidence trigger instead of a stale FND-03 gate.
 ## Validation
 
 The real app passes Expo Doctor, clean prebuild, TypeScript, and Android/iOS
-release export. Physical iOS/Android development-client, OCR, accessibility, and
-upgrade evidence remains a named Gate 1 or pre-pilot obligation.
+release export. The accepted Gate 1 matrix additionally passes iOS-simulator
+and physical-Android development-client execution plus accessible foundation
+reference states. Physical iOS, OCR, store distribution, upgrade, and the
+broader capability matrix remain named pre-pilot obligations.
 
 ## Review Triggers
 

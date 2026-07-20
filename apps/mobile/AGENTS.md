@@ -31,5 +31,6 @@ production feature consumer.
 ## Validation
 
 - Root checks: `pnpm check:workspace`, `pnpm typecheck`, and `pnpm validate`.
-- Native checks arrive with `FND-03`; physical-device acceptance remains a later
-  gate and cannot be replaced by simulator success.
+- Gate 1 uses the founder-approved iOS-simulator plus physical-Android matrix.
+  Do not generalize that narrow acceptance to physical iOS, store distribution,
+  upgrades, native capability checks, or the broader pre-pilot device matrix.

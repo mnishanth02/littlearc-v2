@@ -85,11 +85,17 @@ domains:
       - mobile
       - expo
       - react native
+      - app flow
+      - application flow
+      - user flow
+      - navigation
+      - screen inventory
       - app skeleton
       - fnd-03
       - unistyles
     docs:
       - docs/IMPLEMENTATION_STATUS.md
+      - docs/core/mobile-application-flow.md
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/core/design-system.md
       - docs/core/m0-readiness-and-evidence.md
@@ -116,6 +122,7 @@ domains:
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/backend-data-model-and-database-schema.md
       - docs/reference/environment-variable-catalog.md
       - docs/impl-plan/roadmap.md
     code:
@@ -142,6 +149,7 @@ domains:
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/backend-data-model-and-database-schema.md
       - docs/reference/environment-variable-catalog.md
       - docs/impl-plan/roadmap.md
     code:
@@ -189,6 +197,7 @@ domains:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/littlearc-complete-product-plan.md
       - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/backend-data-model-and-database-schema.md
       - docs/reference/environment-variable-catalog.md
     code:
       - packages/auth/**
@@ -203,6 +212,9 @@ domains:
   database:
     keywords:
       - database
+      - backend schema
+      - data model
+      - entity relationship
       - drizzle
       - postgres
       - rls
@@ -211,6 +223,7 @@ domains:
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/littlearc-architecture-and-tech-stack.md
+      - docs/core/backend-data-model-and-database-schema.md
       - docs/core/m0-readiness-and-evidence.md
       - docs/reference/environment-variable-catalog.md
     code:

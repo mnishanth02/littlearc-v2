@@ -29,7 +29,7 @@ When sources conflict, report the conflict instead of silently choosing.
 2. Accepted ADRs in `docs/adr/`
 3. Live delivery state in `docs/IMPLEMENTATION_STATUS.md`
 4. Active implementation plans and evidence in `docs/impl-plan/`
-5. Core product, architecture, design, and readiness docs in `docs/core/`
+5. Core product, architecture, data-model, design, and readiness docs in `docs/core/`
 6. Reference docs in `docs/reference/`
 7. Templates and archived or superseded material
 
@@ -44,8 +44,8 @@ When sources conflict, report the conflict instead of silently choosing.
   tokens. Export public APIs through `src/index.ts`.
 - `docs/IMPLEMENTATION_STATUS.md` is the project delivery dashboard and AI-agent
   entry point.
-- `docs/core/` contains foundational product, architecture, design-system, and
-  readiness documents.
+- `docs/core/` contains foundational product, architecture, backend data-model,
+  design-system, and readiness documents.
 - `docs/reference/` contains operational and occasional-use reference material.
 - `docs/impl-plan/` contains the roadmap, implementation plans, and their
   validation evidence, grouped by milestone.

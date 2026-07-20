@@ -3,7 +3,7 @@
 > **Work package:** `FND-08`
 > **Status:** Completed
 > **Evidence date:** 19 July 2026
-> **Last updated:** 19 July 2026
+> **Last updated:** 20 July 2026
 > **Toolchain:** Node.js 24.18.0, pnpm 11.14.0
 > **Plan:** [FND-08 package plan](./fnd-08-design-system-prototype-reconciliation-plan.md)
 
@@ -121,8 +121,10 @@ Completed in this package:
 
 Not claimed by this package:
 
-- Physical-device VoiceOver, TalkBack, 200% type, high-contrast visual review,
-  orientation, smallest-phone, or tablet acceptance.
+- The later Gate 1 mobile validation pass is recorded separately in
+  [Gate 1 mobile device and accessibility evidence](./gate-1-mobile-device-and-accessibility-evidence.md).
+- Physical-iOS VoiceOver, orientation, smallest-phone/tablet, representative-
+  user, and broader pre-pilot device-matrix acceptance.
 - Acceptance of EmergencyCard, ProvenanceBadge, RecordSummaryCard, input fields,
   sheets, dialogs, or later reference flows as production APIs.
 - Approval to use real child, participant, household, or medical data.
@@ -132,5 +134,5 @@ Not claimed by this package:
 **Decision: COMPLETE for the accepted FND-08 production design-system
 foundation.** The quarantined prototype no longer defines application APIs; the
 accepted token/theme/primitives boundary is compiled, enforced, tested, and
-integrated into the scaffolded mobile shell. Physical assistive-technology and
-device-matrix evidence remains explicitly deferred to the existing gate.
+integrated into the scaffolded mobile shell. The accepted Gate 1 platform
+matrix subsequently passed; the broader pre-pilot obligations remain deferred.

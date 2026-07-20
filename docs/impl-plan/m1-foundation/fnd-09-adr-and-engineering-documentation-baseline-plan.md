@@ -52,8 +52,9 @@ Out of scope:
 - ADRs for architecture that has not been implemented yet, including
   authentication, offline synchronization, envelope encryption, OCR/AI
   production behavior, billing, backup recovery, and post-pilot updates.
-- Claiming Gate 1 physical-device, production, privacy/legal, restore, or
-  real-data obligations have passed.
+- Claiming Gate 1 mobile evidence before its separate validation pass, or
+  claiming production, privacy/legal, restore, or real-data obligations have
+  passed.
 - Adding a deployment workflow, EAS, production Railway resources, new runtime
   dependencies, or application behavior.
 - Deleting the native harness before its remaining physical-device evidence is
@@ -181,8 +182,9 @@ the accepted focused, broad, and source-only clean-checkout results.
 
 ## Follow-Up
 
-- Gate 1 still requires physical iOS/Android development-client and accessible
-  reference-state evidence; release exports do not satisfy that gate.
+- The later [Gate 1 mobile validation pass](./gate-1-mobile-device-and-accessibility-evidence.md)
+  accepts an iOS simulator plus physical Android for foundation build/runtime
+  and reference-state evidence; broader physical checks remain pre-pilot.
 - Create ADRs for offline data, sync, encryption, AI/OCR, backup, billing, and
   update strategy only when their owning packages begin.
 - Revisit every accepted FND-09 ADR by its recorded review date or earlier when

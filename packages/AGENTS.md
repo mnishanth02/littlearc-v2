@@ -11,6 +11,8 @@ test helpers, and design tokens.
 - `docs/IMPLEMENTATION_STATUS.md`
 - `docs/index.md`
 - `docs/core/littlearc-architecture-and-tech-stack.md`
+- `docs/core/backend-data-model-and-database-schema.md` for domain, contracts,
+  database, authentication, cryptography, or synchronization work
 - Relevant implementation plan under `docs/impl-plan/`
 - Relevant ADR when a package decision is difficult to reverse
 
