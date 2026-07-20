@@ -6,7 +6,7 @@
 > **Review date:** 2026-10-19
 > **Supersedes:** None
 > **Superseded by:** None
-> **Related documents:** [FND-05 plan](../impl-plan/m1-foundation/fnd-05-database-and-migration-foundation-plan.md), [FND-05 evidence](../impl-plan/m1-foundation/fnd-05-implementation-evidence.md), [migration note](../reference/engineering/database-migrations.md)
+> **Related documents:** [FND-05 plan](../impl-plan/m1-foundation/fnd-05-database-and-migration-foundation-plan.md), [FND-05 evidence](../impl-plan/m1-foundation/fnd-05-implementation-evidence.md), [Gate 1 RLS evidence](../impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md), [migration note](../reference/engineering/database-migrations.md)
 
 ---
 
@@ -43,11 +43,12 @@ planning; `db:push` is not a release command.
 
 ## Validation
 
-Generated migration drift, schema/primitive tests, and the successful staging
-forward migration verify the implemented foundation. Container-backed
-cross-household RLS integration and runtime `pg-boss` behavior remain explicit
-Gate 1/later-package evidence; this ADR does not convert policy-source tests into
-those passes.
+Generated migration drift, schema/primitive tests, the successful staging
+forward migration, and the Aiven-backed Gate 1 harness verify the implemented
+foundation. The harness applies the migration to a temporary database and
+proves cross-household filtering and write rejection as `littlearc_app`.
+Runtime `pg-boss`, broader transaction behavior, and PostgreSQL 18-specific
+local-provider compatibility remain later-package evidence.
 
 ## Review Triggers
 

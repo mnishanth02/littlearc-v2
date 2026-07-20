@@ -1,7 +1,7 @@
 # Database Migrations
 
 > **Status:** Active
-> **Last updated:** 2026-07-19
+> **Last updated:** 2026-07-20
 > **Owner:** Engineering
 > **Applies to:** PostgreSQL schema and release migrations
 > **Decision:** [ADR-0005](../../adr/0005-postgresql-rls-migrations-and-pg-boss.md)
@@ -25,6 +25,11 @@
    explicit release step before deploying dependent application code.
 6. Record migration version, source commit, environment, result, and any restore
    or follow-up obligation without recording connection details.
+
+For the local Aiven development service, use `pnpm test:database:rls` to apply
+the reviewed foundation migration to a fresh temporary database and prove the
+Gate 1 tenant boundary. The harness cleans up its database and test-only role
+changes. Do not point this command at production credentials.
 
 ## Prohibited Shortcuts
 

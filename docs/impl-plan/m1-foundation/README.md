@@ -28,6 +28,7 @@ Current package documents:
 - [`FND-09` ADR and Engineering Documentation Baseline Plan](./fnd-09-adr-and-engineering-documentation-baseline-plan.md)
 - [`FND-09` Implementation Evidence](./fnd-09-implementation-evidence.md)
 - [Gate 1 Mobile Device and Accessibility Evidence](./gate-1-mobile-device-and-accessibility-evidence.md)
+- [Gate 1 Aiven PostgreSQL RLS Evidence](./gate-1-aiven-rls-evidence.md)
 
 The live status for these work packages remains in
 [IMPLEMENTATION_STATUS.md](../../IMPLEMENTATION_STATUS.md).

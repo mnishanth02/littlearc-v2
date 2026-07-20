@@ -4,7 +4,7 @@
 > **Last updated:** 2026-07-19
 > **Owner:** Engineering
 > **Applies to:** Server-side PostgreSQL schema from M1 foundation through M5 trust operations
-> **Current delivery boundary:** FND-05 is implemented; Gate 1 must close before M2 implementation begins
+> **Current delivery boundary:** FND-05 and Gate 1 are complete; M2 work-package planning is ready
 > **Authority boundary:** Implemented structures follow executable schema; planned structures require their owning work-package acceptance
 
 ---
@@ -54,6 +54,7 @@ status, roadmap order, architecture, or any accepted ADR.
 | [Database migrations](../reference/engineering/database-migrations.md) | Authoritative schema sources and release procedure |
 | [`packages/database`](../../packages/database/src/schema/index.ts) | Current executable Drizzle schema |
 | [Foundation migration](../../packages/database/migrations/0001_fnd_05_database_foundation.sql) | Current reviewed SQL, roles, grants, and RLS policies |
+| [Gate 1 RLS evidence](../impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md) | Real PostgreSQL cross-household isolation result and evidence boundaries |
 
 ## 3. Assumptions and Open Decisions
 
@@ -1041,7 +1042,9 @@ pnpm validate
 ```
 
 PostgreSQL/RLS claims additionally require a real PostgreSQL integration harness;
-unit inspection of SQL text is not sufficient.
+unit inspection of SQL text is not sufficient. The Gate 1 foundation case is
+implemented by `pnpm test:database:rls`; broader M2-M5 scenarios remain owned by
+their work packages.
 
 ## 32. Risks and Recommendations
 
@@ -1065,6 +1068,8 @@ unit inspection of SQL text is not sufficient.
 
 - [x] Gate 1 mobile-device and accessibility evidence is complete under the
   formally replanned iOS-simulator plus physical-Android matrix.
+- [x] Gate 1 seeded cross-household RLS reads and writes are blocked by real
+  Aiven PostgreSQL when executed as `littlearc_app`.
 - [ ] `OFF-01` and `OFF-02` have standalone accepted plans.
 - [ ] Better Auth schema is generated from the pinned version and reviewed.
 - [ ] Role/co-parent model and country-default conflict are resolved.

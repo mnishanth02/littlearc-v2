@@ -1,7 +1,7 @@
 # LittleArc Local Development
 
-> **Status:** FND-01 foundation setup
-> **Last updated:** 18 July 2026
+> **Status:** Active local-development setup
+> **Last updated:** 20 July 2026
 
 ## Prerequisites
 
@@ -64,10 +64,57 @@ does not rewrite product content to satisfy a new formatter.
 
 ## Environment Files
 
-Copy only the application example you are running, and keep the local file
-untracked. All secret and sensitive examples are deliberately blank. See the
+Local API and worker development use the repository-root `.env.aiven` file.
+Keep this file untracked with mode `0600`, use an Aiven development-only
+PostgreSQL service, and store synthetic fixtures only:
+
+```dotenv
+DATABASE_URL=postgresql://avnadmin:<password>@<host>:<port>/defaultdb?sslmode=require
+```
+
+`pnpm dev:api`, `pnpm dev:worker`, and `pnpm test:database:rls` load this file
+through the local Aiven command wrapper while forcing `APP_ENV=local`. A missing
+`.env.aiven` fails immediately. The wrapper is an implementation detail and
+must not be used to bypass the local environment boundary.
+
+The initial `avnadmin` URI is accepted only while the application skeletons do
+not execute database queries. `avnadmin` can bypass RLS. Before the first
+runtime database-query package, create separate Aiven login users and grant
+them the existing `littlearc_app` and `littlearc_worker` group roles; replace
+the runtime URI rather than using `avnadmin` for tenant traffic.
+
+Railway owns staging configuration independently. Local Aiven credentials must
+never be copied to Railway variables, staging descriptors, mobile bundles, or a
+future production environment. The application-specific `.env.example` files
+remain the complete variable catalog for direct package execution. All secret
+and sensitive examples are deliberately blank. See the
 [environment variable catalog](./environment-variable-catalog.md) for ownership
 and classification.
+
+Apply the reviewed foundation migration with the direct Aiven service URI:
+
+```sh
+aiven_uri="$(sed -n 's/^DATABASE_URL=//p' .env.aiven)"
+psql "$aiven_uri" -v ON_ERROR_STOP=1 \
+  -f packages/database/migrations/0001_fnd_05_database_foundation.sql
+```
+
+Do not use `db:push` against Aiven development, Railway staging, or a future
+production database.
+
+Run the Gate 1 household-isolation harness against a disposable Aiven database:
+
+```sh
+pnpm test:database:rls
+```
+
+The harness applies the reviewed migration, uses two synthetic households,
+executes assertions as `littlearc_app`, and removes the temporary database,
+temporary membership, and any roles it created. The configured Aiven login must
+be allowed to create temporary databases and roles. The command never prints
+the connection string. With `sslmode=require`, the Node harness uses standard
+libpq-compatible encrypted transport. Add the Aiven service CA and move to
+`sslmode=verify-full` when local certificate verification is configured.
 
 ## Retained M0 Harness
 

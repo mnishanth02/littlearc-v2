@@ -1,0 +1,10 @@
+{
+  "extends": "../../tooling/typescript/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["integration/**/*.ts"]
+}
