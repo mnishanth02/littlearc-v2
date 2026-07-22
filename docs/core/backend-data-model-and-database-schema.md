@@ -1,7 +1,7 @@
 # LittleArc Backend Data Model and Database Schema
 
 > **Status:** Active core data-model baseline
-> **Last updated:** 2026-07-19
+> **Last updated:** 2026-07-20
 > **Owner:** Engineering
 > **Applies to:** Server-side PostgreSQL schema from M1 foundation through M5 trust operations
 > **Current delivery boundary:** FND-05 and Gate 1 are complete; M2 work-package planning is ready
@@ -71,13 +71,18 @@ status, roadmap order, architecture, or any accepted ADR.
 | A-07 | Recommendation | Keep notification templates in version-controlled code; persist only `template_key` and `template_version`. |
 | A-08 | Recommendation | Treat file objects as immutable. A replacement creates a new row and relationship rather than overwriting an object. |
 
-### 3.2 Open decisions that block final migration design
+### 3.2 Resolved M2 entry decisions
+
+| ID | Resolution | Evidence |
+| --- | --- | --- |
+| O-01 | Better Auth 1.6.23 owns five global identity/session tables in the `littlearc` schema; household RLS starts at membership in `OFF-02`. | [ADR-0009](../adr/0009-consumer-authentication-and-session-boundary.md) and the reviewed `OFF-01` schema/migration |
+| O-02 | Persist `owner` and `caregiver`; MVP co-parent is a caregiver capability bundle rather than a third stored role. | Accepted [`OFF-02` plan](../impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) |
+| O-03 | Remove the silent US default in `OFF-02` and require an explicit country during household creation. | Accepted [`OFF-02` plan](../impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) |
+
+### 3.3 Open decisions that block final migration design
 
 | ID | Decision required | Owner / work package |
 | --- | --- | --- |
-| O-01 | Generate and review the exact Better Auth 1.6.23 Drizzle schema, table names, plugins, and isolation strategy. | `OFF-01` |
-| O-02 | Reconcile product role language (`owner`, `co-parent`, `caregiver`) with the current domain roles (`owner`, `caregiver`, `staff`). The conservative target models co-parent as a caregiver capability bundle until changed through contracts/ADR. | `OFF-02` |
-| O-03 | Replace or justify the implemented `households.default_country_code = 'US'` default for an India-first product. Do not silently change it. | `OFF-02` |
 | O-04 | Approve adult/parent verification provider, evidence fields, and retention; no verification-document schema is proposed before that decision. | Pre-real-data gate / `OFF-02` |
 | O-05 | Approve retention durations for audit, consent, tombstones, processor payloads, exports, backups, and support data. | Privacy/legal review before real data |
 | O-06 | Decide whether emergency-card versions share the generic record/version aggregate or remain a dedicated aggregate optimized for offline access. This draft recommends dedicated versions. | `OFF-05` |
@@ -320,16 +325,18 @@ compatible migration.
 
 ### 10.1 Provider-owned authentication tables
 
-Better Auth owns user, account, session, and verification storage. Expected
-logical fields are shown for review, but migration SQL must be generated from
-the pinned adapter during `OFF-01`; these are not hand-authored contracts.
+Better Auth owns user, account, session, verification, and rate-limit storage.
+`OFF-01` generated the pinned provider schema, adapted its table constructor to
+the `littlearc` namespace, and committed a reviewed forward migration. The
+provider-owned tables are not LittleArc API contracts.
 
 | Logical table | Required fields | Key constraints / indexes | Sensitive handling |
 | --- | --- | --- | --- |
-| Auth user | `id`, normalized email, email verified state, name/display fields, timestamps | Unique normalized email | Email is PII; no household health content |
-| Auth account | `id`, `user_id`, provider/account ID, scoped tokens if required, timestamps | Unique provider + account ID; user index | Do not store provider refresh tokens unless required |
-| Auth session | `id`, `user_id`, token hash/value per adapter, expiry, IP/device metadata if approved | Unique token; user + expiry index | Hash/token rules follow provider; short-lived and revocable |
-| Auth verification | identifier, value/hash, expiry, attempts | Identifier + expiry indexes | OTP short-lived, one-time, rate-limited; never log value |
+| `auth_user` | `id`, normalized email, email verified state, name/display fields, timestamps | Unique normalized email | Email is PII; no household health content |
+| `auth_account` | `id`, `user_id`, provider/account ID, scoped tokens if required, nullable provider-compatibility password field, timestamps | User index | Password endpoints are disabled and LittleArc never populates the compatibility field; provider tokens remain optional |
+| `auth_session` | `id`, `user_id`, provider token, expiry, optional IP/user-agent metadata, timestamps | Unique token; user index | Seven-day stateful lifetime, daily rotation, server revocation |
+| `auth_verification` | identifier, hashed value plus attempt counter, expiry, timestamps | Identifier index | Five-minute, single-use, three attempts; never log value |
+| `auth_rate_limit` | key, count, last-request time | Unique key | Shared database anti-abuse state; no child or household content |
 
 ### 10.2 LittleArc identity/access tables
 
@@ -1070,9 +1077,9 @@ their work packages.
   formally replanned iOS-simulator plus physical-Android matrix.
 - [x] Gate 1 seeded cross-household RLS reads and writes are blocked by real
   Aiven PostgreSQL when executed as `littlearc_app`.
-- [ ] `OFF-01` and `OFF-02` have standalone accepted plans.
-- [ ] Better Auth schema is generated from the pinned version and reviewed.
-- [ ] Role/co-parent model and country-default conflict are resolved.
+- [x] `OFF-01` and `OFF-02` have standalone accepted plans.
+- [x] Better Auth schema is generated from the pinned version and reviewed.
+- [x] Role/co-parent model and country-default conflict are resolved.
 - [ ] Encrypted envelope and child/profile/record payload schemas are versioned.
 - [ ] Every proposed FK has verified cardinality and same-tenant enforcement.
 - [ ] RLS policies and grants exist for every tenant table and database role.

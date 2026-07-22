@@ -1,6 +1,7 @@
 {
   "extends": "../../tooling/typescript/node.json",
   "compilerOptions": {
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "rootDir": "src",
     "skipLibCheck": true,
     "types": ["node", "vitest/globals"]

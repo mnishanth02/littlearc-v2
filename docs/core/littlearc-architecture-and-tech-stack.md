@@ -2,7 +2,7 @@
 
 > **Status:** Accepted architecture baseline  
 > **Version:** 1.3
-> **Last updated:** 18 July 2026
+> **Last updated:** 20 July 2026
 > **Product source:** [LittleArc Complete Product Plan](./littlearc-complete-product-plan.md)  
 > **M0 source:** [M0 Readiness and Evidence Dossier](./m0-readiness-and-evidence.md)
 > **Audience:** Engineering, product, security, operations, and future implementation agents
@@ -602,6 +602,9 @@ Enable WAL mode after confirming SQLCipher compatibility. Use migrations with fo
 ### 10.1 Consumer authentication
 
 Better Auth is mounted in the Fastify application and persists sessions in PostgreSQL.
+
+The implemented consumer boundary and its provider-schema handling are recorded
+in [ADR-0009](../adr/0009-consumer-authentication-and-session-boundary.md).
 
 Supported launch methods:
 

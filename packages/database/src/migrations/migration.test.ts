@@ -8,6 +8,11 @@ if (!foundation) {
   throw new Error("Expected the FND-05 foundation migration to be registered.");
 }
 const generatedSql = readFileSync(join("migrations", foundation.filename), "utf8");
+const auth = databaseMigrations()[1];
+if (!auth) {
+  throw new Error("Expected the OFF-01 auth migration to be registered.");
+}
+const generatedAuthSql = readFileSync(join("migrations", auth.filename), "utf8");
 
 describe("database migration foundation", () => {
   it("keeps the generated migration artifact in sync with the reviewed source", () => {
@@ -64,5 +69,33 @@ describe("database migration foundation", () => {
     expect(foundation.sql).toContain("create table if not exists littlearc.outbox_events");
     expect(foundation.sql).toContain("create table if not exists littlearc.schema_migrations");
     expect(foundation.sql).not.toContain("__CHECKSUM_SHA256__");
+  });
+});
+
+describe("OFF-01 consumer auth migration", () => {
+  it("keeps the generated migration artifact in sync with reviewed source", () => {
+    expect(generatedAuthSql).toBe(`${auth.sql}\n`);
+  });
+
+  it("creates exactly the pinned Better Auth storage models", () => {
+    for (const table of [
+      "auth_user",
+      "auth_session",
+      "auth_account",
+      "auth_verification",
+      "auth_rate_limit",
+    ]) {
+      expect(auth.sql).toContain(`create table if not exists littlearc.${table}`);
+    }
+    expect(auth.sql).toContain("value text not null");
+    expect(auth.sql).toContain("last_request bigint not null");
+    expect(auth.sql).not.toContain("household_id");
+    expect(auth.sql).not.toContain("child_id");
+  });
+
+  it("gives the API lifecycle access without exposing identity rows to worker or ops roles", () => {
+    expect(auth.sql).toContain("grant select, insert, update, delete on");
+    expect(auth.sql).toContain("to littlearc_app");
+    expect(auth.sql).toContain("from littlearc_worker, littlearc_ops_readonly");
   });
 });

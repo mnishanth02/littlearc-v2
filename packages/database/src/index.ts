@@ -1,4 +1,5 @@
 export * from "./change-feed.js";
+export * from "./client.js";
 export * from "./idempotency.js";
 export * from "./migrations/metadata.js";
 export * from "./outbox.js";

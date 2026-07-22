@@ -116,6 +116,65 @@ describe("API skeleton", () => {
     });
   });
 
+  it("mounts the consumer auth handler and forwards multiple session cookies", async () => {
+    const config = loadApiConfig({ APP_ENV: "local" });
+    const configured = {
+      ...config,
+      consumerAuth: {
+        baseUrl: "http://127.0.0.1:3000",
+        databaseUrl: "postgres://synthetic",
+        emailFrom: "synthetic@example.test",
+        resendApiKey: "synthetic",
+        secret: "synthetic-secret-with-at-least-thirty-two-characters",
+        trustedOrigins: ["http://127.0.0.1:3000"],
+      },
+    } as const;
+    const server = await createApiServer(configured, undefined, {
+      async handler() {
+        return new Response(JSON.stringify({ ok: true }), {
+          headers: [
+            ["content-type", "application/json"],
+            ["set-cookie", "session=one; Path=/; HttpOnly"],
+            ["set-cookie", "state=two; Path=/; HttpOnly"],
+          ],
+          status: 200,
+        });
+      },
+    });
+
+    const response = await server.inject({
+      method: "POST",
+      payload: { email: "CANARY_PARENT@example.test" },
+      url: "/v1/auth/email-otp/send-verification-otp",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.cookies.map((cookie) => cookie.name)).toEqual(["session", "state"]);
+    expect(response.json()).toEqual({ ok: true });
+
+    const readiness = await server.inject({ method: "GET", url: "/ready" });
+    expect(readiness.json().checks[0]).toEqual({
+      name: "auth",
+      owner: "OFF-01",
+      status: "foundation-ready",
+    });
+  });
+
+  it("fails closed for partial consumer auth and social-provider configuration", () => {
+    expect(() =>
+      loadApiConfig({
+        APP_ENV: "local",
+        AUTH_BASE_URL: "http://127.0.0.1:3000",
+      }),
+    ).toThrow("AUTH_TRUSTED_ORIGINS is required");
+    expect(() =>
+      loadApiConfig({
+        APP_ENV: "local",
+        APPLE_CLIENT_ID: "synthetic-client",
+      }),
+    ).toThrow("AUTH_BASE_URL is required");
+  });
+
   it("returns Problem Details for missing routes", async () => {
     const server = await createApiServer(loadApiConfig({ APP_ENV: "local" }));
 

@@ -2,5 +2,35 @@
   "name": "@littlearc/auth",
   "version": "0.0.0",
   "private": true,
-  "description": "LittleArc authentication and authorization policy"
+  "description": "LittleArc authentication and authorization policy",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm --filter @littlearc/database build && tsc --project tsconfig.build.json",
+    "clean": "rm -rf dist coverage",
+    "adapt:schema": "node scripts/adapt-schema.mjs",
+    "regenerate:schema": "pnpm dlx auth@1.6.23 generate --config auth-schema.config.ts --output ../database/src/schema/auth.generated.ts --yes && pnpm adapt:schema",
+    "test": "vitest run src",
+    "test:postgres": "tsx integration/off-01-auth.ts",
+    "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.integration.json"
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "1.6.23",
+    "@better-auth/expo": "1.6.23",
+    "@littlearc/database": "workspace:*",
+    "better-auth": "1.6.23",
+    "resend": "6.17.2"
+  },
+  "devDependencies": {
+    "@types/pg": "8.16.0",
+    "pg": "8.22.0",
+    "tsx": "4.23.1"
+  }
 }

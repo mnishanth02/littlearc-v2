@@ -3,6 +3,11 @@ import { getTableConfig } from "drizzle-orm/pg-core";
 import { describe, expect, it } from "vitest";
 import {
   auditEvents,
+  auth_account,
+  auth_rate_limit,
+  auth_session,
+  auth_user,
+  auth_verification,
   changeEvents,
   children,
   households,
@@ -40,5 +45,22 @@ describe("database schema", () => {
     expect(getTableConfig(children).checks.map((constraint) => constraint.name)).toContain(
       "children_revision_check",
     );
+  });
+
+  it("keeps provider-owned auth tables global and namespaced without tenant content", () => {
+    const authTables = [auth_user, auth_account, auth_session, auth_verification, auth_rate_limit];
+    expect(authTables.map(getTableName)).toEqual([
+      "auth_user",
+      "auth_account",
+      "auth_session",
+      "auth_verification",
+      "auth_rate_limit",
+    ]);
+    for (const table of authTables) {
+      const config = getTableConfig(table);
+      expect(config.schema).toBe("littlearc");
+      expect(config.columns.map((column) => column.name)).not.toContain("household_id");
+      expect(config.columns.map((column) => column.name)).not.toContain("child_id");
+    }
   });
 });

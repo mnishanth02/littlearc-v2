@@ -5,6 +5,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
     "strict": true,
     "useUnknownInCatchVariables": true
   },
@@ -12,6 +13,7 @@
     "index.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
+    "src/auth/**/*.ts",
     "src/bootstrap/**/*.ts",
     "src/components/**/*.ts",
     "src/components/**/*.tsx",

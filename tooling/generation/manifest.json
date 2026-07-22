@@ -7,6 +7,11 @@
       "outputs": ["packages/contracts/baseline", "packages/contracts/src/generated"]
     },
     {
+      "name": "better-auth-schema",
+      "command": ["pnpm", "--filter", "@littlearc/auth", "adapt:schema"],
+      "outputs": ["packages/database/src/schema/auth.ts"]
+    },
+    {
       "name": "database-migrations",
       "command": ["pnpm", "--filter", "@littlearc/database", "generate"],
       "outputs": ["packages/database/migrations"]

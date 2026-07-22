@@ -1,7 +1,7 @@
 # LittleArc Environment Variable Catalog
 
-> **Status:** FND-06 staging contract
-> **Last updated:** 19 July 2026
+> **Status:** Active runtime contract
+> **Last updated:** 20 July 2026
 > **Machine-readable source:** `tooling/environment/variables.mjs`
 
 ## Rules
@@ -28,7 +28,15 @@
 | `HOST` | Public | `FND-03` | Local bind host |
 | `PORT` | Public | `FND-03` | Local HTTP port |
 | `DATABASE_URL` | Secret | `FND-05` | PostgreSQL connection string |
+| `AUTH_BASE_URL` | Public | `OFF-01` | Public API origin used by the consumer-auth handler |
+| `AUTH_TRUSTED_ORIGINS` | Public | `OFF-01` | Comma-separated exact web and app origins allowed at the auth boundary |
+| `AUTH_EMAIL_FROM` | Sensitive | `OFF-01` | Verified sender identity for consumer OTP delivery |
 | `BETTER_AUTH_SECRET` | Secret | `OFF-01` | Consumer-auth signing secret |
+| `RESEND_API_KEY` | Secret | `OFF-01` | Consumer email-OTP delivery credential |
+| `APPLE_CLIENT_ID` | Public | `OFF-01` | Optional Apple consumer-auth client identifier |
+| `APPLE_CLIENT_SECRET` | Secret | `OFF-01` | Optional Apple consumer-auth client secret |
+| `GOOGLE_CLIENT_ID` | Public | `OFF-01` | Optional Google consumer-auth client identifier |
+| `GOOGLE_CLIENT_SECRET` | Secret | `OFF-01` | Optional Google consumer-auth client secret |
 | `S3_ENDPOINT` | Sensitive | `FND-06` | Private bucket endpoint |
 | `S3_ACCESS_KEY_ID` | Secret | `FND-06` | Private bucket access identifier |
 | `S3_SECRET_ACCESS_KEY` | Secret | `FND-06` | Private bucket access secret |

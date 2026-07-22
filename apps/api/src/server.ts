@@ -1,5 +1,6 @@
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import type { ConsumerAuth } from "@littlearc/auth";
 import { contractMetadata, openApiDocument } from "@littlearc/contracts";
 import {
   databaseFoundationReadiness,
@@ -12,6 +13,7 @@ import {
   type SafeLogger,
 } from "@littlearc/observability";
 import Fastify, { type FastifyInstance } from "fastify";
+import { registerConsumerAuthRoute } from "./auth-route.js";
 import type { ApiConfig } from "./config.js";
 import { registerProblemDetails } from "./problem.js";
 
@@ -41,6 +43,7 @@ export async function createApiServer(
     service: "api",
     version: "0.0.0",
   }),
+  consumerAuth?: Pick<ConsumerAuth, "handler">,
 ): Promise<FastifyInstance> {
   const server = Fastify({
     genReqId: () => crypto.randomUUID(),
@@ -75,6 +78,10 @@ export async function createApiServer(
     origin: [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/],
   });
 
+  if (consumerAuth && config.consumerAuth) {
+    registerConsumerAuthRoute(server, consumerAuth, config.consumerAuth.baseUrl);
+  }
+
   server.get("/v1", async () => contractMetadata);
 
   server.get("/v1/openapi.json", async () => openApiDocument);
@@ -107,7 +114,11 @@ export async function createApiServer(
       appEnv: config.appEnv,
       databaseFoundation: databaseFoundationReadiness,
       checks: [
-        { name: "auth", status: "deferred", owner: "OFF-01" },
+        {
+          name: "auth",
+          status: consumerAuth ? "foundation-ready" : "deferred",
+          owner: "OFF-01",
+        },
         ...databaseReadinessChecks,
         { name: "object-storage", status: "deferred", owner: "FND-06" },
       ],
@@ -122,7 +133,11 @@ export async function createApiServer(
       appEnv: config.appEnv,
       databaseFoundation: databaseFoundationReadiness,
       checks: [
-        { name: "auth", status: "deferred", owner: "OFF-01" },
+        {
+          name: "auth",
+          status: consumerAuth ? "foundation-ready" : "deferred",
+          owner: "OFF-01",
+        },
         ...databaseReadinessChecks,
         { name: "object-storage", status: "deferred", owner: "FND-06" },
       ],

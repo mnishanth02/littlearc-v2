@@ -199,15 +199,25 @@ domains:
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/core/backend-data-model-and-database-schema.md
       - docs/reference/environment-variable-catalog.md
+      - docs/adr/0009-consumer-authentication-and-session-boundary.md
+      - docs/impl-plan/m2-offline-trust/README.md
+      - docs/impl-plan/m2-offline-trust/off-01-consumer-authentication-and-session-lifecycle-plan.md
+      - docs/impl-plan/m2-offline-trust/off-01-implementation-evidence.md
+      - docs/impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md
     code:
       - packages/auth/**
       - apps/api/**
       - apps/mobile/**
       - apps/ops-web/**
-    tests: []
+    tests:
+      - packages/auth/src/**/*.test.ts
+      - packages/auth/integration/off-01-auth.ts
+      - apps/api/src/**/*.test.ts
+      - packages/database/src/**/*.test.ts
     validation:
-      - pnpm test:contract
-      - pnpm typecheck
+      - pnpm --filter @littlearc/auth test
+      - pnpm test:database:auth
+      - pnpm validate
 
   database:
     keywords:

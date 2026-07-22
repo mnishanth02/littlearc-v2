@@ -26,5 +26,7 @@ minimumReleaseAgeExclude:
   - drizzle-orm@0.45.2
 
 allowBuilds:
+  "@prisma/client": false
+  better-sqlite3: false
   esbuild: true
   sharp: true

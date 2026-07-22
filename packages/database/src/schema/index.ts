@@ -1,4 +1,5 @@
 export * from "./audit-events.js";
+export * from "./auth.js";
 export * from "./change-events.js";
 export * from "./children.js";
 export * from "./households.js";
