@@ -4,7 +4,7 @@
 > **Last updated:** 2026-07-22
 > **Owner:** Engineering
 > **Applies to:** Server-side PostgreSQL schema from M1 foundation through M5 trust operations
-> **Current delivery boundary:** FND-05, OFF-01, and OFF-02 are complete; OFF-03 planning is ready
+> **Current delivery boundary:** FND-05 and OFF-01 through OFF-05 are complete; later M2/M3-M5 structures remain planned
 > **Authority boundary:** Implemented structures follow executable schema; planned structures require their owning work-package acceptance
 
 ---
@@ -19,9 +19,9 @@ and PostgreSQL row-level security (RLS).
 
 This document separates three levels of certainty:
 
-- **Implemented:** the FND-05 foundation, Better Auth provider schema, and
-  OFF-02 household/membership/profile/consent/key structures and migrations in
-  `packages/database`.
+- **Implemented:** the FND-05 foundation, Better Auth provider schema, OFF-02
+  household/membership/profile/consent/key structures, and the OFF-05 dedicated
+  encrypted emergency-card aggregate/version boundary in `packages/database`.
 - **Planned:** an implementation-ready target for approved M2-M5 product scope,
   subject to the named work-package plan and acceptance gate.
 - **Future:** post-MVP integration, billing, and richer sharing structures that
@@ -50,15 +50,18 @@ status, roadmap order, architecture, or any accepted ADR.
 | [FND-05 evidence](../impl-plan/m1-foundation/fnd-05-implementation-evidence.md) | Implemented schema and validation boundary |
 | [OFF-01 evidence](../impl-plan/m2-offline-trust/off-01-implementation-evidence.md) | Implemented global identity/session provider boundary |
 | [OFF-02 evidence](../impl-plan/m2-offline-trust/off-02-implementation-evidence.md) | Implemented household, membership, encryption, consent, audit, and RLS boundary |
+| [OFF-05 evidence](../impl-plan/m2-offline-trust/off-05-implementation-evidence.md) | Implemented emergency-card aggregate, immutable versions, authorization, shared sync, and validation boundary |
 | [ADR-0004](../adr/0004-fastify-drizzle-modular-monolith.md) | Fastify/Drizzle modular-monolith decision |
 | [ADR-0005](../adr/0005-postgresql-rls-migrations-and-pg-boss.md) | PostgreSQL, RLS, migration, role, and job decisions |
 | [ADR-0007](../adr/0007-privacy-safe-observability-boundary.md) | Telemetry and restricted-data boundary |
 | [ADR-0010](../adr/0010-household-membership-encryption-and-consent-boundary.md) | Membership, encryption, consent, and synthetic-validation decisions |
+| [ADR-0013](../adr/0013-emergency-card-aggregate-and-standard-access-boundary.md) | Dedicated emergency aggregate, immutable versions, standard access, and conflict decisions |
 | [Data classification](../reference/engineering/data-classification.md) | Repository, telemetry, and restricted-data handling |
 | [Database migrations](../reference/engineering/database-migrations.md) | Authoritative schema sources and release procedure |
 | [`packages/database`](../../packages/database/src/schema/index.ts) | Current executable Drizzle schema |
 | [Foundation migration](../../packages/database/migrations/0001_fnd_05_database_foundation.sql) | Current reviewed SQL, roles, grants, and RLS policies |
 | [OFF-02 migration](../../packages/database/migrations/0003_off_02_household_consent_audit.sql) | Current household/membership/profile/consent/key DDL, grants, and RLS policies |
+| [OFF-05 migration](../../packages/database/migrations/0004_off_05_emergency_card.sql) | Current emergency-card/version DDL, immutable trigger, grants, and RLS policies |
 | [Gate 1 RLS evidence](../impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md) | Real PostgreSQL cross-household isolation result and evidence boundaries |
 
 ## 3. Assumptions and Open Decisions
@@ -83,6 +86,7 @@ status, roadmap order, architecture, or any accepted ADR.
 | O-01 | Better Auth 1.6.23 owns five global identity/session tables in the `littlearc` schema; household RLS starts at membership in `OFF-02`. | [ADR-0009](../adr/0009-consumer-authentication-and-session-boundary.md) and the reviewed `OFF-01` schema/migration |
 | O-02 | Persist `owner` and `caregiver`; MVP co-parent is a caregiver capability bundle rather than a third stored role. | Accepted [`OFF-02` plan](../impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) |
 | O-03 | Remove the silent US default in `OFF-02` and require an explicit country during household creation. | Accepted [`OFF-02` plan](../impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) |
+| O-06 | Keep emergency cards as a dedicated aggregate with immutable encrypted versions, standard access, and whole-card critical conflicts. | [ADR-0013](../adr/0013-emergency-card-aggregate-and-standard-access-boundary.md) and accepted [`OFF-05` evidence](../impl-plan/m2-offline-trust/off-05-implementation-evidence.md) |
 | O-07 | Use exact EncryptedEnvelopeV1 JSON and versioned AES-256-GCM household-key metadata with per-object DEKs and context-bound AAD. | [ADR-0010](../adr/0010-household-membership-encryption-and-consent-boundary.md) and accepted [`OFF-02` evidence](../impl-plan/m2-offline-trust/off-02-implementation-evidence.md) |
 
 ### 3.3 Open decisions that block final migration design
@@ -91,7 +95,6 @@ status, roadmap order, architecture, or any accepted ADR.
 | --- | --- | --- |
 | O-04 | Approve adult/parent verification provider, evidence fields, and retention; no verification-document schema is proposed before that decision. | Pre-real-data provider follow-up |
 | O-05 | Approve retention durations for audit, consent, tombstones, processor payloads, exports, backups, and support data. | Privacy/legal review before real data |
-| O-06 | Decide whether emergency-card versions share the generic record/version aggregate or remain a dedicated aggregate optimized for offline access. This draft recommends dedicated versions. | `OFF-05` |
 | O-08 | Define cursor lifetime and reset threshold using observed device inactivity and storage growth. | `OFF-04` |
 | O-09 | Confirm whether email reminders are promoted into M4. Email remains account/essential-operation only by default. | `UTL-02` |
 | O-10 | Approve external processor raw-payload retention. Default is not to retain raw health/document payloads. | Integration-specific plan |
@@ -164,8 +167,8 @@ Status values: `IMPLEMENTED`, `PLANNED`, `PROVIDER`, or `FUTURE`.
 | `devices` | Aggregate child | Identity | IMPLEMENTED | Authorization-neutral metadata; enrollment behavior remains OFF-03 |
 | `consent_events` | Append-only event | Consent | IMPLEMENTED | Regulatory evidence; duration open |
 | `household_keys` | Key metadata | Crypto | IMPLEMENTED | While encrypted household data or recovery copy exists |
-| `emergency_cards` | Aggregate root | Emergency | M2 | Restricted current pointer and access mode |
-| `emergency_card_versions` | Immutable version | Emergency | M2 | Restricted; correction/deletion policy |
+| `emergency_cards` | Aggregate root | Emergency | IMPLEMENTED | Restricted current pointer; one active standard-access card per child |
+| `emergency_card_versions` | Immutable version | Emergency | IMPLEMENTED | Encrypted restricted payload; insert-only application/worker access |
 | `records` | Aggregate root | Records | M3 | Restricted metadata; tombstone then purge |
 | `record_versions` | Immutable version | Records | M3 | Restricted encrypted confirmed/draft payload |
 | `record_suggestions` | Review item | Records/AI | M3/M4 | Restricted; short purpose-bound retention after review |
@@ -378,12 +381,12 @@ OFF-02 removes the household country default, requires exact encrypted-envelope
 shape for child profiles, and adds same-household actor constraints while
 preserving the FND-05 aggregate IDs and lifecycle columns.
 
-### 11.2 Planned child/emergency/record tables
+### 11.2 Implemented emergency and planned record tables
 
 | Table | Core columns | Invariants / access patterns |
 | --- | --- | --- |
-| `emergency_cards` | base columns, `child_id`, `current_version_id`, `access_mode`, `status` | Unique active child card; access mode `standard` or `quick_access`; current version same aggregate |
-| `emergency_card_versions` | `id`, `household_id`, `emergency_card_id`, `version_number`, `encrypted_payload`, `confirmed_by`, `confirmed_at`, `source_revision`, `created_at` | Immutable; unique card/version; no unconfirmed value in quick access |
+| `emergency_cards` | base columns, `child_id`, `current_version_id`, `access_mode`, `status`, actor IDs | Unique active child card; implemented access mode is `standard`; current version is a deferrable same-household/same-aggregate pointer |
+| `emergency_card_versions` | `id`, `household_id`, `emergency_card_id`, `version_number`, `encrypted_payload`, `confirmed_by`, `confirmed_at`, `source_revision`, `created_at` | Immutable trigger and revoked update/delete privileges; unique card/version; exact encrypted-envelope shape; positive source revision |
 | `records` | base columns, `child_id`, `category`, `source_type`, `confirmation_state`, `event_at`, `current_version_id`, `access_policy`, `ai_assisted` | Category/source/state checks; current version same record; partial indexes exclude deleted rows |
 | `record_versions` | `id`, `household_id`, `record_id`, `version_number`, `payload_schema_version`, `encrypted_payload`, `confirmation_state`, `provenance_type`, `source_issuer_id`, `confirmed_by`, `confirmed_at`, `supersedes_version_id`, `created_by`, `created_at` | Immutable; unique record/version; confirmation actor/time paired; self-FK same record |
 | `record_suggestions` | `id`, `household_id`, `record_id`, `record_version_id`, `field_path`, `encrypted_suggestion`, `encrypted_source_span`, `confidence_bucket`, `extractor_type`, `model_id`, `prompt_version`, `consent_event_id`, `review_state`, `reviewed_by`, `reviewed_at`, `created_at`, `expires_at` | Suggestions never authoritative; review state check; consent required for cloud AI |

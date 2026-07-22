@@ -60,11 +60,11 @@ export async function runSynchronization(input: {
           mutations: ready.map((mutation) => ({
             baseRevision: mutation.baseRevision,
             entityId: mutation.entityId,
-            entityType: "child",
+            entityType: mutation.entityType ?? "child",
             idempotencyKey: mutation.idempotencyKey,
             localDependencyIds: mutation.localDependencyIds,
             mutationId: mutation.mutationId,
-            operation: "update",
+            operation: mutation.operation ?? "update",
             payload: mutation.payload,
           })),
         }),

@@ -4,6 +4,566 @@
  */
 
 export interface paths {
+    "/v1/emergency-cards/{cardId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the current authorized emergency-card version */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Current confirmed emergency-card projection */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            accessMode: "standard";
+                            /** @description UUIDv7 identifier */
+                            cardId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            content: {
+                                allergies: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                bloodGroup: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    value: string;
+                                };
+                                criticalNotes: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                /** Format: date */
+                                dateOfBirth: string;
+                                guardianContacts: {
+                                    name: string;
+                                    phone: string;
+                                    relationship: string;
+                                }[];
+                                pediatrician: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    name: string;
+                                    phone: string;
+                                };
+                                preferredName: string;
+                                urgentMedications: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                            };
+                            /** @description Mutable entity revision */
+                            revision: number;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @description Mutable entity revision */
+                            version: number;
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Emergency-card capability required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Emergency card not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        /** Create or append an immutable emergency-card version */
+        put: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Client-generated UUIDv7 idempotency key */
+                    "idempotency-key": string;
+                };
+                path: {
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** @description Mutable entity revision */
+                        baseRevision: number | null;
+                        /** @description UUIDv7 identifier */
+                        childId: string;
+                        content: {
+                            allergies: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "noneConfirmed";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                values: string[];
+                            };
+                            bloodGroup: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            criticalNotes: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "noneConfirmed";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                values: string[];
+                            };
+                            /** Format: date */
+                            dateOfBirth: string;
+                            guardianContacts: {
+                                name: string;
+                                phone: string;
+                                relationship: string;
+                            }[];
+                            pediatrician: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                name: string;
+                                phone: string;
+                            };
+                            preferredName: string;
+                            urgentMedications: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "noneConfirmed";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                values: string[];
+                            };
+                        };
+                        /** @description UUIDv7 identifier */
+                        mutationId: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Emergency-card version updated or replayed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            accessMode: "standard";
+                            /** @description UUIDv7 identifier */
+                            cardId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            content: {
+                                allergies: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                bloodGroup: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    value: string;
+                                };
+                                criticalNotes: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                /** Format: date */
+                                dateOfBirth: string;
+                                guardianContacts: {
+                                    name: string;
+                                    phone: string;
+                                    relationship: string;
+                                }[];
+                                pediatrician: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    name: string;
+                                    phone: string;
+                                };
+                                preferredName: string;
+                                urgentMedications: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                            };
+                            /** @description Mutable entity revision */
+                            revision: number;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @description Mutable entity revision */
+                            version: number;
+                        };
+                    };
+                };
+                /** @description Emergency card and first immutable version created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            accessMode: "standard";
+                            /** @description UUIDv7 identifier */
+                            cardId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            content: {
+                                allergies: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                bloodGroup: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    value: string;
+                                };
+                                criticalNotes: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                /** Format: date */
+                                dateOfBirth: string;
+                                guardianContacts: {
+                                    name: string;
+                                    phone: string;
+                                    relationship: string;
+                                }[];
+                                pediatrician: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    name: string;
+                                    phone: string;
+                                };
+                                preferredName: string;
+                                urgentMedications: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                            };
+                            /** @description Mutable entity revision */
+                            revision: number;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @description Mutable entity revision */
+                            version: number;
+                        };
+                    };
+                };
+                /** @description Emergency-card request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Emergency-card edit capability required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Stale revision or idempotency conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sync": {
         parameters: {
             query?: never;
@@ -61,6 +621,104 @@ export interface paths {
                                 entityId: string;
                                 /** @enum {string} */
                                 entityType: "child";
+                                /** @enum {string} */
+                                operation: "delete";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                entity: {
+                                    /** @enum {string} */
+                                    accessMode: "standard";
+                                    /** @description UUIDv7 identifier */
+                                    cardId: string;
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    content: {
+                                        allergies: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        bloodGroup: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        criticalNotes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        /** Format: date */
+                                        dateOfBirth: string;
+                                        guardianContacts: {
+                                            name: string;
+                                            phone: string;
+                                            relationship: string;
+                                        }[];
+                                        pediatrician: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            name: string;
+                                            phone: string;
+                                        };
+                                        preferredName: string;
+                                        urgentMedications: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                    };
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
+                                };
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "emergencyCard";
+                                /** @enum {string} */
+                                operation: "upsert";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "emergencyCard";
                                 /** @enum {string} */
                                 operation: "delete";
                                 /** @description Mutable entity revision */
@@ -208,7 +866,7 @@ export interface paths {
                             /** @description Opaque pagination or synchronization cursor */
                             capturedCursor: string;
                             hasMore: boolean;
-                            items: {
+                            items: ({
                                 /** @description UUIDv7 identifier */
                                 childId: string;
                                 /** Format: date */
@@ -218,7 +876,80 @@ export interface paths {
                                 revision: number;
                                 /** @description Normalized UTC ISO 8601 timestamp */
                                 updatedAt: string;
-                            }[];
+                            } | {
+                                /** @enum {string} */
+                                accessMode: "standard";
+                                /** @description UUIDv7 identifier */
+                                cardId: string;
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                content: {
+                                    allergies: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                    bloodGroup: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    criticalNotes: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    guardianContacts: {
+                                        name: string;
+                                        phone: string;
+                                        relationship: string;
+                                    }[];
+                                    pediatrician: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        name: string;
+                                        phone: string;
+                                    };
+                                    preferredName: string;
+                                    urgentMedications: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                };
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                updatedAt: string;
+                                /** @description Mutable entity revision */
+                                version: number;
+                            })[];
                             /** @description Opaque pagination or synchronization cursor */
                             nextSnapshotCursor: string | null;
                             /** @description Normalized UTC ISO 8601 timestamp */
@@ -312,7 +1043,7 @@ export interface paths {
             requestBody?: {
                 content: {
                     "application/json": {
-                        mutations: {
+                        mutations: ({
                             /** @description Mutable entity revision */
                             baseRevision: number;
                             /** @description UUIDv7 identifier */
@@ -331,7 +1062,87 @@ export interface paths {
                                 dateOfBirth: string;
                                 preferredName: string;
                             };
-                        }[];
+                        } | {
+                            /** @description Mutable entity revision */
+                            baseRevision: number | null;
+                            /** @description UUIDv7 identifier */
+                            entityId: string;
+                            /** @enum {string} */
+                            entityType: "emergencyCard";
+                            /** @description UUIDv7 identifier */
+                            idempotencyKey: string;
+                            localDependencyIds: string[];
+                            /** @description UUIDv7 identifier */
+                            mutationId: string;
+                            /** @enum {string} */
+                            operation: "create" | "update";
+                            payload: {
+                                /** @enum {string} */
+                                accessMode: "standard";
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                content: {
+                                    allergies: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                    bloodGroup: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    criticalNotes: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    guardianContacts: {
+                                        name: string;
+                                        phone: string;
+                                        relationship: string;
+                                    }[];
+                                    pediatrician: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        name: string;
+                                        phone: string;
+                                    };
+                                    preferredName: string;
+                                    urgentMedications: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                };
+                            };
+                        })[];
                     };
                 };
             };
@@ -358,6 +1169,79 @@ export interface paths {
                                     revision: number;
                                     /** @description Normalized UTC ISO 8601 timestamp */
                                     updatedAt: string;
+                                } | {
+                                    /** @enum {string} */
+                                    accessMode: "standard";
+                                    /** @description UUIDv7 identifier */
+                                    cardId: string;
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    content: {
+                                        allergies: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        bloodGroup: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        criticalNotes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        /** Format: date */
+                                        dateOfBirth: string;
+                                        guardianContacts: {
+                                            name: string;
+                                            phone: string;
+                                            relationship: string;
+                                        }[];
+                                        pediatrician: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            name: string;
+                                            phone: string;
+                                        };
+                                        preferredName: string;
+                                        urgentMedications: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                    };
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
                                 };
                                 /** @enum {string} */
                                 status: "applied" | "duplicate";
@@ -376,6 +1260,79 @@ export interface paths {
                                     revision: number;
                                     /** @description Normalized UTC ISO 8601 timestamp */
                                     updatedAt: string;
+                                } | {
+                                    /** @enum {string} */
+                                    accessMode: "standard";
+                                    /** @description UUIDv7 identifier */
+                                    cardId: string;
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    content: {
+                                        allergies: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        bloodGroup: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        criticalNotes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        /** Format: date */
+                                        dateOfBirth: string;
+                                        guardianContacts: {
+                                            name: string;
+                                            phone: string;
+                                            relationship: string;
+                                        }[];
+                                        pediatrician: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            name: string;
+                                            phone: string;
+                                        };
+                                        preferredName: string;
+                                        urgentMedications: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                    };
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
                                 };
                                 /** @enum {string} */
                                 reason: "staleCriticalRevision";
@@ -483,7 +1440,7 @@ export interface paths {
                         appVersion: string;
                         /** @description UUIDv7 identifier */
                         deviceId: string;
-                        localSchemaVersion: 1 | 2;
+                        localSchemaVersion: 1 | 2 | 3;
                         /** @enum {string} */
                         platform: "android" | "ios";
                     };
@@ -503,7 +1460,7 @@ export interface paths {
                             enrollmentStatus: "active";
                             /** @description UUIDv7 identifier */
                             householdId: string;
-                            localSchemaVersion: 1 | 2;
+                            localSchemaVersion: 1 | 2 | 3;
                             replayed: boolean;
                         };
                     };
@@ -521,7 +1478,7 @@ export interface paths {
                             enrollmentStatus: "active";
                             /** @description UUIDv7 identifier */
                             householdId: string;
-                            localSchemaVersion: 1 | 2;
+                            localSchemaVersion: 1 | 2 | 3;
                             replayed: boolean;
                         };
                     };
@@ -1004,7 +1961,7 @@ export interface components {
             /** @description UUIDv7 identifier */
             actorId: string;
             /** @enum {string} */
-            action: "household_created" | "child_created" | "child_updated" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "staff_action_recorded";
+            action: "household_created" | "child_created" | "child_updated" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "emergency_card_created" | "emergency_card_updated" | "staff_action_recorded";
             targetType: string;
             /** @description UUIDv7 identifier */
             targetId: string;
@@ -1100,6 +2057,79 @@ export interface components {
                 revision: number;
                 /** @description Normalized UTC ISO 8601 timestamp */
                 updatedAt: string;
+            } | {
+                /** @enum {string} */
+                accessMode: "standard";
+                /** @description UUIDv7 identifier */
+                cardId: string;
+                /** @description UUIDv7 identifier */
+                childId: string;
+                content: {
+                    allergies: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    bloodGroup: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    criticalNotes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    /** Format: date */
+                    dateOfBirth: string;
+                    guardianContacts: {
+                        name: string;
+                        phone: string;
+                        relationship: string;
+                    }[];
+                    pediatrician: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        name: string;
+                        phone: string;
+                    };
+                    preferredName: string;
+                    urgentMedications: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                };
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
             };
             /** @enum {string} */
             status: "applied" | "duplicate";
@@ -1118,6 +2148,79 @@ export interface components {
                 revision: number;
                 /** @description Normalized UTC ISO 8601 timestamp */
                 updatedAt: string;
+            } | {
+                /** @enum {string} */
+                accessMode: "standard";
+                /** @description UUIDv7 identifier */
+                cardId: string;
+                /** @description UUIDv7 identifier */
+                childId: string;
+                content: {
+                    allergies: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    bloodGroup: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    criticalNotes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    /** Format: date */
+                    dateOfBirth: string;
+                    guardianContacts: {
+                        name: string;
+                        phone: string;
+                        relationship: string;
+                    }[];
+                    pediatrician: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        name: string;
+                        phone: string;
+                    };
+                    preferredName: string;
+                    urgentMedications: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                };
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
             };
             /** @enum {string} */
             reason: "staleCriticalRevision";
@@ -1169,6 +2272,104 @@ export interface components {
                 /** @description Mutable entity revision */
                 revision: number;
                 sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                entity: {
+                    /** @enum {string} */
+                    accessMode: "standard";
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        allergies: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        bloodGroup: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        criticalNotes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        /** Format: date */
+                        dateOfBirth: string;
+                        guardianContacts: {
+                            name: string;
+                            phone: string;
+                            relationship: string;
+                        }[];
+                        pediatrician: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            name: string;
+                            phone: string;
+                        };
+                        preferredName: string;
+                        urgentMedications: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                    };
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
+                };
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "emergencyCard";
+                /** @enum {string} */
+                operation: "upsert";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "emergencyCard";
+                /** @enum {string} */
+                operation: "delete";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
             })[];
             hasMore: boolean;
             /** @enum {string} */
@@ -1189,7 +2390,7 @@ export interface components {
             /** @description Opaque pagination or synchronization cursor */
             capturedCursor: string;
             hasMore: boolean;
-            items: {
+            items: ({
                 /** @description UUIDv7 identifier */
                 childId: string;
                 /** Format: date */
@@ -1199,14 +2400,87 @@ export interface components {
                 revision: number;
                 /** @description Normalized UTC ISO 8601 timestamp */
                 updatedAt: string;
-            }[];
+            } | {
+                /** @enum {string} */
+                accessMode: "standard";
+                /** @description UUIDv7 identifier */
+                cardId: string;
+                /** @description UUIDv7 identifier */
+                childId: string;
+                content: {
+                    allergies: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    bloodGroup: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    criticalNotes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    /** Format: date */
+                    dateOfBirth: string;
+                    guardianContacts: {
+                        name: string;
+                        phone: string;
+                        relationship: string;
+                    }[];
+                    pediatrician: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        name: string;
+                        phone: string;
+                    };
+                    preferredName: string;
+                    urgentMedications: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                };
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
+            })[];
             /** @description Opaque pagination or synchronization cursor */
             nextSnapshotCursor: string | null;
             /** @description Normalized UTC ISO 8601 timestamp */
             serverTime: string;
         };
         SyncMutationPushRequest: {
-            mutations: {
+            mutations: ({
                 /** @description Mutable entity revision */
                 baseRevision: number;
                 /** @description UUIDv7 identifier */
@@ -1225,7 +2499,87 @@ export interface components {
                     dateOfBirth: string;
                     preferredName: string;
                 };
-            }[];
+            } | {
+                /** @description Mutable entity revision */
+                baseRevision: number | null;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "emergencyCard";
+                /** @description UUIDv7 identifier */
+                idempotencyKey: string;
+                localDependencyIds: string[];
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                operation: "create" | "update";
+                payload: {
+                    /** @enum {string} */
+                    accessMode: "standard";
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        allergies: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        bloodGroup: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        criticalNotes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        /** Format: date */
+                        dateOfBirth: string;
+                        guardianContacts: {
+                            name: string;
+                            phone: string;
+                            relationship: string;
+                        }[];
+                        pediatrician: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            name: string;
+                            phone: string;
+                        };
+                        preferredName: string;
+                        urgentMedications: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                    };
+                };
+            })[];
         };
         SyncMutationPushResponse: {
             results: ({
@@ -1243,6 +2597,79 @@ export interface components {
                     revision: number;
                     /** @description Normalized UTC ISO 8601 timestamp */
                     updatedAt: string;
+                } | {
+                    /** @enum {string} */
+                    accessMode: "standard";
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        allergies: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        bloodGroup: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        criticalNotes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        /** Format: date */
+                        dateOfBirth: string;
+                        guardianContacts: {
+                            name: string;
+                            phone: string;
+                            relationship: string;
+                        }[];
+                        pediatrician: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            name: string;
+                            phone: string;
+                        };
+                        preferredName: string;
+                        urgentMedications: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                    };
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
                 };
                 /** @enum {string} */
                 status: "applied" | "duplicate";
@@ -1261,6 +2688,79 @@ export interface components {
                     revision: number;
                     /** @description Normalized UTC ISO 8601 timestamp */
                     updatedAt: string;
+                } | {
+                    /** @enum {string} */
+                    accessMode: "standard";
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        allergies: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        bloodGroup: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        criticalNotes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        /** Format: date */
+                        dateOfBirth: string;
+                        guardianContacts: {
+                            name: string;
+                            phone: string;
+                            relationship: string;
+                        }[];
+                        pediatrician: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            name: string;
+                            phone: string;
+                        };
+                        preferredName: string;
+                        urgentMedications: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                    };
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
                 };
                 /** @enum {string} */
                 reason: "staleCriticalRevision";
@@ -1316,7 +2816,7 @@ export interface components {
             appVersion: string;
             /** @description UUIDv7 identifier */
             deviceId: string;
-            localSchemaVersion: 1 | 2;
+            localSchemaVersion: 1 | 2 | 3;
             /** @enum {string} */
             platform: "android" | "ios";
         };
@@ -1327,8 +2827,150 @@ export interface components {
             enrollmentStatus: "active";
             /** @description UUIDv7 identifier */
             householdId: string;
-            localSchemaVersion: 1 | 2;
+            localSchemaVersion: 1 | 2 | 3;
             replayed: boolean;
+        };
+        EmergencyCardProjection: {
+            /** @enum {string} */
+            accessMode: "standard";
+            /** @description UUIDv7 identifier */
+            cardId: string;
+            /** @description UUIDv7 identifier */
+            childId: string;
+            content: {
+                allergies: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+                bloodGroup: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    value: string;
+                };
+                criticalNotes: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+                /** Format: date */
+                dateOfBirth: string;
+                guardianContacts: {
+                    name: string;
+                    phone: string;
+                    relationship: string;
+                }[];
+                pediatrician: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    name: string;
+                    phone: string;
+                };
+                preferredName: string;
+                urgentMedications: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+            };
+            /** @description Mutable entity revision */
+            revision: number;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            updatedAt: string;
+            /** @description Mutable entity revision */
+            version: number;
+        };
+        EmergencyCardPutRequest: {
+            /** @description Mutable entity revision */
+            baseRevision: number | null;
+            /** @description UUIDv7 identifier */
+            childId: string;
+            content: {
+                allergies: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+                bloodGroup: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    value: string;
+                };
+                criticalNotes: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+                /** Format: date */
+                dateOfBirth: string;
+                guardianContacts: {
+                    name: string;
+                    phone: string;
+                    relationship: string;
+                }[];
+                pediatrician: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    name: string;
+                    phone: string;
+                };
+                preferredName: string;
+                urgentMedications: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+            };
+            /** @description UUIDv7 identifier */
+            mutationId: string;
         };
     };
     responses: never;

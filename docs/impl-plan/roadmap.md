@@ -633,6 +633,15 @@ through the production-shaped architecture.
 
 #### `OFF-05` Emergency-card vertical slice
 
+> **Implementation status (22 July 2026): COMPLETE.** The accepted standard-
+> access slice now includes a dedicated encrypted aggregate, immutable versions,
+> shared synchronization, SQLCipher schema V3, accessible production routes,
+> 164 tests, Aiven PostgreSQL evidence, Android/iOS exports, and the bounded
+> Pixel 8 offline/dialer/conflict/wipe lifecycle. See the
+> [OFF-05 evidence dossier](./m2-offline-trust/off-05-implementation-evidence.md).
+> Locked quick access remains gated by `OD-03`; this completion does not close
+> Gate 2 or claim physical iOS/two-device evidence.
+
 - Implement profile fields with "not provided" versus "none confirmed" states.
 - Make the card reachable in no more than two deliberate post-unlock actions.
 - Render from SQLCipher with no network.
@@ -1434,7 +1443,10 @@ The recommended M1 implementation sequence is:
    required organization-owned access is available.
 10. `OFF-01` + `OFF-02` — plan authentication, household, consent, and audit.
 11. `OFF-03` + `OFF-04` — plan local security and synchronization.
-12. `OFF-05` — plan the emergency-card walking skeleton and Gate 2 scenarios.
+12. `OFF-05` — complete the emergency-card walking skeleton and its bounded
+    standard-access Gate 2 contribution.
+13. `OFF-06` — plan the onboarding activation shell and the remaining
+    both-platform Gate 2 scenarios.
 
 This section expresses dependency order, not current delivery state. Use the
 [Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) to select the next

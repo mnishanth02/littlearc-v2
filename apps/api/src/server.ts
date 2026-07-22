@@ -19,6 +19,7 @@ import {
   type DeviceEnrollmentRouteDependencies,
   registerDeviceEnrollmentRoute,
 } from "./device-enrollment-route.js";
+import { registerEmergencyCardRoutes } from "./emergency-card-route.js";
 import { nextId } from "./owner-onboarding.js";
 import {
   type OwnerOnboardingRouteDependencies,
@@ -102,6 +103,7 @@ export async function createApiServer(
   }
   if (sync) {
     registerSyncRoutes(server, sync);
+    registerEmergencyCardRoutes(server, sync);
   }
 
   server.get("/v1", async () => contractMetadata);

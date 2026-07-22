@@ -114,6 +114,29 @@ export const localMigrations: ReadonlyArray<LocalMigration> = [
         ON local_conflicts(entity_type, entity_id, created_at);
     `,
   },
+  {
+    version: 3,
+    sql: `
+      ALTER TABLE local_emergency_cards ADD COLUMN card_id TEXT;
+      ALTER TABLE local_emergency_cards ADD COLUMN child_id_snapshot TEXT;
+      ALTER TABLE local_emergency_cards ADD COLUMN version INTEGER NOT NULL DEFAULT 1;
+      ALTER TABLE local_emergency_cards ADD COLUMN access_mode TEXT NOT NULL DEFAULT 'standard';
+      ALTER TABLE local_emergency_cards ADD COLUMN server_payload_json TEXT;
+      ALTER TABLE local_emergency_cards ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'synced';
+      ALTER TABLE local_emergency_cards ADD COLUMN deleted_at TEXT;
+      CREATE UNIQUE INDEX local_emergency_cards_card_id_idx
+        ON local_emergency_cards(card_id);
+      CREATE TABLE local_snapshot_emergency_cards (
+        card_id TEXT PRIMARY KEY NOT NULL,
+        child_id TEXT NOT NULL,
+        revision INTEGER NOT NULL CHECK (revision > 0),
+        version INTEGER NOT NULL CHECK (version > 0),
+        access_mode TEXT NOT NULL CHECK (access_mode = 'standard'),
+        payload_json TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+    `,
+  },
 ] as const;
 
 export async function applyLocalMigrations(database: LocalMigrationDatabase): Promise<number> {

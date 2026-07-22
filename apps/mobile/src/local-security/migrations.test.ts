@@ -42,18 +42,19 @@ function fakeDatabase(options: { readonly failMigration?: boolean } = {}) {
 describe("OFF-03 local migrations", () => {
   it("applies the forward schema once and remains idempotent", async () => {
     const fake = fakeDatabase();
-    await expect(applyLocalMigrations(fake.database)).resolves.toBe(2);
-    await expect(applyLocalMigrations(fake.database)).resolves.toBe(2);
-    expect(fake.applied).toEqual(new Set([1, 2]));
+    await expect(applyLocalMigrations(fake.database)).resolves.toBe(3);
+    await expect(applyLocalMigrations(fake.database)).resolves.toBe(3);
+    expect(fake.applied).toEqual(new Set([1, 2, 3]));
     expect(
       fake.executed.filter((sql) => sql.includes("CREATE TABLE local_enrollment")),
     ).toHaveLength(1);
-    expect(localMigrations.map((migration) => migration.version)).toEqual([1, 2]);
+    expect(localMigrations.map((migration) => migration.version)).toEqual([1, 2, 3]);
     expect(localMigrations[0]?.sql).toContain("CREATE TABLE local_encrypted_files");
     expect(localMigrations[0]?.sql).not.toContain("database_key");
     expect(localMigrations[0]?.sql).not.toContain("file_key");
     expect(localMigrations[1]?.sql).toContain("CREATE TABLE local_conflicts");
     expect(localMigrations[1]?.sql).toContain("CREATE TABLE local_snapshot_children");
+    expect(localMigrations[2]?.sql).toContain("CREATE TABLE local_snapshot_emergency_cards");
   });
 
   it("does not record a failed migration", async () => {

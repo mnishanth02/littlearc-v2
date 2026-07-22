@@ -2,6 +2,10 @@ import { createHash } from "node:crypto";
 import { foundationMigration, foundationMigrationSql } from "./foundation.js";
 import { off01AuthMigration, off01AuthMigrationSql } from "./off-01-auth.js";
 import { off02HouseholdMigration, off02HouseholdMigrationSql } from "./off-02-household.js";
+import {
+  off05EmergencyCardMigration,
+  off05EmergencyCardMigrationSql,
+} from "./off-05-emergency-card.js";
 
 const checksumPlaceholder = "__CHECKSUM_SHA256__";
 
@@ -18,6 +22,7 @@ export function databaseMigrations(): ReadonlyArray<DatabaseMigration> {
     migrationWithChecksum(foundationMigration, foundationMigrationSql),
     migrationWithChecksum(off01AuthMigration, off01AuthMigrationSql),
     migrationWithChecksum(off02HouseholdMigration, off02HouseholdMigrationSql),
+    migrationWithChecksum(off05EmergencyCardMigration, off05EmergencyCardMigrationSql),
   ];
 }
 

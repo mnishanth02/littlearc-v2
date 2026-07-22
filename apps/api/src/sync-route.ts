@@ -65,15 +65,26 @@ export function registerSyncRoutes(
     const result = await executeSync(() =>
       dependencies.service.push({
         identityUserId,
-        mutations: body.data.mutations.map((mutation) => ({
-          ...mutation,
-          entityId: parseUuidV7(mutation.entityId, "entityId"),
-          idempotencyKey: parseUuidV7(mutation.idempotencyKey, "idempotencyKey"),
-          localDependencyIds: mutation.localDependencyIds.map((id) =>
-            parseUuidV7(id, "localDependencyId"),
-          ),
-          mutationId: parseUuidV7(mutation.mutationId, "mutationId"),
-        })),
+        mutations: body.data.mutations.map((mutation) => {
+          const common = {
+            entityId: parseUuidV7(mutation.entityId, "entityId"),
+            idempotencyKey: parseUuidV7(mutation.idempotencyKey, "idempotencyKey"),
+            localDependencyIds: mutation.localDependencyIds.map((id) =>
+              parseUuidV7(id, "localDependencyId"),
+            ),
+            mutationId: parseUuidV7(mutation.mutationId, "mutationId"),
+          };
+          return mutation.entityType === "emergencyCard"
+            ? {
+                ...mutation,
+                ...common,
+                payload: {
+                  ...mutation.payload,
+                  childId: parseUuidV7(mutation.payload.childId, "childId"),
+                },
+              }
+            : { ...mutation, ...common };
+        }),
       }),
     );
     return syncMutationPushResponseSchema.parse(result);

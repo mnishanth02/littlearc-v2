@@ -1,12 +1,13 @@
 import type {
-  ChildProfileSyncMutation,
   SyncCursorCodec,
   SyncMutationOutcome,
   SyncPersistence,
+  SyncPersistenceMutation,
 } from "@littlearc/database";
 import { parseCursor, type UuidV7 } from "@littlearc/domain";
 
 export type SyncService = {
+  readonly readEmergencyCard: SyncPersistence["readEmergencyCard"];
   readonly pull: (input: {
     readonly cursor?: string;
     readonly identityUserId: string;
@@ -27,7 +28,7 @@ export type SyncService = {
   >;
   readonly push: (input: {
     readonly identityUserId: string;
-    readonly mutations: ReadonlyArray<ChildProfileSyncMutation>;
+    readonly mutations: ReadonlyArray<SyncPersistenceMutation>;
   }) => Promise<{
     readonly results: ReadonlyArray<SyncMutationOutcome>;
     readonly serverTime: string;
@@ -50,6 +51,7 @@ export function createSyncService(options: {
   readonly persistence: SyncPersistence;
 }): SyncService {
   return {
+    readEmergencyCard: options.persistence.readEmergencyCard,
     async pull(input) {
       const serverTime = new Date().toISOString();
       if (!input.cursor) {
@@ -78,6 +80,7 @@ export function createSyncService(options: {
         ? options.cursorCodec.parseSnapshotCursor(parseCursor(input.cursor))
         : undefined;
       const page = await options.persistence.snapshot({
+        afterEntityType: parsed?.afterEntityType ?? null,
         afterId: (parsed?.afterId as UuidV7 | null | undefined) ?? null,
         capturedSequence: parsed?.sequence ?? null,
         identityUserId: input.identityUserId,
@@ -90,6 +93,7 @@ export function createSyncService(options: {
         nextSnapshotCursor: page.hasMore
           ? options.cursorCodec.createSnapshotCursor({
               afterId: page.nextAfterId,
+              afterEntityType: page.nextAfterEntityType,
               sequence: page.capturedSequence,
             })
           : null,

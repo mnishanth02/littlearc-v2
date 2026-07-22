@@ -12,6 +12,8 @@ import {
   children,
   consentEvents,
   devices,
+  emergencyCards,
+  emergencyCardVersions,
   householdKeys,
   householdMemberships,
   households,
@@ -94,6 +96,26 @@ describe("database schema", () => {
     );
     expect(getTableConfig(consentEvents).foreignKeys.map((key) => key.getName())).toEqual(
       expect.arrayContaining(["consent_events_actor_fk", "consent_events_child_fk"]),
+    );
+  });
+
+  it("models the OFF-05 dedicated emergency aggregate and immutable versions", () => {
+    expect([emergencyCards, emergencyCardVersions].map(getTableName)).toEqual([
+      "emergency_cards",
+      "emergency_card_versions",
+    ]);
+    expect(getTableConfig(emergencyCards).foreignKeys.map((key) => key.getName())).toEqual(
+      expect.arrayContaining([
+        "emergency_cards_child_fk",
+        "emergency_cards_created_by_fk",
+        "emergency_cards_updated_by_fk",
+      ]),
+    );
+    expect(getTableConfig(emergencyCardVersions).foreignKeys.map((key) => key.getName())).toEqual(
+      expect.arrayContaining([
+        "emergency_card_versions_card_fk",
+        "emergency_card_versions_confirmed_by_fk",
+      ]),
     );
   });
 });

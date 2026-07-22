@@ -5,12 +5,26 @@ import {
   type LocalSyncDatabase,
   listReadyMutations,
   queueChildProfileUpdate,
+  queueEmergencyCardUpdate,
 } from "./repository";
 
 const childId = "019f742b-de82-7292-86cd-5475a1388313";
 const mutationId = "019f742b-de82-7292-86cd-5475a1388314";
 const dependencyId = "019f742b-de82-7292-86cd-5475a1388315";
 const idempotencyKey = "019f742b-de82-7292-86cd-5475a1388316";
+const cardId = "019f742b-de82-7292-86cd-5475a1388317";
+const emergencyContent = {
+  allergies: { state: "noneConfirmed" as const },
+  bloodGroup: { state: "confirmed" as const, value: "O+" },
+  criticalNotes: { state: "notProvided" as const },
+  dateOfBirth: "2020-01-01",
+  guardianContacts: [
+    { name: "Synthetic Guardian", phone: "+919999999999", relationship: "Parent" },
+  ],
+  pediatrician: { state: "notProvided" as const },
+  preferredName: "Synthetic Child",
+  urgentMedications: { state: "noneConfirmed" as const },
+};
 
 function scriptedDatabase(input: {
   readonly all?: ReadonlyArray<unknown>;
@@ -194,5 +208,80 @@ describe("OFF-04 local repository", () => {
         String(call[0]).includes("delete from local_children"),
       ),
     ).toBe(false);
+  });
+});
+
+describe("OFF-05 local emergency-card repository", () => {
+  it("commits a new card and create mutation together", async () => {
+    const scripted = scriptedDatabase({ first: [null] });
+    await queueEmergencyCardUpdate(scripted.database, {
+      cardId,
+      childId,
+      content: emergencyContent,
+      idempotencyKey,
+      localDependencyIds: [],
+      mutationId,
+      now: "2026-07-22T12:00:00.000Z",
+    });
+
+    expect(scripted.runAsync).toHaveBeenCalledTimes(2);
+    expect(scripted.runAsync.mock.calls[0]).toEqual(
+      expect.arrayContaining([mutationId, cardId, "create", null]),
+    );
+    expect(String(scripted.runAsync.mock.calls[1]?.[0])).toContain("local_emergency_cards");
+  });
+
+  it("preserves local and authoritative emergency-card versions on conflict", async () => {
+    const localPayload = JSON.stringify({
+      accessMode: "standard",
+      childId,
+      content: emergencyContent,
+    });
+    const scripted = scriptedDatabase({
+      first: [
+        {
+          attempts: 1,
+          baseRevision: 1,
+          dependencyIdsJson: "[]",
+          entityId: cardId,
+          entityType: "emergencyCard",
+          idempotencyKey,
+          mutationId,
+          nextAttemptAt: null,
+          operation: "update",
+          payloadJson: localPayload,
+          status: "pushing",
+        },
+      ],
+    });
+
+    await applyMutationResults(
+      scripted.database,
+      [
+        {
+          current: {
+            accessMode: "standard",
+            cardId,
+            childId,
+            content: {
+              ...emergencyContent,
+              criticalNotes: { state: "confirmed", values: ["Synthetic remote note"] },
+            },
+            revision: 2,
+            updatedAt: "2026-07-22T12:01:00.000Z",
+            version: 2,
+          },
+          entityId: cardId,
+          mutationId,
+          reason: "staleCriticalRevision",
+          status: "conflict",
+        },
+      ],
+      "2026-07-22T12:02:00.000Z",
+    );
+
+    expect(JSON.stringify(scripted.runAsync.mock.calls)).toContain("local_emergency_cards");
+    expect(JSON.stringify(scripted.runAsync.mock.calls)).toContain("Synthetic remote note");
+    expect(scripted.runAsync.mock.calls.some((call) => call.includes(localPayload))).toBe(true);
   });
 });

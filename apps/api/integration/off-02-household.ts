@@ -8,7 +8,7 @@ import {
   createSyncCursorCodec,
   createSyncPersistence,
 } from "@littlearc/database";
-import type { UuidV7 } from "@littlearc/domain";
+import type { EmergencyCardContent, UuidV7 } from "@littlearc/domain";
 import { Client } from "pg";
 import { loadApiConfig } from "../src/config.js";
 import { createDeviceEnrollmentCommand } from "../src/device-enrollment.js";
@@ -27,10 +27,12 @@ const migrationPaths = [
   "../../../packages/database/migrations/0001_fnd_05_database_foundation.sql",
   "../../../packages/database/migrations/0002_off_01_consumer_auth.sql",
   "../../../packages/database/migrations/0003_off_02_household_consent_audit.sql",
+  "../../../packages/database/migrations/0004_off_05_emergency_card.sql",
 ].map((path) => fileURLToPath(new URL(path, import.meta.url)));
 const deviceMode = process.argv.includes("--device");
 const off03DeviceMode = process.argv.includes("--device-off03");
 const off04DeviceMode = process.argv.includes("--device-off04");
+const off05DeviceMode = process.argv.includes("--device-off05");
 const syntheticRequest: OwnerOnboardingRequest = {
   adultVerificationAssertion: "synthetic-approved-off-02",
   child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
@@ -39,6 +41,23 @@ const syntheticRequest: OwnerOnboardingRequest = {
   parent: { displayName: "Synthetic Parent", relationship: "parent" },
   parentNoticeVersion: "parent-notice-v1",
   timeZone: "Asia/Kolkata",
+};
+
+const syntheticEmergencyContent: EmergencyCardContent = {
+  allergies: { state: "noneConfirmed" },
+  bloodGroup: { state: "confirmed", value: "O+" },
+  criticalNotes: { state: "confirmed", values: ["Synthetic critical note"] },
+  dateOfBirth: "2020-01-01",
+  guardianContacts: [
+    { name: "Synthetic Guardian", phone: "+919999999999", relationship: "Parent" },
+  ],
+  pediatrician: {
+    name: "Synthetic Pediatrician",
+    phone: "+918888888888",
+    state: "confirmed",
+  },
+  preferredName: "Synthetic Child",
+  urgentMedications: { state: "noneConfirmed" },
 };
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -349,6 +368,172 @@ async function runAutomated(
     firstUser,
     secondUser,
   });
+  await runEmergencyCardAutomated(syncService, client, {
+    firstChildId: first.childId,
+    firstHouseholdId: first.householdId,
+    firstUser,
+    secondUser,
+  });
+}
+
+async function runEmergencyCardAutomated(
+  syncService: SyncService,
+  client: Client,
+  input: {
+    readonly firstChildId: UuidV7;
+    readonly firstHouseholdId: UuidV7;
+    readonly firstUser: string;
+    readonly secondUser: string;
+  },
+): Promise<void> {
+  const cardId = nextId();
+  const createMutation = {
+    baseRevision: null,
+    entityId: cardId,
+    entityType: "emergencyCard" as const,
+    idempotencyKey: nextId(),
+    localDependencyIds: [],
+    mutationId: nextId(),
+    operation: "create" as const,
+    payload: {
+      accessMode: "standard" as const,
+      childId: input.firstChildId,
+      content: syntheticEmergencyContent,
+    },
+  };
+  const created = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [createMutation],
+  });
+  assert(created.results[0]?.status === "applied", "Emergency-card create did not apply.");
+  const replay = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [createMutation],
+  });
+  assert(replay.results[0]?.status === "duplicate", "Emergency-card replay was not duplicate.");
+  const mismatch = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [
+      {
+        ...createMutation,
+        payload: {
+          ...createMutation.payload,
+          content: {
+            ...syntheticEmergencyContent,
+            bloodGroup: { state: "notProvided" as const },
+          },
+        },
+      },
+    ],
+  });
+  assert(
+    mismatch.results[0]?.status === "rejected" &&
+      mismatch.results[0].reason === "idempotencyMismatch",
+    "Changed emergency-card replay did not fail closed.",
+  );
+
+  const updateMutation = {
+    ...createMutation,
+    baseRevision: 1,
+    idempotencyKey: nextId(),
+    mutationId: nextId(),
+    operation: "update" as const,
+    payload: {
+      ...createMutation.payload,
+      content: {
+        ...syntheticEmergencyContent,
+        criticalNotes: { state: "confirmed" as const, values: ["Synthetic updated note"] },
+      },
+    },
+  };
+  const updated = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [updateMutation],
+  });
+  assert(updated.results[0]?.status === "applied", "Emergency-card update did not apply.");
+  const stale = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [
+      {
+        ...updateMutation,
+        idempotencyKey: nextId(),
+        mutationId: nextId(),
+      },
+    ],
+  });
+  assert(stale.results[0]?.status === "conflict", "Stale emergency-card edit did not conflict.");
+
+  const card = await syncService.readEmergencyCard({ cardId, identityUserId: input.firstUser });
+  assert(card?.revision === 2 && card.version === 2, "Current emergency-card version is invalid.");
+  const crossHousehold = await syncService.readEmergencyCard({
+    cardId,
+    identityUserId: input.secondUser,
+  });
+  assert(crossHousehold === null, "Cross-household emergency card was visible.");
+
+  const rows = await client.query<{
+    readonly audit: string;
+    readonly changes: string;
+    readonly outbox: string;
+    readonly versions: string;
+  }>(
+    `select
+      (select count(*)::text from littlearc.emergency_card_versions
+        where emergency_card_id = $1) versions,
+      (select count(*)::text from littlearc.audit_events
+        where target_id = $1 and result = 'success') audit,
+      (select count(*)::text from littlearc.change_events
+        where entity_id = $1 and entity_type = 'emergencyCard') changes,
+      (select count(*)::text from littlearc.outbox_events
+        where aggregate_id = $1 and aggregate_type = 'emergency_card') outbox`,
+    [cardId],
+  );
+  assert(
+    rows.rows[0]?.versions === "2" &&
+      rows.rows[0].audit === "2" &&
+      rows.rows[0].changes === "2" &&
+      rows.rows[0].outbox === "2",
+    "Emergency-card immutable history evidence is incomplete.",
+  );
+  let immutableCode: string | undefined;
+  try {
+    await client.query(
+      "update littlearc.emergency_card_versions set source_revision = 9 where emergency_card_id = $1",
+      [cardId],
+    );
+  } catch (error) {
+    immutableCode =
+      error && typeof error === "object" && "code" in error ? String(error.code) : undefined;
+  }
+  assert(immutableCode === "42501", "Emergency-card immutable history accepted an update.");
+
+  const persisted = JSON.stringify(
+    (
+      await client.query(
+        `select encrypted_payload, audit_events.metadata, change_events.payload, outbox_events.payload
+         from littlearc.emergency_card_versions
+         join littlearc.audit_events on audit_events.target_id = emergency_card_versions.emergency_card_id
+         join littlearc.change_events on change_events.entity_id = emergency_card_versions.emergency_card_id
+         join littlearc.outbox_events on outbox_events.aggregate_id = emergency_card_versions.emergency_card_id
+         where emergency_card_versions.emergency_card_id = $1`,
+        [cardId],
+      )
+    ).rows,
+  );
+  for (const canary of [
+    "Synthetic critical note",
+    "Synthetic updated note",
+    "Synthetic Guardian",
+    "+919999999999",
+  ]) {
+    assert(!persisted.includes(canary), "Emergency-card plaintext reached PostgreSQL evidence.");
+  }
+  console.log("OFF-05 PostgreSQL emergency-card validation passed.");
+  console.log(
+    "- Encrypted create, immutable version update, exact replay, and stale conflict passed.",
+  );
+  console.log("- Cross-household isolation, minimized evidence, and plaintext canaries passed.");
+  console.log(`- Emergency-card household: ${input.firstHouseholdId}.`);
 }
 
 async function runSyncAutomated(
@@ -661,6 +846,7 @@ async function serveOff04Device(
   const getSessionIdentity = async (headers: Headers) =>
     headers.get("x-littlearc-synthetic-session") === "off04-pixel8" ? { userId } : null;
   const validatingSyncService: SyncService = {
+    readEmergencyCard: syncService.readEmergencyCard,
     async pull(input) {
       try {
         return await syncService.pull(input);
@@ -832,6 +1018,101 @@ async function serveOff04Device(
   return async () => server.close();
 }
 
+async function serveOff05Device(
+  onboardingCommand: OwnerOnboardingCommand,
+  deviceCommand: DeviceEnrollmentCommand,
+  syncService: SyncService,
+  client: Client,
+): Promise<() => Promise<void>> {
+  const userId = "synthetic-off05-pixel8";
+  await insertAuthUser(client, userId, "synthetic.off05.pixel8@example.test");
+  const onboarding = await execute(onboardingCommand, userId);
+  const cardId = nextId();
+  const getSessionIdentity = async (headers: Headers) =>
+    headers.get("x-littlearc-synthetic-session") === "off05-pixel8" ? { userId } : null;
+  const server = await createApiServer(
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    undefined,
+    undefined,
+    undefined,
+    { command: deviceCommand, getSessionIdentity },
+    { getSessionIdentity, service: syncService },
+  );
+
+  server.get("/v1/validation/off05/bootstrap", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    return {
+      cardId,
+      childId: onboarding.childId,
+      householdId: onboarding.householdId,
+    };
+  });
+  server.post("/v1/validation/off05/remote-edit", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const result = await syncService.push({
+      identityUserId: userId,
+      mutations: [
+        {
+          baseRevision: 1,
+          entityId: cardId,
+          entityType: "emergencyCard",
+          idempotencyKey: nextId(),
+          localDependencyIds: [],
+          mutationId: nextId(),
+          operation: "update",
+          payload: {
+            accessMode: "standard",
+            childId: onboarding.childId,
+            content: {
+              ...syntheticEmergencyContent,
+              criticalNotes: {
+                state: "confirmed",
+                values: ["Synthetic remote critical note"],
+              },
+            },
+          },
+        },
+      ],
+    });
+    assert(result.results[0]?.status === "applied", "OFF-05 remote edit did not apply.");
+    console.log("OFF-05 simulated remote writer applied emergency-card revision 2.");
+    return result;
+  });
+  server.get("/v1/validation/off05/evidence", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const result = await client.query<{
+      readonly audit: string;
+      readonly changes: string;
+      readonly outbox: string;
+      readonly revision: number;
+      readonly versions: string;
+    }>(
+      `select
+        (select count(*)::text from littlearc.emergency_card_versions
+          where emergency_card_id = $1) versions,
+        (select count(*)::text from littlearc.audit_events
+          where target_id = $1 and result = 'success') audit,
+        (select count(*)::text from littlearc.change_events
+          where entity_id = $1 and entity_type = 'emergencyCard') changes,
+        (select count(*)::text from littlearc.outbox_events
+          where aggregate_id = $1 and aggregate_type = 'emergency_card') outbox,
+        (select revision from littlearc.emergency_cards where id = $1) revision`,
+      [cardId],
+    );
+    return result.rows[0];
+  });
+
+  await server.listen({ host: "127.0.0.1", port: 3000 });
+  console.log("OFF-05 synthetic device API listening on 127.0.0.1:3000.");
+  return async () => server.close();
+}
+
 async function run(): Promise<void> {
   const sourceUrl = process.env.DATABASE_URL;
   assert(sourceUrl, "DATABASE_URL must be loaded from the untracked .env.aiven file.");
@@ -885,7 +1166,13 @@ async function run(): Promise<void> {
       persistence: createSyncPersistence({ crypto, database: connection.database }),
     });
 
-    if (off04DeviceMode) {
+    if (off05DeviceMode) {
+      closeServer = await serveOff05Device(command, deviceCommand, syncService, databaseClient);
+      await new Promise<void>((resolve) => {
+        process.once("SIGINT", resolve);
+        process.once("SIGTERM", resolve);
+      });
+    } else if (off04DeviceMode) {
       closeServer = await serveOff04Device(command, deviceCommand, syncService, databaseClient);
       await new Promise<void>((resolve) => {
         process.once("SIGINT", resolve);

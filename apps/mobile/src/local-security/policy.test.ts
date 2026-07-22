@@ -32,10 +32,10 @@ describe("OFF-03 local security policy", () => {
           deviceId: uuidV7,
           generationId: uuidV7,
           householdId: uuidV7,
-          localSchemaVersion: 2,
+          localSchemaVersion: 3,
         }),
       ),
-    ).toMatchObject({ localSchemaVersion: 2 });
+    ).toMatchObject({ localSchemaVersion: 3 });
     expect(() =>
       parseLocalEnrollmentMarker(
         JSON.stringify({

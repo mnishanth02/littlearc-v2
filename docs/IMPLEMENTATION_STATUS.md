@@ -68,11 +68,12 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | `FND-07` Observability and privacy guards | `COMPLETE` | Engineering | Safe logger, allowlisted analytics/flags, Sentry scrubbing, kill switches, and leakage canaries accepted; see [evidence](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) |
 | `FND-08` Design-system prototype reconciliation | `COMPLETE` | Engineering | Semantic tokens, three themes, accessible primitives, dev gallery, enforcement, exports, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
 | `FND-09` ADR and engineering documentation baseline | `COMPLETE` | Engineering | Eight foundation ADRs, six engineering notes, structural enforcement, context lookup, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
-| M2. Offline trust slice | `IN PROGRESS` | Engineering | `OFF-01` through `OFF-04` are complete; prepare and review the standalone `OFF-05` emergency-card vertical-slice plan without crossing the real-provider or real-data gates |
+| M2. Offline trust slice | `IN PROGRESS` | Engineering | `OFF-01` through `OFF-05` are complete; plan `OFF-06` next while Gate 2 remains open for both-platform onboarding, two-device conflict, and the other named criteria |
 | `OFF-01` Consumer authentication and session lifecycle | `COMPLETE` | Engineering | Better Auth policy, reviewed schema/migration, API/SecureStore boundaries, 111-test root suite, Aiven PostgreSQL lifecycle, and bounded Pixel 8 SecureStore/deep-link evidence accepted; see [evidence](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) |
 | `OFF-02` Household, parent, child, consent, and audit | `COMPLETE` | Engineering | Encryption, atomic onboarding, RLS, append-only evidence, 126 tests, Aiven PostgreSQL, builds, validation, clean-checkout, and bounded Pixel 8 UI/HTTP/database proof accepted; see [evidence](./impl-plan/m2-offline-trust/off-02-implementation-evidence.md) |
 | `OFF-03` Local security and enrollment | `COMPLETE` | Engineering | Authority-neutral enrollment, device-bound key custody, SQLCipher and authenticated files, invalidation recovery, verified wipe, 138 tests, Aiven PostgreSQL, and bounded Pixel 8 native lifecycle accepted; see [evidence](./impl-plan/m2-offline-trust/off-03-implementation-evidence.md) |
 | `OFF-04` Repository and synchronization engine | `COMPLETE` | Engineering | Signed cursors, reset-safe SQLCipher repositories, ordered mutations, critical conflicts, 151 tests, Aiven PostgreSQL, repository gates, and the bounded Pixel 8 lifecycle passed; see [evidence](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) |
+| `OFF-05` Emergency-card vertical slice | `COMPLETE` | Engineering | Dedicated encrypted aggregate, immutable versions, shared sync, SQLCipher V3, accessible standard-access UI, 164 tests, Aiven PostgreSQL, repository gates, and the bounded Pixel 8 lifecycle passed; see [evidence](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) |
 | M3 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
@@ -99,6 +100,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 22 Jul 2026 | [`OFF-02` household, parent, child, consent, and audit](./impl-plan/m2-offline-trust/off-02-implementation-evidence.md) | `COMPLETE` | AES-GCM envelope encryption, explicit country and owner/caregiver policy, atomic idempotent onboarding, same-household RLS/FKs, append-only consent/audit, 126 tests, Aiven PostgreSQL, builds, validation, clean-checkout, and bounded Pixel 8 UI/HTTP/database evidence passed |
 | 22 Jul 2026 | [`OFF-03` local security and enrollment](./impl-plan/m2-offline-trust/off-03-implementation-evidence.md) | `COMPLETE` | Session-derived authority-neutral enrollment, protected random keys, keyed SQLCipher schema V1, independent AES-GCM files, invalidation recovery, sign-out wipe, 138 tests, Aiven PostgreSQL, repository gates, and bounded Pixel 8 native lifecycle passed |
 | 22 Jul 2026 | [`OFF-04` repository and synchronization engine](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) | `COMPLETE` | Signed cursors, authenticated pull/snapshot/push, atomic encrypted PostgreSQL updates, SQLCipher schema V2 repositories, ordered mutations, critical conflicts, tombstones, reset-safe reconciliation, 151 tests, and the bounded Pixel 8 lifecycle passed |
+| 22 Jul 2026 | [`OFF-05` emergency-card vertical slice](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) | `COMPLETE` | Dedicated encrypted aggregate, immutable versions, explicit clinical states, shared synchronization, SQLCipher schema V3, standard post-unlock UI, 164 tests, Aiven integration, Android/iOS exports, accessibility, and the bounded Pixel 8 offline/dialer/conflict/wipe lifecycle passed |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -112,14 +114,13 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 
 ## 6. In-Progress Register
 
-No work package is currently in progress. Start the next package only after its
-standalone plan is reviewed and accepted.
+No work package is currently in progress.
 
 ## 7. Ready Queue
 
-| Item | Tag | Owner | Immediate next action |
+| Item | Tag | Owner | Readiness |
 | --- | --- | --- | --- |
-| `OFF-05` Emergency-card vertical slice | `READY` | Engineering | Draft and review a standalone plan that consumes the accepted OFF-04 repository/sync boundary and defines the remaining Gate 2 evidence. |
+| `OFF-06` Onboarding activation shell | `READY` | Engineering | `OFF-05` is complete; create and review a standalone plan for the value/privacy promise, account/consent/child/emergency setup composition, synthetic first-record continuation, allowed funnel milestones, and remaining Gate 2 evidence. |
 
 The complete dependency order remains in Section 25 of the implementation
 roadmap. This section should show only the next few actionable packages.
@@ -168,6 +169,7 @@ roadmap. This section should show only the next few actionable packages.
 | [`OFF-02` Household, parent, child, consent, and audit](./impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-02-implementation-evidence.md) |
 | [`OFF-03` Local security and enrollment](./impl-plan/m2-offline-trust/off-03-local-security-and-enrollment-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-03-implementation-evidence.md) |
 | [`OFF-04` Repository and synchronization engine](./impl-plan/m2-offline-trust/off-04-repository-and-synchronization-engine-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) |
+| [`OFF-05` Emergency-card vertical slice](./impl-plan/m2-offline-trust/off-05-emergency-card-vertical-slice-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) |
 
 ## 11. Agent Workflow
 
@@ -197,7 +199,7 @@ For every status change:
 7. Keep the matching implementation plan's status header and module-status
    table in sync with this dashboard.
 
-The next status change should move OFF-05 to `IN PROGRESS` only after its
-standalone emergency-card plan is reviewed and accepted. The real-provider,
-real-data, physical-iOS, two-device, and broader pre-pilot gates remain
-unchanged.
+`OFF-06` planning is ready. M2 and Gate 2 remain open until the onboarding
+activation shell, both-platform flow, two-device conflict, and every other
+named gate criterion have passing evidence. The quick-access, real-provider,
+real-data, physical-iOS, and broader pre-pilot gates remain unchanged.

@@ -96,6 +96,8 @@ domains:
       - repository
       - synchronization
       - offline mutation
+      - emergency card
+      - off-05
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/core/mobile-application-flow.md
@@ -104,8 +106,11 @@ domains:
       - docs/core/m0-readiness-and-evidence.md
       - docs/impl-plan/roadmap.md
       - docs/adr/0012-server-authoritative-synchronization-and-conflict-boundary.md
+      - docs/adr/0013-emergency-card-aggregate-and-standard-access-boundary.md
       - docs/impl-plan/m2-offline-trust/off-04-repository-and-synchronization-engine-plan.md
       - docs/impl-plan/m2-offline-trust/off-04-implementation-evidence.md
+      - docs/impl-plan/m2-offline-trust/off-05-emergency-card-vertical-slice-plan.md
+      - docs/impl-plan/m2-offline-trust/off-05-implementation-evidence.md
     code:
       - apps/mobile/**
       - packages/design-tokens/**
@@ -125,6 +130,8 @@ domains:
       - synchronization
       - cursor
       - mutation push
+      - emergency card
+      - off-05
       - application
       - skeleton
       - fnd-03
@@ -135,8 +142,11 @@ domains:
       - docs/reference/environment-variable-catalog.md
       - docs/impl-plan/roadmap.md
       - docs/adr/0012-server-authoritative-synchronization-and-conflict-boundary.md
+      - docs/adr/0013-emergency-card-aggregate-and-standard-access-boundary.md
       - docs/impl-plan/m2-offline-trust/off-04-repository-and-synchronization-engine-plan.md
       - docs/impl-plan/m2-offline-trust/off-04-implementation-evidence.md
+      - docs/impl-plan/m2-offline-trust/off-05-emergency-card-vertical-slice-plan.md
+      - docs/impl-plan/m2-offline-trust/off-05-implementation-evidence.md
     code:
       - apps/api/**
       - packages/contracts/**
@@ -259,10 +269,13 @@ domains:
       - docs/reference/environment-variable-catalog.md
       - docs/adr/0010-household-membership-encryption-and-consent-boundary.md
       - docs/adr/0012-server-authoritative-synchronization-and-conflict-boundary.md
+      - docs/adr/0013-emergency-card-aggregate-and-standard-access-boundary.md
       - docs/impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md
       - docs/impl-plan/m2-offline-trust/off-02-implementation-evidence.md
       - docs/impl-plan/m2-offline-trust/off-04-repository-and-synchronization-engine-plan.md
       - docs/impl-plan/m2-offline-trust/off-04-implementation-evidence.md
+      - docs/impl-plan/m2-offline-trust/off-05-emergency-card-vertical-slice-plan.md
+      - docs/impl-plan/m2-offline-trust/off-05-implementation-evidence.md
     code:
       - packages/database/**
       - packages/crypto/**
@@ -276,6 +289,7 @@ domains:
       - pnpm test:contract
       - pnpm test:database:household
       - pnpm test:database:sync
+      - pnpm test:database:emergency-card
       - pnpm typecheck
 
   design-system:

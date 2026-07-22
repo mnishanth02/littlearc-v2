@@ -18,6 +18,11 @@ if (!household) {
   throw new Error("Expected the OFF-02 household migration to be registered.");
 }
 const generatedHouseholdSql = readFileSync(join("migrations", household.filename), "utf8");
+const emergencyCard = databaseMigrations()[3];
+if (!emergencyCard) {
+  throw new Error("Expected the OFF-05 emergency-card migration to be registered.");
+}
+const generatedEmergencyCardSql = readFileSync(join("migrations", emergencyCard.filename), "utf8");
 
 describe("database migration foundation", () => {
   it("keeps the generated migration artifact in sync with the reviewed source", () => {
@@ -135,5 +140,27 @@ describe("OFF-02 household migration", () => {
     expect(household.sql).toContain(
       "revoke all on littlearc.household_keys from littlearc_worker, littlearc_ops_readonly",
     );
+  });
+});
+
+describe("OFF-05 emergency-card migration", () => {
+  it("keeps the reviewed source and generated artifact synchronized", () => {
+    expect(generatedEmergencyCardSql).toBe(`${emergencyCard.sql}\n`);
+  });
+
+  it("enforces dedicated encrypted immutable version history under RLS", () => {
+    expect(emergencyCard.sql).toContain("create table littlearc.emergency_cards");
+    expect(emergencyCard.sql).toContain("create table littlearc.emergency_card_versions");
+    expect(emergencyCard.sql).toContain("emergency_cards_one_active_child_idx");
+    expect(emergencyCard.sql).toContain("emergency_cards_current_version_fk");
+    expect(emergencyCard.sql).toContain("emergency_card_versions_envelope_check");
+    expect(emergencyCard.sql).toContain("emergency_card_versions_immutable");
+    expect(emergencyCard.sql).toContain(
+      "alter table littlearc.emergency_card_versions force row level security",
+    );
+    expect(emergencyCard.sql).toContain(
+      "revoke update, delete on littlearc.emergency_card_versions",
+    );
+    expect(emergencyCard.sql).toContain("revoke all on littlearc.emergency_card_versions");
   });
 });

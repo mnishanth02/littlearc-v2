@@ -56,6 +56,7 @@ export default {
       ],
       "expo-local-authentication",
       "expo-notifications",
+      "expo-web-browser",
       [
         "react-native-document-scanner-plugin",
         {

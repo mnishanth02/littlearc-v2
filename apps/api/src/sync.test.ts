@@ -7,6 +7,9 @@ const childId = parseUuidV7("019f742b-de82-7292-86cd-5475a1388313");
 
 function persistence(overrides: Partial<SyncPersistence> = {}): SyncPersistence {
   return {
+    async readEmergencyCard() {
+      return null;
+    },
     async pull() {
       return {
         changes: [],
@@ -32,6 +35,7 @@ function persistence(overrides: Partial<SyncPersistence> = {}): SyncPersistence 
             updatedAt: "2026-07-22T12:00:00.000Z",
           },
         ],
+        nextAfterEntityType: null,
         nextAfterId: null,
       };
     },

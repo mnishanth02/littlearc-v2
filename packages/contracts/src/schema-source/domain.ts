@@ -3,6 +3,7 @@ import {
   confirmationStates,
   consentPurposes,
   consentStates,
+  emergencyCardAccessModes,
   recordCategories,
   recordSourceTypes,
 } from "@littlearc/domain";
@@ -87,7 +88,7 @@ export const deviceEnrollmentRequestSchema = z.object({
     .trim()
     .regex(/^[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$/),
   deviceId: uuidV7Schema,
-  localSchemaVersion: z.union([z.literal(1), z.literal(2)]),
+  localSchemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   platform: z.enum(["android", "ios"]),
 });
 
@@ -95,7 +96,7 @@ export const deviceEnrollmentResponseSchema = z.object({
   deviceId: uuidV7Schema,
   enrollmentStatus: z.literal("active"),
   householdId: uuidV7Schema,
-  localSchemaVersion: z.union([z.literal(1), z.literal(2)]),
+  localSchemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   replayed: z.boolean(),
 });
 
@@ -162,7 +163,56 @@ export const childProfileProjectionSchema = z.object({
   updatedAt: utcTimestampSchema,
 });
 
-export const syncChangeSchema = z.discriminatedUnion("operation", [
+export const emergencyCardContactSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  phone: z.string().regex(/^\+[1-9]\d{7,14}$/),
+  relationship: z.string().trim().min(1).max(80),
+});
+
+export const emergencyCardScalarSchema = z.discriminatedUnion("state", [
+  z.object({ state: z.literal("notProvided") }),
+  z.object({ state: z.literal("confirmed"), value: z.string().trim().min(1).max(16) }),
+]);
+
+export const emergencyCardListSchema = (maximumItemLength: number) =>
+  z.discriminatedUnion("state", [
+    z.object({ state: z.literal("notProvided") }),
+    z.object({ state: z.literal("noneConfirmed") }),
+    z.object({
+      state: z.literal("confirmed"),
+      values: z.array(z.string().trim().min(1).max(maximumItemLength)).min(1).max(20),
+    }),
+  ]);
+
+export const emergencyCardContentSchema = z.object({
+  allergies: emergencyCardListSchema(160),
+  bloodGroup: emergencyCardScalarSchema,
+  criticalNotes: emergencyCardListSchema(500),
+  dateOfBirth: z.string().date(),
+  guardianContacts: z.array(emergencyCardContactSchema).min(1).max(5),
+  pediatrician: z.discriminatedUnion("state", [
+    z.object({ state: z.literal("notProvided") }),
+    z.object({
+      state: z.literal("confirmed"),
+      name: z.string().trim().min(1).max(120),
+      phone: z.string().regex(/^\+[1-9]\d{7,14}$/),
+    }),
+  ]),
+  preferredName: z.string().trim().min(1).max(120),
+  urgentMedications: emergencyCardListSchema(160),
+});
+
+export const emergencyCardProjectionSchema = z.object({
+  accessMode: z.enum(emergencyCardAccessModes),
+  cardId: uuidV7Schema,
+  childId: uuidV7Schema,
+  content: emergencyCardContentSchema,
+  revision: revisionSchema,
+  updatedAt: utcTimestampSchema,
+  version: revisionSchema,
+});
+
+export const syncChangeSchema = z.union([
   z.object({
     changedAt: utcTimestampSchema,
     entity: childProfileProjectionSchema,
@@ -176,6 +226,23 @@ export const syncChangeSchema = z.discriminatedUnion("operation", [
     changedAt: utcTimestampSchema,
     entityId: uuidV7Schema,
     entityType: z.literal("child"),
+    operation: z.literal("delete"),
+    revision: revisionSchema,
+    sequence: z.number().int().positive(),
+  }),
+  z.object({
+    changedAt: utcTimestampSchema,
+    entity: emergencyCardProjectionSchema,
+    entityId: uuidV7Schema,
+    entityType: z.literal("emergencyCard"),
+    operation: z.literal("upsert"),
+    revision: revisionSchema,
+    sequence: z.number().int().positive(),
+  }),
+  z.object({
+    changedAt: utcTimestampSchema,
+    entityId: uuidV7Schema,
+    entityType: z.literal("emergencyCard"),
     operation: z.literal("delete"),
     revision: revisionSchema,
     sequence: z.number().int().positive(),
@@ -204,7 +271,7 @@ export const syncPullResponseSchema = z.discriminatedUnion("kind", [
 export const syncSnapshotPageSchema = z.object({
   capturedCursor: cursorSchema,
   hasMore: z.boolean(),
-  items: z.array(childProfileProjectionSchema),
+  items: z.array(z.union([childProfileProjectionSchema, emergencyCardProjectionSchema])),
   nextSnapshotCursor: cursorSchema.nullable(),
   serverTime: utcTimestampSchema,
 });
@@ -223,8 +290,31 @@ export const childProfileSyncMutationSchema = z.object({
   }),
 });
 
+export const emergencyCardSyncMutationSchema = z.object({
+  baseRevision: revisionSchema.nullable(),
+  entityId: uuidV7Schema,
+  entityType: z.literal("emergencyCard"),
+  idempotencyKey: uuidV7Schema,
+  localDependencyIds: z.array(uuidV7Schema).max(50),
+  mutationId: uuidV7Schema,
+  operation: z.enum(["create", "update"]),
+  payload: z.object({
+    accessMode: z.enum(emergencyCardAccessModes),
+    childId: uuidV7Schema,
+    content: emergencyCardContentSchema,
+  }),
+});
+
 export const syncMutationPushRequestSchema = z.object({
-  mutations: z.array(childProfileSyncMutationSchema).min(1).max(50),
+  mutations: z
+    .array(
+      z.discriminatedUnion("entityType", [
+        childProfileSyncMutationSchema,
+        emergencyCardSyncMutationSchema,
+      ]),
+    )
+    .min(1)
+    .max(50),
 });
 
 const syncMutationResultBaseSchema = z.object({
@@ -234,11 +324,11 @@ const syncMutationResultBaseSchema = z.object({
 
 export const syncMutationResultSchema = z.discriminatedUnion("status", [
   syncMutationResultBaseSchema.extend({
-    entity: childProfileProjectionSchema,
+    entity: z.union([childProfileProjectionSchema, emergencyCardProjectionSchema]),
     status: z.enum(["applied", "duplicate"]),
   }),
   syncMutationResultBaseSchema.extend({
-    current: childProfileProjectionSchema,
+    current: z.union([childProfileProjectionSchema, emergencyCardProjectionSchema]),
     reason: z.literal("staleCriticalRevision"),
     status: z.literal("conflict"),
   }),
@@ -259,4 +349,11 @@ export const syncMutationResultSchema = z.discriminatedUnion("status", [
 export const syncMutationPushResponseSchema = z.object({
   results: z.array(syncMutationResultSchema),
   serverTime: utcTimestampSchema,
+});
+
+export const emergencyCardPutRequestSchema = z.object({
+  baseRevision: revisionSchema.nullable(),
+  childId: uuidV7Schema,
+  content: emergencyCardContentSchema,
+  mutationId: uuidV7Schema,
 });

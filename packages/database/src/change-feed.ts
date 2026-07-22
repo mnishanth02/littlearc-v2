@@ -8,6 +8,7 @@ export type ChangeFeedCursorPayload = {
 };
 
 export type SnapshotCursorPayload = {
+  readonly afterEntityType?: "child" | "emergencyCard" | null;
   readonly afterId: string | null;
   readonly kind: "snapshot";
   readonly sequence: number;
@@ -19,6 +20,7 @@ export type SyncCursorPayload = ChangeFeedCursorPayload | SnapshotCursorPayload;
 export type SyncCursorCodec = {
   readonly createChangesCursor: (sequence: number) => Cursor;
   readonly createSnapshotCursor: (input: {
+    readonly afterEntityType?: "child" | "emergencyCard" | null;
     readonly afterId: string | null;
     readonly sequence: number;
   }) => Cursor;
@@ -111,6 +113,7 @@ export function createSyncCursorCodec(keyMaterial: Buffer): SyncCursorCodec {
     createSnapshotCursor(input) {
       return create({
         afterId: input.afterId,
+        ...(input.afterEntityType !== undefined ? { afterEntityType: input.afterEntityType } : {}),
         kind: "snapshot",
         sequence: input.sequence,
         version: 1,

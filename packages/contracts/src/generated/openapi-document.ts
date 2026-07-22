@@ -4,7 +4,7 @@ export const openApiDocument = {
   "info": {
     "title": "LittleArc API",
     "version": "0.1.0",
-    "description": "Versioned LittleArc API contract through OFF-04 synchronization."
+    "description": "Versioned LittleArc API contract through the OFF-05 emergency-card slice."
   },
   "servers": [
     {
@@ -28,6 +28,10 @@ export const openApiDocument = {
     {
       "name": "sync",
       "description": "Server-authoritative repository synchronization"
+    },
+    {
+      "name": "emergency-cards",
+      "description": "Authorized emergency-card configuration and immutable versions"
     }
   ],
   "components": {
@@ -355,6 +359,8 @@ export const openApiDocument = {
               "record_deleted",
               "membership_changed",
               "device_enrolled",
+              "emergency_card_created",
+              "emergency_card_updated",
               "staff_action_recorded"
             ]
           },
@@ -703,39 +709,393 @@ export const openApiDocument = {
                 "description": "UUIDv7 identifier"
               },
               "entity": {
-                "type": "object",
-                "properties": {
-                  "childId": {
-                    "type": "string",
-                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                    "description": "UUIDv7 identifier"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "childId": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                        "description": "UUIDv7 identifier"
+                      },
+                      "dateOfBirth": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "preferredName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "revision": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "description": "Mutable entity revision"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                        "description": "Normalized UTC ISO 8601 timestamp"
+                      }
+                    },
+                    "required": [
+                      "childId",
+                      "dateOfBirth",
+                      "preferredName",
+                      "revision",
+                      "updatedAt"
+                    ]
                   },
-                  "dateOfBirth": {
-                    "type": "string",
-                    "format": "date"
-                  },
-                  "preferredName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 120
-                  },
-                  "revision": {
-                    "type": "integer",
-                    "exclusiveMinimum": 0,
-                    "description": "Mutable entity revision"
-                  },
-                  "updatedAt": {
-                    "type": "string",
-                    "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
-                    "description": "Normalized UTC ISO 8601 timestamp"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "accessMode": {
+                        "type": "string",
+                        "enum": [
+                          "standard"
+                        ]
+                      },
+                      "cardId": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                        "description": "UUIDv7 identifier"
+                      },
+                      "childId": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                        "description": "UUIDv7 identifier"
+                      },
+                      "content": {
+                        "type": "object",
+                        "properties": {
+                          "allergies": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "noneConfirmed"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "values": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    },
+                                    "minItems": 1,
+                                    "maxItems": 20
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "values"
+                                ]
+                              }
+                            ]
+                          },
+                          "bloodGroup": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "value": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 16
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "value"
+                                ]
+                              }
+                            ]
+                          },
+                          "criticalNotes": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "noneConfirmed"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "values": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 500
+                                    },
+                                    "minItems": 1,
+                                    "maxItems": 20
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "values"
+                                ]
+                              }
+                            ]
+                          },
+                          "dateOfBirth": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "guardianContacts": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "phone": {
+                                  "type": "string",
+                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                },
+                                "relationship": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 80
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "phone",
+                                "relationship"
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 5
+                          },
+                          "pediatrician": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 120
+                                  },
+                                  "phone": {
+                                    "type": "string",
+                                    "pattern": "^\\+[1-9]\\d{7,14}$"
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "name",
+                                  "phone"
+                                ]
+                              }
+                            ]
+                          },
+                          "preferredName": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "urgentMedications": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "noneConfirmed"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "values": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    },
+                                    "minItems": 1,
+                                    "maxItems": 20
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "values"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "allergies",
+                          "bloodGroup",
+                          "criticalNotes",
+                          "dateOfBirth",
+                          "guardianContacts",
+                          "pediatrician",
+                          "preferredName",
+                          "urgentMedications"
+                        ]
+                      },
+                      "revision": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "description": "Mutable entity revision"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                        "description": "Normalized UTC ISO 8601 timestamp"
+                      },
+                      "version": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "description": "Mutable entity revision"
+                      }
+                    },
+                    "required": [
+                      "accessMode",
+                      "cardId",
+                      "childId",
+                      "content",
+                      "revision",
+                      "updatedAt",
+                      "version"
+                    ]
                   }
-                },
-                "required": [
-                  "childId",
-                  "dateOfBirth",
-                  "preferredName",
-                  "revision",
-                  "updatedAt"
                 ]
               },
               "status": {
@@ -767,39 +1127,393 @@ export const openApiDocument = {
                 "description": "UUIDv7 identifier"
               },
               "current": {
-                "type": "object",
-                "properties": {
-                  "childId": {
-                    "type": "string",
-                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                    "description": "UUIDv7 identifier"
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "childId": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                        "description": "UUIDv7 identifier"
+                      },
+                      "dateOfBirth": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "preferredName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "revision": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "description": "Mutable entity revision"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                        "description": "Normalized UTC ISO 8601 timestamp"
+                      }
+                    },
+                    "required": [
+                      "childId",
+                      "dateOfBirth",
+                      "preferredName",
+                      "revision",
+                      "updatedAt"
+                    ]
                   },
-                  "dateOfBirth": {
-                    "type": "string",
-                    "format": "date"
-                  },
-                  "preferredName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 120
-                  },
-                  "revision": {
-                    "type": "integer",
-                    "exclusiveMinimum": 0,
-                    "description": "Mutable entity revision"
-                  },
-                  "updatedAt": {
-                    "type": "string",
-                    "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
-                    "description": "Normalized UTC ISO 8601 timestamp"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "accessMode": {
+                        "type": "string",
+                        "enum": [
+                          "standard"
+                        ]
+                      },
+                      "cardId": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                        "description": "UUIDv7 identifier"
+                      },
+                      "childId": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                        "description": "UUIDv7 identifier"
+                      },
+                      "content": {
+                        "type": "object",
+                        "properties": {
+                          "allergies": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "noneConfirmed"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "values": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    },
+                                    "minItems": 1,
+                                    "maxItems": 20
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "values"
+                                ]
+                              }
+                            ]
+                          },
+                          "bloodGroup": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "value": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 16
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "value"
+                                ]
+                              }
+                            ]
+                          },
+                          "criticalNotes": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "noneConfirmed"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "values": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 500
+                                    },
+                                    "minItems": 1,
+                                    "maxItems": 20
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "values"
+                                ]
+                              }
+                            ]
+                          },
+                          "dateOfBirth": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "guardianContacts": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "phone": {
+                                  "type": "string",
+                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                },
+                                "relationship": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 80
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "phone",
+                                "relationship"
+                              ]
+                            },
+                            "minItems": 1,
+                            "maxItems": 5
+                          },
+                          "pediatrician": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 120
+                                  },
+                                  "phone": {
+                                    "type": "string",
+                                    "pattern": "^\\+[1-9]\\d{7,14}$"
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "name",
+                                  "phone"
+                                ]
+                              }
+                            ]
+                          },
+                          "preferredName": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120
+                          },
+                          "urgentMedications": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "notProvided"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "noneConfirmed"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "state"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": [
+                                      "confirmed"
+                                    ]
+                                  },
+                                  "values": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    },
+                                    "minItems": 1,
+                                    "maxItems": 20
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "values"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "allergies",
+                          "bloodGroup",
+                          "criticalNotes",
+                          "dateOfBirth",
+                          "guardianContacts",
+                          "pediatrician",
+                          "preferredName",
+                          "urgentMedications"
+                        ]
+                      },
+                      "revision": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "description": "Mutable entity revision"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                        "description": "Normalized UTC ISO 8601 timestamp"
+                      },
+                      "version": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "description": "Mutable entity revision"
+                      }
+                    },
+                    "required": [
+                      "accessMode",
+                      "cardId",
+                      "childId",
+                      "content",
+                      "revision",
+                      "updatedAt",
+                      "version"
+                    ]
                   }
-                },
-                "required": [
-                  "childId",
-                  "dateOfBirth",
-                  "preferredName",
-                  "revision",
-                  "updatedAt"
                 ]
               },
               "reason": {
@@ -872,7 +1586,7 @@ export const openApiDocument = {
               "changes": {
                 "type": "array",
                 "items": {
-                  "oneOf": [
+                  "anyOf": [
                     {
                       "type": "object",
                       "properties": {
@@ -997,6 +1711,445 @@ export const openApiDocument = {
                         "revision",
                         "sequence"
                       ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "changedAt": {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                          "description": "Normalized UTC ISO 8601 timestamp"
+                        },
+                        "entity": {
+                          "type": "object",
+                          "properties": {
+                            "accessMode": {
+                              "type": "string",
+                              "enum": [
+                                "standard"
+                              ]
+                            },
+                            "cardId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "childId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "content": {
+                              "type": "object",
+                              "properties": {
+                                "allergies": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "bloodGroup": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 16
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "criticalNotes": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 500
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "dateOfBirth": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "guardianContacts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 120
+                                      },
+                                      "phone": {
+                                        "type": "string",
+                                        "pattern": "^\\+[1-9]\\d{7,14}$"
+                                      },
+                                      "relationship": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 80
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "phone",
+                                      "relationship"
+                                    ]
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 5
+                                },
+                                "pediatrician": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "name": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 120
+                                        },
+                                        "phone": {
+                                          "type": "string",
+                                          "pattern": "^\\+[1-9]\\d{7,14}$"
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "name",
+                                        "phone"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "preferredName": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "urgentMedications": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "allergies",
+                                "bloodGroup",
+                                "criticalNotes",
+                                "dateOfBirth",
+                                "guardianContacts",
+                                "pediatrician",
+                                "preferredName",
+                                "urgentMedications"
+                              ]
+                            },
+                            "revision": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                              "description": "Normalized UTC ISO 8601 timestamp"
+                            },
+                            "version": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            }
+                          },
+                          "required": [
+                            "accessMode",
+                            "cardId",
+                            "childId",
+                            "content",
+                            "revision",
+                            "updatedAt",
+                            "version"
+                          ]
+                        },
+                        "entityId": {
+                          "type": "string",
+                          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                          "description": "UUIDv7 identifier"
+                        },
+                        "entityType": {
+                          "type": "string",
+                          "enum": [
+                            "emergencyCard"
+                          ]
+                        },
+                        "operation": {
+                          "type": "string",
+                          "enum": [
+                            "upsert"
+                          ]
+                        },
+                        "revision": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "description": "Mutable entity revision"
+                        },
+                        "sequence": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        }
+                      },
+                      "required": [
+                        "changedAt",
+                        "entity",
+                        "entityId",
+                        "entityType",
+                        "operation",
+                        "revision",
+                        "sequence"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "changedAt": {
+                          "type": "string",
+                          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                          "description": "Normalized UTC ISO 8601 timestamp"
+                        },
+                        "entityId": {
+                          "type": "string",
+                          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                          "description": "UUIDv7 identifier"
+                        },
+                        "entityType": {
+                          "type": "string",
+                          "enum": [
+                            "emergencyCard"
+                          ]
+                        },
+                        "operation": {
+                          "type": "string",
+                          "enum": [
+                            "delete"
+                          ]
+                        },
+                        "revision": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "description": "Mutable entity revision"
+                        },
+                        "sequence": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        }
+                      },
+                      "required": [
+                        "changedAt",
+                        "entityId",
+                        "entityType",
+                        "operation",
+                        "revision",
+                        "sequence"
+                      ]
                     }
                   ]
                 }
@@ -1073,39 +2226,393 @@ export const openApiDocument = {
           "items": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "childId": {
-                  "type": "string",
-                  "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                  "description": "UUIDv7 identifier"
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "childId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "dateOfBirth": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "preferredName": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    }
+                  },
+                  "required": [
+                    "childId",
+                    "dateOfBirth",
+                    "preferredName",
+                    "revision",
+                    "updatedAt"
+                  ]
                 },
-                "dateOfBirth": {
-                  "type": "string",
-                  "format": "date"
-                },
-                "preferredName": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 120
-                },
-                "revision": {
-                  "type": "integer",
-                  "exclusiveMinimum": 0,
-                  "description": "Mutable entity revision"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
-                  "description": "Normalized UTC ISO 8601 timestamp"
+                {
+                  "type": "object",
+                  "properties": {
+                    "accessMode": {
+                      "type": "string",
+                      "enum": [
+                        "standard"
+                      ]
+                    },
+                    "cardId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "childId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "allergies": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        },
+                        "bloodGroup": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 16
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "value"
+                              ]
+                            }
+                          ]
+                        },
+                        "criticalNotes": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        },
+                        "dateOfBirth": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "guardianContacts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "phone": {
+                                "type": "string",
+                                "pattern": "^\\+[1-9]\\d{7,14}$"
+                              },
+                              "relationship": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "phone",
+                              "relationship"
+                            ]
+                          },
+                          "minItems": 1,
+                          "maxItems": 5
+                        },
+                        "pediatrician": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "phone": {
+                                  "type": "string",
+                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "name",
+                                "phone"
+                              ]
+                            }
+                          ]
+                        },
+                        "preferredName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "urgentMedications": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "allergies",
+                        "bloodGroup",
+                        "criticalNotes",
+                        "dateOfBirth",
+                        "guardianContacts",
+                        "pediatrician",
+                        "preferredName",
+                        "urgentMedications"
+                      ]
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "version": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    }
+                  },
+                  "required": [
+                    "accessMode",
+                    "cardId",
+                    "childId",
+                    "content",
+                    "revision",
+                    "updatedAt",
+                    "version"
+                  ]
                 }
-              },
-              "required": [
-                "childId",
-                "dateOfBirth",
-                "preferredName",
-                "revision",
-                "updatedAt"
               ]
             }
           },
@@ -1137,77 +2644,467 @@ export const openApiDocument = {
           "mutations": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "baseRevision": {
-                  "type": "integer",
-                  "exclusiveMinimum": 0,
-                  "description": "Mutable entity revision"
-                },
-                "entityId": {
-                  "type": "string",
-                  "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                  "description": "UUIDv7 identifier"
-                },
-                "entityType": {
-                  "type": "string",
-                  "enum": [
-                    "child"
-                  ]
-                },
-                "idempotencyKey": {
-                  "type": "string",
-                  "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                  "description": "UUIDv7 identifier"
-                },
-                "localDependencyIds": {
-                  "type": "array",
-                  "items": {
-                    "type": "string",
-                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                    "description": "UUIDv7 identifier"
-                  },
-                  "maxItems": 50
-                },
-                "mutationId": {
-                  "type": "string",
-                  "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                  "description": "UUIDv7 identifier"
-                },
-                "operation": {
-                  "type": "string",
-                  "enum": [
-                    "update"
-                  ]
-                },
-                "payload": {
+              "oneOf": [
+                {
                   "type": "object",
                   "properties": {
-                    "dateOfBirth": {
-                      "type": "string",
-                      "format": "date"
+                    "baseRevision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
                     },
-                    "preferredName": {
+                    "entityId": {
                       "type": "string",
-                      "minLength": 1,
-                      "maxLength": 120
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "entityType": {
+                      "type": "string",
+                      "enum": [
+                        "child"
+                      ]
+                    },
+                    "idempotencyKey": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "localDependencyIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                        "description": "UUIDv7 identifier"
+                      },
+                      "maxItems": 50
+                    },
+                    "mutationId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "operation": {
+                      "type": "string",
+                      "enum": [
+                        "update"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {
+                        "dateOfBirth": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "preferredName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        }
+                      },
+                      "required": [
+                        "dateOfBirth",
+                        "preferredName"
+                      ]
                     }
                   },
                   "required": [
-                    "dateOfBirth",
-                    "preferredName"
+                    "baseRevision",
+                    "entityId",
+                    "entityType",
+                    "idempotencyKey",
+                    "localDependencyIds",
+                    "mutationId",
+                    "operation",
+                    "payload"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "baseRevision": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    },
+                    "entityId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "entityType": {
+                      "type": "string",
+                      "enum": [
+                        "emergencyCard"
+                      ]
+                    },
+                    "idempotencyKey": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "localDependencyIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                        "description": "UUIDv7 identifier"
+                      },
+                      "maxItems": 50
+                    },
+                    "mutationId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "operation": {
+                      "type": "string",
+                      "enum": [
+                        "create",
+                        "update"
+                      ]
+                    },
+                    "payload": {
+                      "type": "object",
+                      "properties": {
+                        "accessMode": {
+                          "type": "string",
+                          "enum": [
+                            "standard"
+                          ]
+                        },
+                        "childId": {
+                          "type": "string",
+                          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                          "description": "UUIDv7 identifier"
+                        },
+                        "content": {
+                          "type": "object",
+                          "properties": {
+                            "allergies": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "noneConfirmed"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "values": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 160
+                                      },
+                                      "minItems": 1,
+                                      "maxItems": 20
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "values"
+                                  ]
+                                }
+                              ]
+                            },
+                            "bloodGroup": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 16
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
+                                }
+                              ]
+                            },
+                            "criticalNotes": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "noneConfirmed"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "values": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 500
+                                      },
+                                      "minItems": 1,
+                                      "maxItems": 20
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "values"
+                                  ]
+                                }
+                              ]
+                            },
+                            "dateOfBirth": {
+                              "type": "string",
+                              "format": "date"
+                            },
+                            "guardianContacts": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 120
+                                  },
+                                  "phone": {
+                                    "type": "string",
+                                    "pattern": "^\\+[1-9]\\d{7,14}$"
+                                  },
+                                  "relationship": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "phone",
+                                  "relationship"
+                                ]
+                              },
+                              "minItems": 1,
+                              "maxItems": 5
+                            },
+                            "pediatrician": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "name": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 120
+                                    },
+                                    "phone": {
+                                      "type": "string",
+                                      "pattern": "^\\+[1-9]\\d{7,14}$"
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "name",
+                                    "phone"
+                                  ]
+                                }
+                              ]
+                            },
+                            "preferredName": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            },
+                            "urgentMedications": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "noneConfirmed"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "values": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 160
+                                      },
+                                      "minItems": 1,
+                                      "maxItems": 20
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "values"
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "allergies",
+                            "bloodGroup",
+                            "criticalNotes",
+                            "dateOfBirth",
+                            "guardianContacts",
+                            "pediatrician",
+                            "preferredName",
+                            "urgentMedications"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "accessMode",
+                        "childId",
+                        "content"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "baseRevision",
+                    "entityId",
+                    "entityType",
+                    "idempotencyKey",
+                    "localDependencyIds",
+                    "mutationId",
+                    "operation",
+                    "payload"
                   ]
                 }
-              },
-              "required": [
-                "baseRevision",
-                "entityId",
-                "entityType",
-                "idempotencyKey",
-                "localDependencyIds",
-                "mutationId",
-                "operation",
-                "payload"
               ]
             },
             "minItems": 1,
@@ -1239,39 +3136,393 @@ export const openApiDocument = {
                       "description": "UUIDv7 identifier"
                     },
                     "entity": {
-                      "type": "object",
-                      "properties": {
-                        "childId": {
-                          "type": "string",
-                          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                          "description": "UUIDv7 identifier"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "childId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "dateOfBirth": {
+                              "type": "string",
+                              "format": "date"
+                            },
+                            "preferredName": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            },
+                            "revision": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                              "description": "Normalized UTC ISO 8601 timestamp"
+                            }
+                          },
+                          "required": [
+                            "childId",
+                            "dateOfBirth",
+                            "preferredName",
+                            "revision",
+                            "updatedAt"
+                          ]
                         },
-                        "dateOfBirth": {
-                          "type": "string",
-                          "format": "date"
-                        },
-                        "preferredName": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 120
-                        },
-                        "revision": {
-                          "type": "integer",
-                          "exclusiveMinimum": 0,
-                          "description": "Mutable entity revision"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
-                          "description": "Normalized UTC ISO 8601 timestamp"
+                        {
+                          "type": "object",
+                          "properties": {
+                            "accessMode": {
+                              "type": "string",
+                              "enum": [
+                                "standard"
+                              ]
+                            },
+                            "cardId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "childId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "content": {
+                              "type": "object",
+                              "properties": {
+                                "allergies": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "bloodGroup": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 16
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "criticalNotes": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 500
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "dateOfBirth": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "guardianContacts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 120
+                                      },
+                                      "phone": {
+                                        "type": "string",
+                                        "pattern": "^\\+[1-9]\\d{7,14}$"
+                                      },
+                                      "relationship": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 80
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "phone",
+                                      "relationship"
+                                    ]
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 5
+                                },
+                                "pediatrician": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "name": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 120
+                                        },
+                                        "phone": {
+                                          "type": "string",
+                                          "pattern": "^\\+[1-9]\\d{7,14}$"
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "name",
+                                        "phone"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "preferredName": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "urgentMedications": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "allergies",
+                                "bloodGroup",
+                                "criticalNotes",
+                                "dateOfBirth",
+                                "guardianContacts",
+                                "pediatrician",
+                                "preferredName",
+                                "urgentMedications"
+                              ]
+                            },
+                            "revision": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                              "description": "Normalized UTC ISO 8601 timestamp"
+                            },
+                            "version": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            }
+                          },
+                          "required": [
+                            "accessMode",
+                            "cardId",
+                            "childId",
+                            "content",
+                            "revision",
+                            "updatedAt",
+                            "version"
+                          ]
                         }
-                      },
-                      "required": [
-                        "childId",
-                        "dateOfBirth",
-                        "preferredName",
-                        "revision",
-                        "updatedAt"
                       ]
                     },
                     "status": {
@@ -1303,39 +3554,393 @@ export const openApiDocument = {
                       "description": "UUIDv7 identifier"
                     },
                     "current": {
-                      "type": "object",
-                      "properties": {
-                        "childId": {
-                          "type": "string",
-                          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                          "description": "UUIDv7 identifier"
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "childId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "dateOfBirth": {
+                              "type": "string",
+                              "format": "date"
+                            },
+                            "preferredName": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            },
+                            "revision": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                              "description": "Normalized UTC ISO 8601 timestamp"
+                            }
+                          },
+                          "required": [
+                            "childId",
+                            "dateOfBirth",
+                            "preferredName",
+                            "revision",
+                            "updatedAt"
+                          ]
                         },
-                        "dateOfBirth": {
-                          "type": "string",
-                          "format": "date"
-                        },
-                        "preferredName": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 120
-                        },
-                        "revision": {
-                          "type": "integer",
-                          "exclusiveMinimum": 0,
-                          "description": "Mutable entity revision"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
-                          "description": "Normalized UTC ISO 8601 timestamp"
+                        {
+                          "type": "object",
+                          "properties": {
+                            "accessMode": {
+                              "type": "string",
+                              "enum": [
+                                "standard"
+                              ]
+                            },
+                            "cardId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "childId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "content": {
+                              "type": "object",
+                              "properties": {
+                                "allergies": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "bloodGroup": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 16
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "criticalNotes": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 500
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "dateOfBirth": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "guardianContacts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 120
+                                      },
+                                      "phone": {
+                                        "type": "string",
+                                        "pattern": "^\\+[1-9]\\d{7,14}$"
+                                      },
+                                      "relationship": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 80
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "phone",
+                                      "relationship"
+                                    ]
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 5
+                                },
+                                "pediatrician": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "name": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 120
+                                        },
+                                        "phone": {
+                                          "type": "string",
+                                          "pattern": "^\\+[1-9]\\d{7,14}$"
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "name",
+                                        "phone"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "preferredName": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "urgentMedications": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "noneConfirmed"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "values": {
+                                          "type": "array",
+                                          "items": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          },
+                                          "minItems": 1,
+                                          "maxItems": 20
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "values"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "allergies",
+                                "bloodGroup",
+                                "criticalNotes",
+                                "dateOfBirth",
+                                "guardianContacts",
+                                "pediatrician",
+                                "preferredName",
+                                "urgentMedications"
+                              ]
+                            },
+                            "revision": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            },
+                            "updatedAt": {
+                              "type": "string",
+                              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                              "description": "Normalized UTC ISO 8601 timestamp"
+                            },
+                            "version": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            }
+                          },
+                          "required": [
+                            "accessMode",
+                            "cardId",
+                            "childId",
+                            "content",
+                            "revision",
+                            "updatedAt",
+                            "version"
+                          ]
                         }
-                      },
-                      "required": [
-                        "childId",
-                        "dateOfBirth",
-                        "preferredName",
-                        "revision",
-                        "updatedAt"
                       ]
                     },
                     "reason": {
@@ -1561,6 +4166,12 @@ export const openApiDocument = {
                 "enum": [
                   2
                 ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  3
+                ]
               }
             ]
           },
@@ -1611,6 +4222,12 @@ export const openApiDocument = {
                 "enum": [
                   2
                 ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  3
+                ]
               }
             ]
           },
@@ -1625,11 +4242,2843 @@ export const openApiDocument = {
           "localSchemaVersion",
           "replayed"
         ]
+      },
+      "EmergencyCardProjection": {
+        "type": "object",
+        "properties": {
+          "accessMode": {
+            "type": "string",
+            "enum": [
+              "standard"
+            ]
+          },
+          "cardId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "childId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "allergies": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "noneConfirmed"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "minItems": 1,
+                        "maxItems": 20
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "values"
+                    ]
+                  }
+                ]
+              },
+              "bloodGroup": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 16
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              "criticalNotes": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "noneConfirmed"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "minItems": 1,
+                        "maxItems": 20
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "values"
+                    ]
+                  }
+                ]
+              },
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date"
+              },
+              "guardianContacts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "phone": {
+                      "type": "string",
+                      "pattern": "^\\+[1-9]\\d{7,14}$"
+                    },
+                    "relationship": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "phone",
+                    "relationship"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 5
+              },
+              "pediatrician": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "phone": {
+                        "type": "string",
+                        "pattern": "^\\+[1-9]\\d{7,14}$"
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "name",
+                      "phone"
+                    ]
+                  }
+                ]
+              },
+              "preferredName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "urgentMedications": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "noneConfirmed"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "minItems": 1,
+                        "maxItems": 20
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "values"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "allergies",
+              "bloodGroup",
+              "criticalNotes",
+              "dateOfBirth",
+              "guardianContacts",
+              "pediatrician",
+              "preferredName",
+              "urgentMedications"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "Mutable entity revision"
+          },
+          "updatedAt": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+            "description": "Normalized UTC ISO 8601 timestamp"
+          },
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "description": "Mutable entity revision"
+          }
+        },
+        "required": [
+          "accessMode",
+          "cardId",
+          "childId",
+          "content",
+          "revision",
+          "updatedAt",
+          "version"
+        ]
+      },
+      "EmergencyCardPutRequest": {
+        "type": "object",
+        "properties": {
+          "baseRevision": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "exclusiveMinimum": 0,
+            "description": "Mutable entity revision"
+          },
+          "childId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "content": {
+            "type": "object",
+            "properties": {
+              "allergies": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "noneConfirmed"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "minItems": 1,
+                        "maxItems": 20
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "values"
+                    ]
+                  }
+                ]
+              },
+              "bloodGroup": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 16
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "value"
+                    ]
+                  }
+                ]
+              },
+              "criticalNotes": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "noneConfirmed"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "minItems": 1,
+                        "maxItems": 20
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "values"
+                    ]
+                  }
+                ]
+              },
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date"
+              },
+              "guardianContacts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "phone": {
+                      "type": "string",
+                      "pattern": "^\\+[1-9]\\d{7,14}$"
+                    },
+                    "relationship": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 80
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "phone",
+                    "relationship"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 5
+              },
+              "pediatrician": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "phone": {
+                        "type": "string",
+                        "pattern": "^\\+[1-9]\\d{7,14}$"
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "name",
+                      "phone"
+                    ]
+                  }
+                ]
+              },
+              "preferredName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "urgentMedications": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "notProvided"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "noneConfirmed"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "state"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "confirmed"
+                        ]
+                      },
+                      "values": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 160
+                        },
+                        "minItems": 1,
+                        "maxItems": 20
+                      }
+                    },
+                    "required": [
+                      "state",
+                      "values"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "allergies",
+              "bloodGroup",
+              "criticalNotes",
+              "dateOfBirth",
+              "guardianContacts",
+              "pediatrician",
+              "preferredName",
+              "urgentMedications"
+            ]
+          },
+          "mutationId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          }
+        },
+        "required": [
+          "baseRevision",
+          "childId",
+          "content",
+          "mutationId"
+        ]
       }
     },
     "parameters": {}
   },
   "paths": {
+    "/v1/emergency-cards/{cardId}": {
+      "get": {
+        "tags": [
+          "emergency-cards"
+        ],
+        "summary": "Read the current authorized emergency-card version",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "cardId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current confirmed emergency-card projection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessMode": {
+                      "type": "string",
+                      "enum": [
+                        "standard"
+                      ]
+                    },
+                    "cardId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "childId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "allergies": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        },
+                        "bloodGroup": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 16
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "value"
+                              ]
+                            }
+                          ]
+                        },
+                        "criticalNotes": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        },
+                        "dateOfBirth": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "guardianContacts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "phone": {
+                                "type": "string",
+                                "pattern": "^\\+[1-9]\\d{7,14}$"
+                              },
+                              "relationship": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "phone",
+                              "relationship"
+                            ]
+                          },
+                          "minItems": 1,
+                          "maxItems": 5
+                        },
+                        "pediatrician": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "phone": {
+                                  "type": "string",
+                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "name",
+                                "phone"
+                              ]
+                            }
+                          ]
+                        },
+                        "preferredName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "urgentMedications": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "allergies",
+                        "bloodGroup",
+                        "criticalNotes",
+                        "dateOfBirth",
+                        "guardianContacts",
+                        "pediatrician",
+                        "preferredName",
+                        "urgentMedications"
+                      ]
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "version": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    }
+                  },
+                  "required": [
+                    "accessMode",
+                    "cardId",
+                    "childId",
+                    "content",
+                    "revision",
+                    "updatedAt",
+                    "version"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Consumer session required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Emergency-card capability required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Emergency card not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "emergency-cards"
+        ],
+        "summary": "Create or append an immutable emergency-card version",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "cardId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "Client-generated UUIDv7 idempotency key"
+            },
+            "required": true,
+            "description": "Client-generated UUIDv7 idempotency key",
+            "name": "idempotency-key",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "baseRevision": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "exclusiveMinimum": 0,
+                    "description": "Mutable entity revision"
+                  },
+                  "childId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                    "description": "UUIDv7 identifier"
+                  },
+                  "content": {
+                    "type": "object",
+                    "properties": {
+                      "allergies": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "noneConfirmed"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "values": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 160
+                                },
+                                "minItems": 1,
+                                "maxItems": 20
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "values"
+                            ]
+                          }
+                        ]
+                      },
+                      "bloodGroup": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 16
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "criticalNotes": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "noneConfirmed"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "values": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 500
+                                },
+                                "minItems": 1,
+                                "maxItems": 20
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "values"
+                            ]
+                          }
+                        ]
+                      },
+                      "dateOfBirth": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "guardianContacts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 120
+                            },
+                            "phone": {
+                              "type": "string",
+                              "pattern": "^\\+[1-9]\\d{7,14}$"
+                            },
+                            "relationship": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 80
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "phone",
+                            "relationship"
+                          ]
+                        },
+                        "minItems": 1,
+                        "maxItems": 5
+                      },
+                      "pediatrician": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "phone": {
+                                "type": "string",
+                                "pattern": "^\\+[1-9]\\d{7,14}$"
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "name",
+                              "phone"
+                            ]
+                          }
+                        ]
+                      },
+                      "preferredName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "urgentMedications": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "noneConfirmed"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "values": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 160
+                                },
+                                "minItems": 1,
+                                "maxItems": 20
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "values"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "allergies",
+                      "bloodGroup",
+                      "criticalNotes",
+                      "dateOfBirth",
+                      "guardianContacts",
+                      "pediatrician",
+                      "preferredName",
+                      "urgentMedications"
+                    ]
+                  },
+                  "mutationId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                    "description": "UUIDv7 identifier"
+                  }
+                },
+                "required": [
+                  "baseRevision",
+                  "childId",
+                  "content",
+                  "mutationId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Emergency-card version updated or replayed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessMode": {
+                      "type": "string",
+                      "enum": [
+                        "standard"
+                      ]
+                    },
+                    "cardId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "childId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "allergies": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        },
+                        "bloodGroup": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 16
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "value"
+                              ]
+                            }
+                          ]
+                        },
+                        "criticalNotes": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        },
+                        "dateOfBirth": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "guardianContacts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "phone": {
+                                "type": "string",
+                                "pattern": "^\\+[1-9]\\d{7,14}$"
+                              },
+                              "relationship": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "phone",
+                              "relationship"
+                            ]
+                          },
+                          "minItems": 1,
+                          "maxItems": 5
+                        },
+                        "pediatrician": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "phone": {
+                                  "type": "string",
+                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "name",
+                                "phone"
+                              ]
+                            }
+                          ]
+                        },
+                        "preferredName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "urgentMedications": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "allergies",
+                        "bloodGroup",
+                        "criticalNotes",
+                        "dateOfBirth",
+                        "guardianContacts",
+                        "pediatrician",
+                        "preferredName",
+                        "urgentMedications"
+                      ]
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "version": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    }
+                  },
+                  "required": [
+                    "accessMode",
+                    "cardId",
+                    "childId",
+                    "content",
+                    "revision",
+                    "updatedAt",
+                    "version"
+                  ]
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Emergency card and first immutable version created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessMode": {
+                      "type": "string",
+                      "enum": [
+                        "standard"
+                      ]
+                    },
+                    "cardId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "childId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "content": {
+                      "type": "object",
+                      "properties": {
+                        "allergies": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        },
+                        "bloodGroup": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 16
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "value"
+                              ]
+                            }
+                          ]
+                        },
+                        "criticalNotes": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        },
+                        "dateOfBirth": {
+                          "type": "string",
+                          "format": "date"
+                        },
+                        "guardianContacts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "phone": {
+                                "type": "string",
+                                "pattern": "^\\+[1-9]\\d{7,14}$"
+                              },
+                              "relationship": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 80
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "phone",
+                              "relationship"
+                            ]
+                          },
+                          "minItems": 1,
+                          "maxItems": 5
+                        },
+                        "pediatrician": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                },
+                                "phone": {
+                                  "type": "string",
+                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "name",
+                                "phone"
+                              ]
+                            }
+                          ]
+                        },
+                        "preferredName": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        },
+                        "urgentMedications": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "notProvided"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "noneConfirmed"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "state"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "state": {
+                                  "type": "string",
+                                  "enum": [
+                                    "confirmed"
+                                  ]
+                                },
+                                "values": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  },
+                                  "minItems": 1,
+                                  "maxItems": 20
+                                }
+                              },
+                              "required": [
+                                "state",
+                                "values"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "allergies",
+                        "bloodGroup",
+                        "criticalNotes",
+                        "dateOfBirth",
+                        "guardianContacts",
+                        "pediatrician",
+                        "preferredName",
+                        "urgentMedications"
+                      ]
+                    },
+                    "revision": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "version": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "description": "Mutable entity revision"
+                    }
+                  },
+                  "required": [
+                    "accessMode",
+                    "cardId",
+                    "childId",
+                    "content",
+                    "revision",
+                    "updatedAt",
+                    "version"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Emergency-card request is invalid",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Consumer session required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Emergency-card edit capability required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale revision or idempotency conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/sync": {
       "get": {
         "tags": [
@@ -1675,7 +7124,7 @@ export const openApiDocument = {
                         "changes": {
                           "type": "array",
                           "items": {
-                            "oneOf": [
+                            "anyOf": [
                               {
                                 "type": "object",
                                 "properties": {
@@ -1774,6 +7223,445 @@ export const openApiDocument = {
                                     "type": "string",
                                     "enum": [
                                       "child"
+                                    ]
+                                  },
+                                  "operation": {
+                                    "type": "string",
+                                    "enum": [
+                                      "delete"
+                                    ]
+                                  },
+                                  "revision": {
+                                    "type": "integer",
+                                    "exclusiveMinimum": 0,
+                                    "description": "Mutable entity revision"
+                                  },
+                                  "sequence": {
+                                    "type": "integer",
+                                    "exclusiveMinimum": 0
+                                  }
+                                },
+                                "required": [
+                                  "changedAt",
+                                  "entityId",
+                                  "entityType",
+                                  "operation",
+                                  "revision",
+                                  "sequence"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "changedAt": {
+                                    "type": "string",
+                                    "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                    "description": "Normalized UTC ISO 8601 timestamp"
+                                  },
+                                  "entity": {
+                                    "type": "object",
+                                    "properties": {
+                                      "accessMode": {
+                                        "type": "string",
+                                        "enum": [
+                                          "standard"
+                                        ]
+                                      },
+                                      "cardId": {
+                                        "type": "string",
+                                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                        "description": "UUIDv7 identifier"
+                                      },
+                                      "childId": {
+                                        "type": "string",
+                                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                        "description": "UUIDv7 identifier"
+                                      },
+                                      "content": {
+                                        "type": "object",
+                                        "properties": {
+                                          "allergies": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 160
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "bloodGroup": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 16
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "criticalNotes": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 500
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "dateOfBirth": {
+                                            "type": "string",
+                                            "format": "date"
+                                          },
+                                          "guardianContacts": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "object",
+                                              "properties": {
+                                                "name": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                },
+                                                "phone": {
+                                                  "type": "string",
+                                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                                },
+                                                "relationship": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 80
+                                                }
+                                              },
+                                              "required": [
+                                                "name",
+                                                "phone",
+                                                "relationship"
+                                              ]
+                                            },
+                                            "minItems": 1,
+                                            "maxItems": 5
+                                          },
+                                          "pediatrician": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "name": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 120
+                                                  },
+                                                  "phone": {
+                                                    "type": "string",
+                                                    "pattern": "^\\+[1-9]\\d{7,14}$"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "name",
+                                                  "phone"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "preferredName": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          },
+                                          "urgentMedications": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 160
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "allergies",
+                                          "bloodGroup",
+                                          "criticalNotes",
+                                          "dateOfBirth",
+                                          "guardianContacts",
+                                          "pediatrician",
+                                          "preferredName",
+                                          "urgentMedications"
+                                        ]
+                                      },
+                                      "revision": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Mutable entity revision"
+                                      },
+                                      "updatedAt": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                        "description": "Normalized UTC ISO 8601 timestamp"
+                                      },
+                                      "version": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Mutable entity revision"
+                                      }
+                                    },
+                                    "required": [
+                                      "accessMode",
+                                      "cardId",
+                                      "childId",
+                                      "content",
+                                      "revision",
+                                      "updatedAt",
+                                      "version"
+                                    ]
+                                  },
+                                  "entityId": {
+                                    "type": "string",
+                                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                    "description": "UUIDv7 identifier"
+                                  },
+                                  "entityType": {
+                                    "type": "string",
+                                    "enum": [
+                                      "emergencyCard"
+                                    ]
+                                  },
+                                  "operation": {
+                                    "type": "string",
+                                    "enum": [
+                                      "upsert"
+                                    ]
+                                  },
+                                  "revision": {
+                                    "type": "integer",
+                                    "exclusiveMinimum": 0,
+                                    "description": "Mutable entity revision"
+                                  },
+                                  "sequence": {
+                                    "type": "integer",
+                                    "exclusiveMinimum": 0
+                                  }
+                                },
+                                "required": [
+                                  "changedAt",
+                                  "entity",
+                                  "entityId",
+                                  "entityType",
+                                  "operation",
+                                  "revision",
+                                  "sequence"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "changedAt": {
+                                    "type": "string",
+                                    "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                    "description": "Normalized UTC ISO 8601 timestamp"
+                                  },
+                                  "entityId": {
+                                    "type": "string",
+                                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                    "description": "UUIDv7 identifier"
+                                  },
+                                  "entityType": {
+                                    "type": "string",
+                                    "enum": [
+                                      "emergencyCard"
                                     ]
                                   },
                                   "operation": {
@@ -2207,39 +8095,393 @@ export const openApiDocument = {
                     "items": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "childId": {
-                            "type": "string",
-                            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                            "description": "UUIDv7 identifier"
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "childId": {
+                                "type": "string",
+                                "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                "description": "UUIDv7 identifier"
+                              },
+                              "dateOfBirth": {
+                                "type": "string",
+                                "format": "date"
+                              },
+                              "preferredName": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              },
+                              "revision": {
+                                "type": "integer",
+                                "exclusiveMinimum": 0,
+                                "description": "Mutable entity revision"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                "description": "Normalized UTC ISO 8601 timestamp"
+                              }
+                            },
+                            "required": [
+                              "childId",
+                              "dateOfBirth",
+                              "preferredName",
+                              "revision",
+                              "updatedAt"
+                            ]
                           },
-                          "dateOfBirth": {
-                            "type": "string",
-                            "format": "date"
-                          },
-                          "preferredName": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 120
-                          },
-                          "revision": {
-                            "type": "integer",
-                            "exclusiveMinimum": 0,
-                            "description": "Mutable entity revision"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
-                            "description": "Normalized UTC ISO 8601 timestamp"
+                          {
+                            "type": "object",
+                            "properties": {
+                              "accessMode": {
+                                "type": "string",
+                                "enum": [
+                                  "standard"
+                                ]
+                              },
+                              "cardId": {
+                                "type": "string",
+                                "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                "description": "UUIDv7 identifier"
+                              },
+                              "childId": {
+                                "type": "string",
+                                "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                "description": "UUIDv7 identifier"
+                              },
+                              "content": {
+                                "type": "object",
+                                "properties": {
+                                  "allergies": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "noneConfirmed"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "values": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 160
+                                            },
+                                            "minItems": 1,
+                                            "maxItems": 20
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "values"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "bloodGroup": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 16
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "criticalNotes": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "noneConfirmed"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "values": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 500
+                                            },
+                                            "minItems": 1,
+                                            "maxItems": 20
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "values"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "dateOfBirth": {
+                                    "type": "string",
+                                    "format": "date"
+                                  },
+                                  "guardianContacts": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 120
+                                        },
+                                        "phone": {
+                                          "type": "string",
+                                          "pattern": "^\\+[1-9]\\d{7,14}$"
+                                        },
+                                        "relationship": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 80
+                                        }
+                                      },
+                                      "required": [
+                                        "name",
+                                        "phone",
+                                        "relationship"
+                                      ]
+                                    },
+                                    "minItems": 1,
+                                    "maxItems": 5
+                                  },
+                                  "pediatrician": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "name": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          },
+                                          "phone": {
+                                            "type": "string",
+                                            "pattern": "^\\+[1-9]\\d{7,14}$"
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "name",
+                                          "phone"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "preferredName": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 120
+                                  },
+                                  "urgentMedications": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "noneConfirmed"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "values": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 160
+                                            },
+                                            "minItems": 1,
+                                            "maxItems": 20
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "values"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "allergies",
+                                  "bloodGroup",
+                                  "criticalNotes",
+                                  "dateOfBirth",
+                                  "guardianContacts",
+                                  "pediatrician",
+                                  "preferredName",
+                                  "urgentMedications"
+                                ]
+                              },
+                              "revision": {
+                                "type": "integer",
+                                "exclusiveMinimum": 0,
+                                "description": "Mutable entity revision"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                "description": "Normalized UTC ISO 8601 timestamp"
+                              },
+                              "version": {
+                                "type": "integer",
+                                "exclusiveMinimum": 0,
+                                "description": "Mutable entity revision"
+                              }
+                            },
+                            "required": [
+                              "accessMode",
+                              "cardId",
+                              "childId",
+                              "content",
+                              "revision",
+                              "updatedAt",
+                              "version"
+                            ]
                           }
-                        },
-                        "required": [
-                          "childId",
-                          "dateOfBirth",
-                          "preferredName",
-                          "revision",
-                          "updatedAt"
                         ]
                       }
                     },
@@ -2483,77 +8725,467 @@ export const openApiDocument = {
                   "mutations": {
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "properties": {
-                        "baseRevision": {
-                          "type": "integer",
-                          "exclusiveMinimum": 0,
-                          "description": "Mutable entity revision"
-                        },
-                        "entityId": {
-                          "type": "string",
-                          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                          "description": "UUIDv7 identifier"
-                        },
-                        "entityType": {
-                          "type": "string",
-                          "enum": [
-                            "child"
-                          ]
-                        },
-                        "idempotencyKey": {
-                          "type": "string",
-                          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                          "description": "UUIDv7 identifier"
-                        },
-                        "localDependencyIds": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                            "description": "UUIDv7 identifier"
-                          },
-                          "maxItems": 50
-                        },
-                        "mutationId": {
-                          "type": "string",
-                          "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                          "description": "UUIDv7 identifier"
-                        },
-                        "operation": {
-                          "type": "string",
-                          "enum": [
-                            "update"
-                          ]
-                        },
-                        "payload": {
+                      "oneOf": [
+                        {
                           "type": "object",
                           "properties": {
-                            "dateOfBirth": {
-                              "type": "string",
-                              "format": "date"
+                            "baseRevision": {
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
                             },
-                            "preferredName": {
+                            "entityId": {
                               "type": "string",
-                              "minLength": 1,
-                              "maxLength": 120
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "entityType": {
+                              "type": "string",
+                              "enum": [
+                                "child"
+                              ]
+                            },
+                            "idempotencyKey": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "localDependencyIds": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                "description": "UUIDv7 identifier"
+                              },
+                              "maxItems": 50
+                            },
+                            "mutationId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "operation": {
+                              "type": "string",
+                              "enum": [
+                                "update"
+                              ]
+                            },
+                            "payload": {
+                              "type": "object",
+                              "properties": {
+                                "dateOfBirth": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "preferredName": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 120
+                                }
+                              },
+                              "required": [
+                                "dateOfBirth",
+                                "preferredName"
+                              ]
                             }
                           },
                           "required": [
-                            "dateOfBirth",
-                            "preferredName"
+                            "baseRevision",
+                            "entityId",
+                            "entityType",
+                            "idempotencyKey",
+                            "localDependencyIds",
+                            "mutationId",
+                            "operation",
+                            "payload"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "baseRevision": {
+                              "type": [
+                                "integer",
+                                "null"
+                              ],
+                              "exclusiveMinimum": 0,
+                              "description": "Mutable entity revision"
+                            },
+                            "entityId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "entityType": {
+                              "type": "string",
+                              "enum": [
+                                "emergencyCard"
+                              ]
+                            },
+                            "idempotencyKey": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "localDependencyIds": {
+                              "type": "array",
+                              "items": {
+                                "type": "string",
+                                "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                "description": "UUIDv7 identifier"
+                              },
+                              "maxItems": 50
+                            },
+                            "mutationId": {
+                              "type": "string",
+                              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                              "description": "UUIDv7 identifier"
+                            },
+                            "operation": {
+                              "type": "string",
+                              "enum": [
+                                "create",
+                                "update"
+                              ]
+                            },
+                            "payload": {
+                              "type": "object",
+                              "properties": {
+                                "accessMode": {
+                                  "type": "string",
+                                  "enum": [
+                                    "standard"
+                                  ]
+                                },
+                                "childId": {
+                                  "type": "string",
+                                  "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                  "description": "UUIDv7 identifier"
+                                },
+                                "content": {
+                                  "type": "object",
+                                  "properties": {
+                                    "allergies": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "noneConfirmed"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "values": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string",
+                                                "minLength": 1,
+                                                "maxLength": 160
+                                              },
+                                              "minItems": 1,
+                                              "maxItems": 20
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "values"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "bloodGroup": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 16
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "criticalNotes": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "noneConfirmed"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "values": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string",
+                                                "minLength": 1,
+                                                "maxLength": 500
+                                              },
+                                              "minItems": 1,
+                                              "maxItems": 20
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "values"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "dateOfBirth": {
+                                      "type": "string",
+                                      "format": "date"
+                                    },
+                                    "guardianContacts": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "name": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          },
+                                          "phone": {
+                                            "type": "string",
+                                            "pattern": "^\\+[1-9]\\d{7,14}$"
+                                          },
+                                          "relationship": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 80
+                                          }
+                                        },
+                                        "required": [
+                                          "name",
+                                          "phone",
+                                          "relationship"
+                                        ]
+                                      },
+                                      "minItems": 1,
+                                      "maxItems": 5
+                                    },
+                                    "pediatrician": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "name": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 120
+                                            },
+                                            "phone": {
+                                              "type": "string",
+                                              "pattern": "^\\+[1-9]\\d{7,14}$"
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "name",
+                                            "phone"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "preferredName": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 120
+                                    },
+                                    "urgentMedications": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "noneConfirmed"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "values": {
+                                              "type": "array",
+                                              "items": {
+                                                "type": "string",
+                                                "minLength": 1,
+                                                "maxLength": 160
+                                              },
+                                              "minItems": 1,
+                                              "maxItems": 20
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "values"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "allergies",
+                                    "bloodGroup",
+                                    "criticalNotes",
+                                    "dateOfBirth",
+                                    "guardianContacts",
+                                    "pediatrician",
+                                    "preferredName",
+                                    "urgentMedications"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "accessMode",
+                                "childId",
+                                "content"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "baseRevision",
+                            "entityId",
+                            "entityType",
+                            "idempotencyKey",
+                            "localDependencyIds",
+                            "mutationId",
+                            "operation",
+                            "payload"
                           ]
                         }
-                      },
-                      "required": [
-                        "baseRevision",
-                        "entityId",
-                        "entityType",
-                        "idempotencyKey",
-                        "localDependencyIds",
-                        "mutationId",
-                        "operation",
-                        "payload"
                       ]
                     },
                     "minItems": 1,
@@ -2593,39 +9225,393 @@ export const openApiDocument = {
                                 "description": "UUIDv7 identifier"
                               },
                               "entity": {
-                                "type": "object",
-                                "properties": {
-                                  "childId": {
-                                    "type": "string",
-                                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                                    "description": "UUIDv7 identifier"
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "childId": {
+                                        "type": "string",
+                                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                        "description": "UUIDv7 identifier"
+                                      },
+                                      "dateOfBirth": {
+                                        "type": "string",
+                                        "format": "date"
+                                      },
+                                      "preferredName": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 120
+                                      },
+                                      "revision": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Mutable entity revision"
+                                      },
+                                      "updatedAt": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                        "description": "Normalized UTC ISO 8601 timestamp"
+                                      }
+                                    },
+                                    "required": [
+                                      "childId",
+                                      "dateOfBirth",
+                                      "preferredName",
+                                      "revision",
+                                      "updatedAt"
+                                    ]
                                   },
-                                  "dateOfBirth": {
-                                    "type": "string",
-                                    "format": "date"
-                                  },
-                                  "preferredName": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 120
-                                  },
-                                  "revision": {
-                                    "type": "integer",
-                                    "exclusiveMinimum": 0,
-                                    "description": "Mutable entity revision"
-                                  },
-                                  "updatedAt": {
-                                    "type": "string",
-                                    "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
-                                    "description": "Normalized UTC ISO 8601 timestamp"
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "accessMode": {
+                                        "type": "string",
+                                        "enum": [
+                                          "standard"
+                                        ]
+                                      },
+                                      "cardId": {
+                                        "type": "string",
+                                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                        "description": "UUIDv7 identifier"
+                                      },
+                                      "childId": {
+                                        "type": "string",
+                                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                        "description": "UUIDv7 identifier"
+                                      },
+                                      "content": {
+                                        "type": "object",
+                                        "properties": {
+                                          "allergies": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 160
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "bloodGroup": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 16
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "criticalNotes": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 500
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "dateOfBirth": {
+                                            "type": "string",
+                                            "format": "date"
+                                          },
+                                          "guardianContacts": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "object",
+                                              "properties": {
+                                                "name": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                },
+                                                "phone": {
+                                                  "type": "string",
+                                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                                },
+                                                "relationship": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 80
+                                                }
+                                              },
+                                              "required": [
+                                                "name",
+                                                "phone",
+                                                "relationship"
+                                              ]
+                                            },
+                                            "minItems": 1,
+                                            "maxItems": 5
+                                          },
+                                          "pediatrician": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "name": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 120
+                                                  },
+                                                  "phone": {
+                                                    "type": "string",
+                                                    "pattern": "^\\+[1-9]\\d{7,14}$"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "name",
+                                                  "phone"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "preferredName": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          },
+                                          "urgentMedications": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 160
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "allergies",
+                                          "bloodGroup",
+                                          "criticalNotes",
+                                          "dateOfBirth",
+                                          "guardianContacts",
+                                          "pediatrician",
+                                          "preferredName",
+                                          "urgentMedications"
+                                        ]
+                                      },
+                                      "revision": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Mutable entity revision"
+                                      },
+                                      "updatedAt": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                        "description": "Normalized UTC ISO 8601 timestamp"
+                                      },
+                                      "version": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Mutable entity revision"
+                                      }
+                                    },
+                                    "required": [
+                                      "accessMode",
+                                      "cardId",
+                                      "childId",
+                                      "content",
+                                      "revision",
+                                      "updatedAt",
+                                      "version"
+                                    ]
                                   }
-                                },
-                                "required": [
-                                  "childId",
-                                  "dateOfBirth",
-                                  "preferredName",
-                                  "revision",
-                                  "updatedAt"
                                 ]
                               },
                               "status": {
@@ -2657,39 +9643,393 @@ export const openApiDocument = {
                                 "description": "UUIDv7 identifier"
                               },
                               "current": {
-                                "type": "object",
-                                "properties": {
-                                  "childId": {
-                                    "type": "string",
-                                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
-                                    "description": "UUIDv7 identifier"
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "childId": {
+                                        "type": "string",
+                                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                        "description": "UUIDv7 identifier"
+                                      },
+                                      "dateOfBirth": {
+                                        "type": "string",
+                                        "format": "date"
+                                      },
+                                      "preferredName": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 120
+                                      },
+                                      "revision": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Mutable entity revision"
+                                      },
+                                      "updatedAt": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                        "description": "Normalized UTC ISO 8601 timestamp"
+                                      }
+                                    },
+                                    "required": [
+                                      "childId",
+                                      "dateOfBirth",
+                                      "preferredName",
+                                      "revision",
+                                      "updatedAt"
+                                    ]
                                   },
-                                  "dateOfBirth": {
-                                    "type": "string",
-                                    "format": "date"
-                                  },
-                                  "preferredName": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 120
-                                  },
-                                  "revision": {
-                                    "type": "integer",
-                                    "exclusiveMinimum": 0,
-                                    "description": "Mutable entity revision"
-                                  },
-                                  "updatedAt": {
-                                    "type": "string",
-                                    "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
-                                    "description": "Normalized UTC ISO 8601 timestamp"
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "accessMode": {
+                                        "type": "string",
+                                        "enum": [
+                                          "standard"
+                                        ]
+                                      },
+                                      "cardId": {
+                                        "type": "string",
+                                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                        "description": "UUIDv7 identifier"
+                                      },
+                                      "childId": {
+                                        "type": "string",
+                                        "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                                        "description": "UUIDv7 identifier"
+                                      },
+                                      "content": {
+                                        "type": "object",
+                                        "properties": {
+                                          "allergies": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 160
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "bloodGroup": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 16
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "criticalNotes": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 500
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "dateOfBirth": {
+                                            "type": "string",
+                                            "format": "date"
+                                          },
+                                          "guardianContacts": {
+                                            "type": "array",
+                                            "items": {
+                                              "type": "object",
+                                              "properties": {
+                                                "name": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                },
+                                                "phone": {
+                                                  "type": "string",
+                                                  "pattern": "^\\+[1-9]\\d{7,14}$"
+                                                },
+                                                "relationship": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 80
+                                                }
+                                              },
+                                              "required": [
+                                                "name",
+                                                "phone",
+                                                "relationship"
+                                              ]
+                                            },
+                                            "minItems": 1,
+                                            "maxItems": 5
+                                          },
+                                          "pediatrician": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "name": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 120
+                                                  },
+                                                  "phone": {
+                                                    "type": "string",
+                                                    "pattern": "^\\+[1-9]\\d{7,14}$"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "name",
+                                                  "phone"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "preferredName": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          },
+                                          "urgentMedications": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "noneConfirmed"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "values": {
+                                                    "type": "array",
+                                                    "items": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 160
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 20
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "values"
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "allergies",
+                                          "bloodGroup",
+                                          "criticalNotes",
+                                          "dateOfBirth",
+                                          "guardianContacts",
+                                          "pediatrician",
+                                          "preferredName",
+                                          "urgentMedications"
+                                        ]
+                                      },
+                                      "revision": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Mutable entity revision"
+                                      },
+                                      "updatedAt": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                                        "description": "Normalized UTC ISO 8601 timestamp"
+                                      },
+                                      "version": {
+                                        "type": "integer",
+                                        "exclusiveMinimum": 0,
+                                        "description": "Mutable entity revision"
+                                      }
+                                    },
+                                    "required": [
+                                      "accessMode",
+                                      "cardId",
+                                      "childId",
+                                      "content",
+                                      "revision",
+                                      "updatedAt",
+                                      "version"
+                                    ]
                                   }
-                                },
-                                "required": [
-                                  "childId",
-                                  "dateOfBirth",
-                                  "preferredName",
-                                  "revision",
-                                  "updatedAt"
                                 ]
                               },
                               "reason": {
@@ -3003,6 +10343,12 @@ export const openApiDocument = {
                         "enum": [
                           2
                         ]
+                      },
+                      {
+                        "type": "number",
+                        "enum": [
+                          3
+                        ]
                       }
                     ]
                   },
@@ -3061,6 +10407,12 @@ export const openApiDocument = {
                           "enum": [
                             2
                           ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            3
+                          ]
                         }
                       ]
                     },
@@ -3114,6 +10466,12 @@ export const openApiDocument = {
                           "type": "number",
                           "enum": [
                             2
+                          ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            3
                           ]
                         }
                       ]

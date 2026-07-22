@@ -8,6 +8,8 @@ import {
   contractMetadataSchema,
   deviceEnrollmentRequestSchema,
   deviceEnrollmentResponseSchema,
+  emergencyCardProjectionSchema,
+  emergencyCardPutRequestSchema,
   householdIdentifierSchema,
   idempotencyKeySchema,
   ownerOnboardingRequestSchema,
@@ -21,6 +23,7 @@ import {
   syncMutationSchema,
   syncPullResponseSchema,
   syncSnapshotPageSchema,
+  uuidV7Schema,
   z,
 } from "../schema-source/index.js";
 
@@ -65,6 +68,76 @@ registry.register("OwnerOnboardingRequest", ownerOnboardingRequestSchema);
 registry.register("OwnerOnboardingResponse", ownerOnboardingResponseSchema);
 registry.register("DeviceEnrollmentRequest", deviceEnrollmentRequestSchema);
 registry.register("DeviceEnrollmentResponse", deviceEnrollmentResponseSchema);
+registry.register("EmergencyCardProjection", emergencyCardProjectionSchema);
+registry.register("EmergencyCardPutRequest", emergencyCardPutRequestSchema);
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/emergency-cards/{cardId}",
+  tags: ["emergency-cards"],
+  summary: "Read the current authorized emergency-card version",
+  security: [{ consumerSession: [] }],
+  request: {
+    params: z.object({ cardId: uuidV7Schema }),
+  },
+  responses: {
+    200: {
+      description: "Current confirmed emergency-card projection",
+      content: { "application/json": { schema: emergencyCardProjectionSchema } },
+    },
+    401: {
+      description: "Consumer session required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    403: {
+      description: "Emergency-card capability required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    404: {
+      description: "Emergency card not found",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "put",
+  path: "/v1/emergency-cards/{cardId}",
+  tags: ["emergency-cards"],
+  summary: "Create or append an immutable emergency-card version",
+  security: [{ consumerSession: [] }],
+  request: {
+    params: z.object({ cardId: uuidV7Schema }),
+    headers: z.object({ "idempotency-key": idempotencyKeySchema }),
+    body: { content: { "application/json": { schema: emergencyCardPutRequestSchema } } },
+  },
+  responses: {
+    200: {
+      description: "Emergency-card version updated or replayed",
+      content: { "application/json": { schema: emergencyCardProjectionSchema } },
+    },
+    201: {
+      description: "Emergency card and first immutable version created",
+      content: { "application/json": { schema: emergencyCardProjectionSchema } },
+    },
+    400: {
+      description: "Emergency-card request is invalid",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    401: {
+      description: "Consumer session required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    403: {
+      description: "Emergency-card edit capability required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    409: {
+      description: "Stale revision or idempotency conflict",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
 
 registry.registerPath({
   method: "get",
@@ -312,7 +385,7 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
     info: {
       title: "LittleArc API",
       version: "0.1.0",
-      description: "Versioned LittleArc API contract through OFF-04 synchronization.",
+      description: "Versioned LittleArc API contract through the OFF-05 emergency-card slice.",
     },
     servers: [
       {
@@ -336,6 +409,10 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
       {
         name: "sync",
         description: "Server-authoritative repository synchronization",
+      },
+      {
+        name: "emergency-cards",
+        description: "Authorized emergency-card configuration and immutable versions",
       },
     ],
   }) as unknown as GeneratedOpenApiDocument;

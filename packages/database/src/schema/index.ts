@@ -4,6 +4,8 @@ export * from "./change-events.js";
 export * from "./children.js";
 export * from "./consent-events.js";
 export * from "./devices.js";
+export * from "./emergency-card-versions.js";
+export * from "./emergency-cards.js";
 export * from "./household-keys.js";
 export * from "./household-memberships.js";
 export * from "./households.js";

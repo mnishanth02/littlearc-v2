@@ -15,6 +15,7 @@
     "validate:device:off02": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device",
     "validate:device:off03": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off03",
     "validate:device:off04": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off04",
+    "validate:device:off05": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off05",
     "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.integration.json"
   },
   "dependencies": {

@@ -61,6 +61,11 @@ export default function LandingScreen() {
         </View>
 
         <View style={styles.actions}>
+          <Button
+            label="Open emergency card"
+            onPress={() => router.push("/emergency")}
+            testID="open-emergency-card"
+          />
           <Button label="Open runtime status" onPress={() => router.push("/status")} />
           {__DEV__ ? (
             <>
@@ -80,6 +85,12 @@ export default function LandingScreen() {
                 label="Open OFF-04 repository validation"
                 onPress={() => router.push("/off-04-validation")}
                 testID="open-off04-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open OFF-05 emergency-card validation"
+                onPress={() => router.push("/off-05-validation")}
+                testID="open-off05-validation"
                 variant="secondary"
               />
               <Button

@@ -21,7 +21,7 @@ export type EnvelopeContext = {
   readonly aadSchemaVersion: number;
   readonly householdId: string;
   readonly objectId: string;
-  readonly objectType: "child_profile" | "parent_profile";
+  readonly objectType: "child_profile" | "emergency_card" | "parent_profile";
 };
 
 export type WrappedHouseholdKey = {

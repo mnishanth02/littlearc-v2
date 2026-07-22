@@ -350,6 +350,7 @@ describe("API skeleton", () => {
     const childId = nextId();
     const cursor = "eyJzeW50aGV0aWMiOiJvZmYwNC1jdXJzb3IifQ";
     const service = {
+      readEmergencyCard: vi.fn(async () => null),
       pull: vi.fn(async () => ({
         changes: [],
         hasMore: false,
@@ -439,6 +440,93 @@ describe("API skeleton", () => {
     expect(service.pull).toHaveBeenCalledWith(
       expect.objectContaining({ identityUserId: "synthetic-auth-user" }),
     );
+    expect(service.push).toHaveBeenCalledWith(
+      expect.objectContaining({ identityUserId: "synthetic-auth-user" }),
+    );
+  });
+
+  it("validates OFF-05 emergency-card read and immutable-version write routes", async () => {
+    const cardId = nextId();
+    const childId = nextId();
+    const projection = {
+      accessMode: "standard" as const,
+      cardId,
+      childId,
+      content: {
+        allergies: { state: "noneConfirmed" as const },
+        bloodGroup: { state: "confirmed" as const, value: "O+" },
+        criticalNotes: { state: "notProvided" as const },
+        dateOfBirth: "2020-01-01",
+        guardianContacts: [
+          { name: "Synthetic Guardian", phone: "+919999999999", relationship: "Parent" },
+        ],
+        pediatrician: { state: "notProvided" as const },
+        preferredName: "Synthetic Child",
+        urgentMedications: { state: "noneConfirmed" as const },
+      },
+      revision: 1,
+      updatedAt: "2026-07-22T12:00:00.000Z",
+      version: 1,
+    };
+    const service = {
+      readEmergencyCard: vi.fn(async () => projection),
+      pull: vi.fn(async () => ({
+        changes: [],
+        hasMore: false,
+        kind: "changes" as const,
+        nextCursor: "eyJzeW50aGV0aWMiOiJvZmYwNS1jdXJzb3IifQ",
+        serverTime: "2026-07-22T12:00:00.000Z",
+      })),
+      push: vi.fn(async () => ({
+        results: [
+          {
+            entity: projection,
+            entityId: cardId,
+            mutationId: nextId(),
+            status: "applied" as const,
+          },
+        ],
+        serverTime: "2026-07-22T12:00:00.000Z",
+      })),
+      snapshot: vi.fn(async () => ({
+        capturedCursor: "eyJzeW50aGV0aWMiOiJvZmYwNS1jdXJzb3IifQ",
+        hasMore: false,
+        items: [projection],
+        nextSnapshotCursor: null,
+        serverTime: "2026-07-22T12:00:00.000Z",
+      })),
+    };
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "local" }),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        async getSessionIdentity() {
+          return { userId: "synthetic-auth-user" };
+        },
+        service,
+      },
+    );
+
+    const read = await server.inject({ method: "GET", url: `/v1/emergency-cards/${cardId}` });
+    const write = await server.inject({
+      headers: { "idempotency-key": nextId() },
+      method: "PUT",
+      payload: {
+        baseRevision: null,
+        childId,
+        content: projection.content,
+        mutationId: nextId(),
+      },
+      url: `/v1/emergency-cards/${cardId}`,
+    });
+
+    expect(read.statusCode).toBe(200);
+    expect(read.json()).toMatchObject({ cardId, revision: 1, version: 1 });
+    expect(write.statusCode).toBe(201);
+    expect(write.json()).toMatchObject({ cardId, revision: 1, version: 1 });
     expect(service.push).toHaveBeenCalledWith(
       expect.objectContaining({ identityUserId: "synthetic-auth-user" }),
     );
