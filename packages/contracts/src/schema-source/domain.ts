@@ -87,7 +87,7 @@ export const deviceEnrollmentRequestSchema = z.object({
     .trim()
     .regex(/^[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$/),
   deviceId: uuidV7Schema,
-  localSchemaVersion: z.literal(1),
+  localSchemaVersion: z.union([z.literal(1), z.literal(2)]),
   platform: z.enum(["android", "ios"]),
 });
 
@@ -95,7 +95,7 @@ export const deviceEnrollmentResponseSchema = z.object({
   deviceId: uuidV7Schema,
   enrollmentStatus: z.literal("active"),
   householdId: uuidV7Schema,
-  localSchemaVersion: z.literal(1),
+  localSchemaVersion: z.union([z.literal(1), z.literal(2)]),
   replayed: z.boolean(),
 });
 
@@ -152,4 +152,111 @@ export const syncMutationSchema = z.object({
   operation: z.enum(["create", "update", "delete"]),
   baseRevision: revisionSchema.nullable(),
   localDependencyIds: z.array(uuidV7Schema),
+});
+
+export const childProfileProjectionSchema = z.object({
+  childId: uuidV7Schema,
+  dateOfBirth: z.string().date(),
+  preferredName: z.string().trim().min(1).max(120),
+  revision: revisionSchema,
+  updatedAt: utcTimestampSchema,
+});
+
+export const syncChangeSchema = z.discriminatedUnion("operation", [
+  z.object({
+    changedAt: utcTimestampSchema,
+    entity: childProfileProjectionSchema,
+    entityId: uuidV7Schema,
+    entityType: z.literal("child"),
+    operation: z.literal("upsert"),
+    revision: revisionSchema,
+    sequence: z.number().int().positive(),
+  }),
+  z.object({
+    changedAt: utcTimestampSchema,
+    entityId: uuidV7Schema,
+    entityType: z.literal("child"),
+    operation: z.literal("delete"),
+    revision: revisionSchema,
+    sequence: z.number().int().positive(),
+  }),
+]);
+
+export const syncChangesPageSchema = z.object({
+  changes: z.array(syncChangeSchema),
+  hasMore: z.boolean(),
+  kind: z.literal("changes"),
+  nextCursor: cursorSchema,
+  serverTime: utcTimestampSchema,
+});
+
+export const syncResetRequiredSchema = z.object({
+  kind: z.literal("resetRequired"),
+  reason: z.enum(["initialSync", "cursorExpired"]),
+  serverTime: utcTimestampSchema,
+});
+
+export const syncPullResponseSchema = z.discriminatedUnion("kind", [
+  syncChangesPageSchema,
+  syncResetRequiredSchema,
+]);
+
+export const syncSnapshotPageSchema = z.object({
+  capturedCursor: cursorSchema,
+  hasMore: z.boolean(),
+  items: z.array(childProfileProjectionSchema),
+  nextSnapshotCursor: cursorSchema.nullable(),
+  serverTime: utcTimestampSchema,
+});
+
+export const childProfileSyncMutationSchema = z.object({
+  baseRevision: revisionSchema,
+  entityId: uuidV7Schema,
+  entityType: z.literal("child"),
+  idempotencyKey: uuidV7Schema,
+  localDependencyIds: z.array(uuidV7Schema).max(50),
+  mutationId: uuidV7Schema,
+  operation: z.literal("update"),
+  payload: z.object({
+    dateOfBirth: z.string().date(),
+    preferredName: z.string().trim().min(1).max(120),
+  }),
+});
+
+export const syncMutationPushRequestSchema = z.object({
+  mutations: z.array(childProfileSyncMutationSchema).min(1).max(50),
+});
+
+const syncMutationResultBaseSchema = z.object({
+  entityId: uuidV7Schema,
+  mutationId: uuidV7Schema,
+});
+
+export const syncMutationResultSchema = z.discriminatedUnion("status", [
+  syncMutationResultBaseSchema.extend({
+    entity: childProfileProjectionSchema,
+    status: z.enum(["applied", "duplicate"]),
+  }),
+  syncMutationResultBaseSchema.extend({
+    current: childProfileProjectionSchema,
+    reason: z.literal("staleCriticalRevision"),
+    status: z.literal("conflict"),
+  }),
+  syncMutationResultBaseSchema.extend({
+    reason: z.enum([
+      "authorizationDenied",
+      "dependencyFailed",
+      "dependencyMissing",
+      "idempotencyMismatch",
+      "tombstoneWins",
+      "unsupportedMutation",
+      "validationFailed",
+    ]),
+    status: z.literal("rejected"),
+  }),
+]);
+
+export const syncMutationPushResponseSchema = z.object({
+  results: z.array(syncMutationResultSchema),
+  serverTime: utcTimestampSchema,
 });

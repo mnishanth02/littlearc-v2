@@ -77,6 +77,43 @@ export const localMigrations: ReadonlyArray<LocalMigration> = [
       );
     `,
   },
+  {
+    version: 2,
+    sql: `
+      ALTER TABLE local_children ADD COLUMN server_payload_json TEXT;
+      ALTER TABLE local_children ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'synced';
+      ALTER TABLE local_mutations ADD COLUMN base_revision INTEGER;
+      ALTER TABLE local_mutations ADD COLUMN idempotency_key TEXT;
+      ALTER TABLE local_mutations ADD COLUMN dependency_ids_json TEXT NOT NULL DEFAULT '[]';
+      ALTER TABLE local_mutations ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE local_mutations ADD COLUMN next_attempt_at TEXT;
+      ALTER TABLE local_mutations ADD COLUMN last_error_code TEXT;
+      ALTER TABLE local_mutations ADD COLUMN updated_at TEXT;
+      ALTER TABLE local_sync_state ADD COLUMN reset_status TEXT NOT NULL DEFAULT 'idle';
+      ALTER TABLE local_sync_state ADD COLUMN captured_cursor TEXT;
+      CREATE TABLE local_conflicts (
+        conflict_id TEXT PRIMARY KEY NOT NULL,
+        mutation_id TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        local_payload_json TEXT,
+        server_payload_json TEXT,
+        reason TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (mutation_id) REFERENCES local_mutations(mutation_id)
+      );
+      CREATE TABLE local_snapshot_children (
+        child_id TEXT PRIMARY KEY NOT NULL,
+        revision INTEGER NOT NULL CHECK (revision > 0),
+        payload_json TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE INDEX local_mutations_dispatch_idx
+        ON local_mutations(status, next_attempt_at, created_at);
+      CREATE INDEX local_conflicts_entity_idx
+        ON local_conflicts(entity_type, entity_id, created_at);
+    `,
+  },
 ] as const;
 
 export async function applyLocalMigrations(database: LocalMigrationDatabase): Promise<number> {

@@ -616,6 +616,13 @@ through the production-shaped architecture.
 
 #### `OFF-04` Repository and synchronization engine
 
+> **Implementation status (22 July 2026): COMPLETE.** Signed cursors,
+> authenticated pull/snapshot/push, atomic PostgreSQL evidence, SQLCipher schema
+> V2 repositories, ordered offline mutations, explicit critical conflicts,
+> tombstones, reset-safe reconciliation, sign-out warnings, 151 tests, Aiven
+> integration, repository gates, and the bounded Pixel 8 lifecycle pass. See the
+> [OFF-04 evidence dossier](./m2-offline-trust/off-04-implementation-evidence.md).
+
 - Implement repository reads from SQLCipher and background network refresh.
 - Implement local mutation IDs, dependency ordering, retry/backoff, and status.
 - Implement server change sequence, opaque cursor pull, mutation push,

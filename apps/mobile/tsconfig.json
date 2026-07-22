@@ -9,14 +9,5 @@
     "strict": true,
     "useUnknownInCatchVariables": true
   },
-  "include": [
-    "index.ts",
-    "app/**/*.ts",
-    "app/**/*.tsx",
-    "src/auth/**/*.ts",
-    "src/bootstrap/**/*.ts",
-    "src/components/**/*.ts",
-    "src/components/**/*.tsx",
-    "src/theme/**/*.ts"
-  ]
+  "include": ["index.ts", "app/**/*.ts", "app/**/*.tsx", "src/**/*.ts", "src/**/*.tsx"]
 }

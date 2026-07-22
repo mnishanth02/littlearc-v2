@@ -17,6 +17,8 @@ stable plans and their validation evidence.
 - [`OFF-02` implementation evidence](./off-02-implementation-evidence.md)
 - [`OFF-03` Local security and enrollment](./off-03-local-security-and-enrollment-plan.md)
 - [`OFF-03` implementation evidence](./off-03-implementation-evidence.md)
+- [`OFF-04` Repository and synchronization engine](./off-04-repository-and-synchronization-engine-plan.md)
+- [`OFF-04` implementation evidence](./off-04-implementation-evidence.md)
 
 `OFF-01` and `OFF-02` are planned together because identity IDs, household
 membership, role language, consent, and child-creation gates cross their
@@ -26,3 +28,8 @@ accepted identity/session boundary instead of reimplementing authentication.
 
 `OFF-03` consumes both boundaries to protect the device-local read model. It
 does not implement OFF-04 synchronization or OFF-05 emergency-card content.
+
+`OFF-04` is complete. It consumes the unlocked SQLCipher boundary and existing
+server change, idempotency, audit, and outbox primitives. Its first production
+aggregate is the synthetic-only child profile; OFF-05 remains responsible for
+emergency-card content and product UI.

@@ -8,4 +8,5 @@ export * from "./owner-onboarding.js";
 export * from "./readiness.js";
 export * from "./roles.js";
 export * from "./schema/index.js";
+export * from "./sync.js";
 export * from "./tenant-context.js";

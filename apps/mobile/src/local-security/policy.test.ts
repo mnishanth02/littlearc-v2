@@ -32,10 +32,10 @@ describe("OFF-03 local security policy", () => {
           deviceId: uuidV7,
           generationId: uuidV7,
           householdId: uuidV7,
-          localSchemaVersion: 1,
+          localSchemaVersion: 2,
         }),
       ),
-    ).toMatchObject({ localSchemaVersion: 1 });
+    ).toMatchObject({ localSchemaVersion: 2 });
     expect(() =>
       parseLocalEnrollmentMarker(
         JSON.stringify({
@@ -47,6 +47,17 @@ describe("OFF-03 local security policy", () => {
         }),
       ),
     ).toThrow("invalid");
+    expect(
+      parseLocalEnrollmentMarker(
+        JSON.stringify({
+          appLockPolicy: localAppLockPolicy,
+          deviceId: uuidV7,
+          generationId: uuidV7,
+          householdId: uuidV7,
+          localSchemaVersion: 1,
+        }),
+      ),
+    ).toMatchObject({ localSchemaVersion: 1 });
   });
 
   it("wipes local security even when remote sign-out fails", async () => {

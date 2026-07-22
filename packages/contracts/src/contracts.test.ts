@@ -10,7 +10,10 @@ import {
   openApiDocument,
   ownerOnboardingRequestSchema,
   problemDetailsSchema,
+  syncMutationPushRequestSchema,
+  syncMutationResultSchema,
   syncMutationSchema,
+  syncPullResponseSchema,
   utcTimestampSchema,
   uuidV7Schema,
 } from "./index.js";
@@ -136,5 +139,49 @@ describe("LittleArc API contract", () => {
         platform: "android",
       }),
     ).toThrow();
+  });
+
+  it("defines bounded OFF-04 pull, snapshot, mutation, and conflict contracts", () => {
+    expect(Object.keys(openApiDocument.paths)).toEqual(
+      expect.arrayContaining(["/v1/sync", "/v1/sync/snapshot", "/v1/sync/mutations"]),
+    );
+    expect(
+      syncPullResponseSchema.parse({
+        kind: "resetRequired",
+        reason: "cursorExpired",
+        serverTime: "2026-07-22T12:00:00.000Z",
+      }),
+    ).toMatchObject({ reason: "cursorExpired" });
+    expect(
+      syncMutationPushRequestSchema.parse({
+        mutations: [
+          {
+            baseRevision: 1,
+            entityId: validUuidV7,
+            entityType: "child",
+            idempotencyKey: validUuidV7,
+            localDependencyIds: [],
+            mutationId: validUuidV7,
+            operation: "update",
+            payload: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
+          },
+        ],
+      }),
+    ).toBeDefined();
+    expect(
+      syncMutationResultSchema.parse({
+        current: {
+          childId: validUuidV7,
+          dateOfBirth: "2020-01-01",
+          preferredName: "Server Synthetic Child",
+          revision: 2,
+          updatedAt: "2026-07-22T12:00:00.000Z",
+        },
+        entityId: validUuidV7,
+        mutationId: validUuidV7,
+        reason: "staleCriticalRevision",
+        status: "conflict",
+      }),
+    ).toMatchObject({ status: "conflict" });
   });
 });

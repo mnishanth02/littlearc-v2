@@ -1,6 +1,10 @@
 import { createConsumerAuth, createResendOtpDelivery } from "@littlearc/auth";
 import { createStructuredPayloadCrypto } from "@littlearc/crypto";
-import { createDatabaseConnection } from "@littlearc/database";
+import {
+  createDatabaseConnection,
+  createSyncCursorCodec,
+  createSyncPersistence,
+} from "@littlearc/database";
 import { createSafeLogger } from "@littlearc/observability";
 import { loadApiConfig } from "./config.js";
 import { createDeviceEnrollmentCommand } from "./device-enrollment.js";
@@ -9,6 +13,7 @@ import {
   createSyntheticAdultVerification,
 } from "./owner-onboarding.js";
 import { createApiServer } from "./server.js";
+import { createSyncService } from "./sync.js";
 
 const config = loadApiConfig();
 const logger = createSafeLogger({
@@ -38,15 +43,18 @@ const consumerAuth =
         trustedOrigins: config.consumerAuth.trustedOrigins,
       })
     : undefined;
+const structuredPayloadCrypto = config.ownerOnboarding
+  ? createStructuredPayloadCrypto({
+      keyEncryptionKey: Buffer.from(config.ownerOnboarding.keyEncryptionKey, "base64url"),
+      wrappingKeyVersion: config.ownerOnboarding.wrappingKeyVersion,
+    })
+  : undefined;
 const ownerOnboarding =
-  config.ownerOnboarding && consumerAuth && databaseConnection
+  config.ownerOnboarding && consumerAuth && databaseConnection && structuredPayloadCrypto
     ? {
         command: createOwnerOnboardingCommand({
           adultVerification: createSyntheticAdultVerification(),
-          crypto: createStructuredPayloadCrypto({
-            keyEncryptionKey: Buffer.from(config.ownerOnboarding.keyEncryptionKey, "base64url"),
-            wrappingKeyVersion: config.ownerOnboarding.wrappingKeyVersion,
-          }),
+          crypto: structuredPayloadCrypto,
           database: databaseConnection.database,
         }),
         getSessionIdentity: consumerAuth.getSessionIdentity,
@@ -59,12 +67,28 @@ const deviceEnrollment =
         getSessionIdentity: consumerAuth.getSessionIdentity,
       }
     : undefined;
+const sync =
+  consumerAuth && databaseConnection && structuredPayloadCrypto && config.ownerOnboarding
+    ? {
+        getSessionIdentity: consumerAuth.getSessionIdentity,
+        service: createSyncService({
+          cursorCodec: createSyncCursorCodec(
+            Buffer.from(config.ownerOnboarding.keyEncryptionKey, "base64url"),
+          ),
+          persistence: createSyncPersistence({
+            crypto: structuredPayloadCrypto,
+            database: databaseConnection.database,
+          }),
+        }),
+      }
+    : undefined;
 const server = await createApiServer(
   config,
   logger,
   consumerAuth,
   ownerOnboarding,
   deviceEnrollment,
+  sync,
 );
 
 if (databaseConnection) {

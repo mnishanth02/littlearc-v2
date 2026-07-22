@@ -145,6 +145,13 @@ export async function validateUnlockedLocalSecurity(): Promise<{
   try {
     cipherVersion = await requireCipher(first);
     await applyLocalMigrations(first);
+    if (marker.localSchemaVersion !== localSchemaVersion) {
+      await SecureStore.setItemAsync(
+        enrollmentMarkerName,
+        JSON.stringify({ ...marker, localSchemaVersion }),
+        deviceOnlyOptions,
+      );
+    }
   } finally {
     await first.closeAsync();
   }
@@ -180,6 +187,29 @@ export async function validateUnlockedLocalSecurity(): Promise<{
     reopenPassed: true,
     wrongDatabaseKeyRejected: await wrongDatabaseKeyIsRejected(),
   };
+}
+
+export async function withUnlockedLocalDatabase<T>(
+  task: (database: SQLite.SQLiteDatabase) => Promise<T>,
+): Promise<T> {
+  const markerValue = await SecureStore.getItemAsync(enrollmentMarkerName, deviceOnlyOptions);
+  if (!markerValue) {
+    throw new Error("This installation is not enrolled.");
+  }
+  parseLocalEnrollmentMarker(markerValue);
+  const databaseKey = await SecureStore.getItemAsync(databaseKeyName, protectedOptions);
+  if (!databaseKey) {
+    throw new Error("Account reauthentication is required before synchronization.");
+  }
+  const database = await openEncryptedDatabase(databaseKey);
+  try {
+    await requireCipher(database);
+    await applyLocalMigrations(database);
+    await database.execAsync("PRAGMA foreign_keys = ON;");
+    return await task(database);
+  } finally {
+    await database.closeAsync();
+  }
 }
 
 export async function simulateProtectedKeyInvalidationForValidation(): Promise<void> {

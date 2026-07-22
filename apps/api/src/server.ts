@@ -25,6 +25,7 @@ import {
   registerOwnerOnboardingRoute,
 } from "./owner-onboarding-route.js";
 import { registerProblemDetails } from "./problem.js";
+import { registerSyncRoutes, type SyncRouteDependencies } from "./sync-route.js";
 
 export type HealthResponse = {
   readonly status: "ok";
@@ -55,6 +56,7 @@ export async function createApiServer(
   consumerAuth?: Pick<ConsumerAuth, "handler">,
   ownerOnboarding?: OwnerOnboardingRouteDependencies,
   deviceEnrollment?: DeviceEnrollmentRouteDependencies,
+  sync?: SyncRouteDependencies,
 ): Promise<FastifyInstance> {
   const server = Fastify({
     genReqId: () => nextId(),
@@ -97,6 +99,9 @@ export async function createApiServer(
   }
   if (deviceEnrollment) {
     registerDeviceEnrollmentRoute(server, deviceEnrollment);
+  }
+  if (sync) {
+    registerSyncRoutes(server, sync);
   }
 
   server.get("/v1", async () => contractMetadata);

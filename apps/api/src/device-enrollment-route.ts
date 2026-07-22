@@ -10,7 +10,7 @@ export type DeviceEnrollmentCommand = {
     readonly request: {
       readonly appVersion: string;
       readonly deviceId: UuidV7;
-      readonly localSchemaVersion: 1;
+      readonly localSchemaVersion: 1 | 2;
       readonly platform: "android" | "ios";
     };
     readonly requestId: UuidV7;
@@ -18,7 +18,7 @@ export type DeviceEnrollmentCommand = {
     readonly deviceId: UuidV7;
     readonly enrollmentStatus: "active";
     readonly householdId: UuidV7;
-    readonly localSchemaVersion: 1;
+    readonly localSchemaVersion: 1 | 2;
     readonly replayed: boolean;
   }>;
 };

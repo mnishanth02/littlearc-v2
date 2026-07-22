@@ -44,6 +44,7 @@
 | `OFF-01` consumer authentication and session lifecycle | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-01-consumer-authentication-and-session-lifecycle-plan.md), [evidence](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) |
 | `OFF-02` household, parent, child, consent, and audit | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md), [evidence](./impl-plan/m2-offline-trust/off-02-implementation-evidence.md) |
 | `OFF-03` local security and enrollment | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-03-local-security-and-enrollment-plan.md), [evidence](./impl-plan/m2-offline-trust/off-03-implementation-evidence.md) |
+| `OFF-04` repository and synchronization engine | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-04-repository-and-synchronization-engine-plan.md), [evidence](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) |
 
 ## Engineering Baseline
 

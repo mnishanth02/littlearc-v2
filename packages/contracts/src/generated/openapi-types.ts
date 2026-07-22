@@ -4,6 +4,462 @@
  */
 
 export interface paths {
+    "/v1/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pull ordered household changes or request reconciliation */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ordered changes or a typed reset requirement */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            changes: ({
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                entity: {
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    preferredName: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                };
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "child";
+                                /** @enum {string} */
+                                operation: "upsert";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "child";
+                                /** @enum {string} */
+                                operation: "delete";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            })[];
+                            hasMore: boolean;
+                            /** @enum {string} */
+                            kind: "changes";
+                            /** @description Opaque pagination or synchronization cursor */
+                            nextCursor: string;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            serverTime: string;
+                        } | {
+                            /** @enum {string} */
+                            kind: "resetRequired";
+                            /** @enum {string} */
+                            reason: "initialSync" | "cursorExpired";
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            serverTime: string;
+                        };
+                    };
+                };
+                /** @description Cursor or page request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Active household membership required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sync/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a captured paginated household snapshot */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Captured child repository snapshot page */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Opaque pagination or synchronization cursor */
+                            capturedCursor: string;
+                            hasMore: boolean;
+                            items: {
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                /** Format: date */
+                                dateOfBirth: string;
+                                preferredName: string;
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                updatedAt: string;
+                            }[];
+                            /** @description Opaque pagination or synchronization cursor */
+                            nextSnapshotCursor: string | null;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            serverTime: string;
+                        };
+                    };
+                };
+                /** @description Snapshot cursor or page request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sync/mutations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Push ordered idempotent local mutations */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        mutations: {
+                            /** @description Mutable entity revision */
+                            baseRevision: number;
+                            /** @description UUIDv7 identifier */
+                            entityId: string;
+                            /** @enum {string} */
+                            entityType: "child";
+                            /** @description UUIDv7 identifier */
+                            idempotencyKey: string;
+                            localDependencyIds: string[];
+                            /** @description UUIDv7 identifier */
+                            mutationId: string;
+                            /** @enum {string} */
+                            operation: "update";
+                            payload: {
+                                /** Format: date */
+                                dateOfBirth: string;
+                                preferredName: string;
+                            };
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Independent mutation outcomes */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            results: ({
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @description UUIDv7 identifier */
+                                mutationId: string;
+                                entity: {
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    preferredName: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                };
+                                /** @enum {string} */
+                                status: "applied" | "duplicate";
+                            } | {
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @description UUIDv7 identifier */
+                                mutationId: string;
+                                current: {
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    preferredName: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                };
+                                /** @enum {string} */
+                                reason: "staleCriticalRevision";
+                                /** @enum {string} */
+                                status: "conflict";
+                            } | {
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @description UUIDv7 identifier */
+                                mutationId: string;
+                                /** @enum {string} */
+                                reason: "authorizationDenied" | "dependencyFailed" | "dependencyMissing" | "idempotencyMismatch" | "tombstoneWins" | "unsupportedMutation" | "validationFailed";
+                                /** @enum {string} */
+                                status: "rejected";
+                            })[];
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            serverTime: string;
+                        };
+                    };
+                };
+                /** @description Mutation batch is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/devices/enrollment": {
         parameters: {
             query?: never;
@@ -27,8 +483,7 @@ export interface paths {
                         appVersion: string;
                         /** @description UUIDv7 identifier */
                         deviceId: string;
-                        /** @enum {number} */
-                        localSchemaVersion: 1;
+                        localSchemaVersion: 1 | 2;
                         /** @enum {string} */
                         platform: "android" | "ios";
                     };
@@ -48,8 +503,7 @@ export interface paths {
                             enrollmentStatus: "active";
                             /** @description UUIDv7 identifier */
                             householdId: string;
-                            /** @enum {number} */
-                            localSchemaVersion: 1;
+                            localSchemaVersion: 1 | 2;
                             replayed: boolean;
                         };
                     };
@@ -67,8 +521,7 @@ export interface paths {
                             enrollmentStatus: "active";
                             /** @description UUIDv7 identifier */
                             householdId: string;
-                            /** @enum {number} */
-                            localSchemaVersion: 1;
+                            localSchemaVersion: 1 | 2;
                             replayed: boolean;
                         };
                     };
@@ -551,7 +1004,7 @@ export interface components {
             /** @description UUIDv7 identifier */
             actorId: string;
             /** @enum {string} */
-            action: "household_created" | "child_created" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "staff_action_recorded";
+            action: "household_created" | "child_created" | "child_updated" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "staff_action_recorded";
             targetType: string;
             /** @description UUIDv7 identifier */
             targetId: string;
@@ -601,6 +1054,231 @@ export interface components {
             baseRevision: number | null;
             localDependencyIds: string[];
         };
+        ChildProfileProjection: {
+            /** @description UUIDv7 identifier */
+            childId: string;
+            /** Format: date */
+            dateOfBirth: string;
+            preferredName: string;
+            /** @description Mutable entity revision */
+            revision: number;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            updatedAt: string;
+        };
+        ChildProfileSyncMutation: {
+            /** @description Mutable entity revision */
+            baseRevision: number;
+            /** @description UUIDv7 identifier */
+            entityId: string;
+            /** @enum {string} */
+            entityType: "child";
+            /** @description UUIDv7 identifier */
+            idempotencyKey: string;
+            localDependencyIds: string[];
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+            /** @enum {string} */
+            operation: "update";
+            payload: {
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+            };
+        };
+        SyncMutationResult: {
+            /** @description UUIDv7 identifier */
+            entityId: string;
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+            entity: {
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+            };
+            /** @enum {string} */
+            status: "applied" | "duplicate";
+        } | {
+            /** @description UUIDv7 identifier */
+            entityId: string;
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+            current: {
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+            };
+            /** @enum {string} */
+            reason: "staleCriticalRevision";
+            /** @enum {string} */
+            status: "conflict";
+        } | {
+            /** @description UUIDv7 identifier */
+            entityId: string;
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+            /** @enum {string} */
+            reason: "authorizationDenied" | "dependencyFailed" | "dependencyMissing" | "idempotencyMismatch" | "tombstoneWins" | "unsupportedMutation" | "validationFailed";
+            /** @enum {string} */
+            status: "rejected";
+        };
+        SyncPullResponse: {
+            changes: ({
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                entity: {
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** Format: date */
+                    dateOfBirth: string;
+                    preferredName: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                };
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "child";
+                /** @enum {string} */
+                operation: "upsert";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "child";
+                /** @enum {string} */
+                operation: "delete";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            })[];
+            hasMore: boolean;
+            /** @enum {string} */
+            kind: "changes";
+            /** @description Opaque pagination or synchronization cursor */
+            nextCursor: string;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            serverTime: string;
+        } | {
+            /** @enum {string} */
+            kind: "resetRequired";
+            /** @enum {string} */
+            reason: "initialSync" | "cursorExpired";
+            /** @description Normalized UTC ISO 8601 timestamp */
+            serverTime: string;
+        };
+        SyncSnapshotPage: {
+            /** @description Opaque pagination or synchronization cursor */
+            capturedCursor: string;
+            hasMore: boolean;
+            items: {
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+            }[];
+            /** @description Opaque pagination or synchronization cursor */
+            nextSnapshotCursor: string | null;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            serverTime: string;
+        };
+        SyncMutationPushRequest: {
+            mutations: {
+                /** @description Mutable entity revision */
+                baseRevision: number;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "child";
+                /** @description UUIDv7 identifier */
+                idempotencyKey: string;
+                localDependencyIds: string[];
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                operation: "update";
+                payload: {
+                    /** Format: date */
+                    dateOfBirth: string;
+                    preferredName: string;
+                };
+            }[];
+        };
+        SyncMutationPushResponse: {
+            results: ({
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                entity: {
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** Format: date */
+                    dateOfBirth: string;
+                    preferredName: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                };
+                /** @enum {string} */
+                status: "applied" | "duplicate";
+            } | {
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                current: {
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** Format: date */
+                    dateOfBirth: string;
+                    preferredName: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                };
+                /** @enum {string} */
+                reason: "staleCriticalRevision";
+                /** @enum {string} */
+                status: "conflict";
+            } | {
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                reason: "authorizationDenied" | "dependencyFailed" | "dependencyMissing" | "idempotencyMismatch" | "tombstoneWins" | "unsupportedMutation" | "validationFailed";
+                /** @enum {string} */
+                status: "rejected";
+            })[];
+            /** @description Normalized UTC ISO 8601 timestamp */
+            serverTime: string;
+        };
         OwnerOnboardingRequest: {
             adultVerificationAssertion: string;
             child: {
@@ -638,8 +1316,7 @@ export interface components {
             appVersion: string;
             /** @description UUIDv7 identifier */
             deviceId: string;
-            /** @enum {number} */
-            localSchemaVersion: 1;
+            localSchemaVersion: 1 | 2;
             /** @enum {string} */
             platform: "android" | "ios";
         };
@@ -650,8 +1327,7 @@ export interface components {
             enrollmentStatus: "active";
             /** @description UUIDv7 identifier */
             householdId: string;
-            /** @enum {number} */
-            localSchemaVersion: 1;
+            localSchemaVersion: 1 | 2;
             replayed: boolean;
         };
     };

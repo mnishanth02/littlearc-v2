@@ -2,6 +2,8 @@ import { OpenAPIRegistry, OpenApiGeneratorV31 } from "@asteasolutions/zod-to-ope
 import {
   auditEventSchema,
   childIdentifierSchema,
+  childProfileProjectionSchema,
+  childProfileSyncMutationSchema,
   consentEventSchema,
   contractMetadataSchema,
   deviceEnrollmentRequestSchema,
@@ -13,7 +15,12 @@ import {
   paginatedResponseSchema,
   problemDetailsSchema,
   recordDescriptorSchema,
+  syncMutationPushRequestSchema,
+  syncMutationPushResponseSchema,
+  syncMutationResultSchema,
   syncMutationSchema,
+  syncPullResponseSchema,
+  syncSnapshotPageSchema,
   z,
 } from "../schema-source/index.js";
 
@@ -47,10 +54,106 @@ registry.register("ConsentEvent", consentEventSchema);
 registry.register("AuditEvent", auditEventSchema);
 registry.register("RecordDescriptor", recordDescriptorSchema);
 registry.register("SyncMutation", syncMutationSchema);
+registry.register("ChildProfileProjection", childProfileProjectionSchema);
+registry.register("ChildProfileSyncMutation", childProfileSyncMutationSchema);
+registry.register("SyncMutationResult", syncMutationResultSchema);
+registry.register("SyncPullResponse", syncPullResponseSchema);
+registry.register("SyncSnapshotPage", syncSnapshotPageSchema);
+registry.register("SyncMutationPushRequest", syncMutationPushRequestSchema);
+registry.register("SyncMutationPushResponse", syncMutationPushResponseSchema);
 registry.register("OwnerOnboardingRequest", ownerOnboardingRequestSchema);
 registry.register("OwnerOnboardingResponse", ownerOnboardingResponseSchema);
 registry.register("DeviceEnrollmentRequest", deviceEnrollmentRequestSchema);
 registry.register("DeviceEnrollmentResponse", deviceEnrollmentResponseSchema);
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/sync",
+  tags: ["sync"],
+  summary: "Pull ordered household changes or request reconciliation",
+  security: [{ consumerSession: [] }],
+  request: {
+    query: z.object({
+      cursor: z.string().optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(50),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Ordered changes or a typed reset requirement",
+      content: { "application/json": { schema: syncPullResponseSchema } },
+    },
+    400: {
+      description: "Cursor or page request is invalid",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    401: {
+      description: "Consumer session required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    403: {
+      description: "Active household membership required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/sync/snapshot",
+  tags: ["sync"],
+  summary: "Read a captured paginated household snapshot",
+  security: [{ consumerSession: [] }],
+  request: {
+    query: z.object({
+      cursor: z.string().optional(),
+      limit: z.coerce.number().int().min(1).max(100).default(50),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Captured child repository snapshot page",
+      content: { "application/json": { schema: syncSnapshotPageSchema } },
+    },
+    400: {
+      description: "Snapshot cursor or page request is invalid",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    401: {
+      description: "Consumer session required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/v1/sync/mutations",
+  tags: ["sync"],
+  summary: "Push ordered idempotent local mutations",
+  security: [{ consumerSession: [] }],
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: syncMutationPushRequestSchema },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Independent mutation outcomes",
+      content: { "application/json": { schema: syncMutationPushResponseSchema } },
+    },
+    400: {
+      description: "Mutation batch is invalid",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    401: {
+      description: "Consumer session required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
 
 registry.registerPath({
   method: "post",
@@ -209,7 +312,7 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
     info: {
       title: "LittleArc API",
       version: "0.1.0",
-      description: "Versioned LittleArc API contract through OFF-03 local enrollment.",
+      description: "Versioned LittleArc API contract through OFF-04 synchronization.",
     },
     servers: [
       {
@@ -229,6 +332,10 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
       {
         name: "devices",
         description: "Authority-neutral authenticated installation enrollment",
+      },
+      {
+        name: "sync",
+        description: "Server-authoritative repository synchronization",
       },
     ],
   }) as unknown as GeneratedOpenApiDocument;

@@ -346,6 +346,104 @@ describe("API skeleton", () => {
     expect(dependencies.command.execute).not.toHaveBeenCalled();
   });
 
+  it("authenticates and validates OFF-04 pull, snapshot, and mutation routes", async () => {
+    const childId = nextId();
+    const cursor = "eyJzeW50aGV0aWMiOiJvZmYwNC1jdXJzb3IifQ";
+    const service = {
+      pull: vi.fn(async () => ({
+        changes: [],
+        hasMore: false,
+        kind: "changes" as const,
+        nextCursor: cursor,
+        serverTime: "2026-07-22T12:00:00.000Z",
+      })),
+      push: vi.fn(async (input: { readonly mutations: ReadonlyArray<unknown> }) => ({
+        results: [
+          {
+            entity: {
+              childId,
+              dateOfBirth: "2020-01-01",
+              preferredName: "Synthetic Updated Child",
+              revision: 2,
+              updatedAt: "2026-07-22T12:00:00.000Z",
+            },
+            entityId: childId,
+            mutationId: nextId(),
+            status: "applied" as const,
+          },
+        ],
+        serverTime: "2026-07-22T12:00:00.000Z",
+        submittedCount: input.mutations.length,
+      })),
+      snapshot: vi.fn(async () => ({
+        capturedCursor: cursor,
+        hasMore: false,
+        items: [
+          {
+            childId,
+            dateOfBirth: "2020-01-01",
+            preferredName: "Synthetic Child",
+            revision: 1,
+            updatedAt: "2026-07-22T11:00:00.000Z",
+          },
+        ],
+        nextSnapshotCursor: null,
+        serverTime: "2026-07-22T12:00:00.000Z",
+      })),
+    };
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "local" }),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        async getSessionIdentity() {
+          return { userId: "synthetic-auth-user" };
+        },
+        service,
+      },
+    );
+
+    const pull = await server.inject({ method: "GET", url: `/v1/sync?cursor=${cursor}` });
+    const snapshot = await server.inject({ method: "GET", url: "/v1/sync/snapshot" });
+    const mutationId = nextId();
+    const push = await server.inject({
+      method: "POST",
+      payload: {
+        mutations: [
+          {
+            baseRevision: 1,
+            entityId: childId,
+            entityType: "child",
+            idempotencyKey: nextId(),
+            localDependencyIds: [],
+            mutationId,
+            operation: "update",
+            payload: {
+              dateOfBirth: "2020-01-01",
+              preferredName: "Synthetic Updated Child",
+            },
+          },
+        ],
+      },
+      url: "/v1/sync/mutations",
+    });
+
+    expect(pull.statusCode).toBe(200);
+    expect(pull.json()).toMatchObject({ kind: "changes", nextCursor: cursor });
+    expect(snapshot.statusCode).toBe(200);
+    expect(snapshot.json().items[0]).toMatchObject({ childId, revision: 1 });
+    expect(push.statusCode).toBe(200);
+    expect(push.json().results[0]).toMatchObject({ entityId: childId, status: "applied" });
+    expect(service.pull).toHaveBeenCalledWith(
+      expect.objectContaining({ identityUserId: "synthetic-auth-user" }),
+    );
+    expect(service.push).toHaveBeenCalledWith(
+      expect.objectContaining({ identityUserId: "synthetic-auth-user" }),
+    );
+  });
+
   it("does not misclassify unexpected database errors as client policy failures", async () => {
     const server = await createApiServer(
       loadApiConfig({ APP_ENV: "local" }),

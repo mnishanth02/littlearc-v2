@@ -1,4 +1,4 @@
-export const localSchemaVersion = 1 as const;
+export const localSchemaVersion = 2 as const;
 export const localAppLockPolicy = "strong_biometric" as const;
 
 export type ProtectedKeyState = "available" | "cancelled" | "missing" | "unavailable";
@@ -25,7 +25,7 @@ export type LocalEnrollmentMarker = {
   readonly deviceId: string;
   readonly generationId: string;
   readonly householdId: string;
-  readonly localSchemaVersion: typeof localSchemaVersion;
+  readonly localSchemaVersion: 1 | typeof localSchemaVersion;
 };
 
 export function parseLocalEnrollmentMarker(value: string): LocalEnrollmentMarker {
@@ -35,7 +35,7 @@ export function parseLocalEnrollmentMarker(value: string): LocalEnrollmentMarker
     !isUuidV7(parsed.deviceId) ||
     !isUuidV7(parsed.generationId) ||
     !isUuidV7(parsed.householdId) ||
-    parsed.localSchemaVersion !== localSchemaVersion
+    (parsed.localSchemaVersion !== 1 && parsed.localSchemaVersion !== localSchemaVersion)
   ) {
     throw new Error("The local enrollment marker is invalid.");
   }

@@ -76,6 +76,7 @@ export type ConsentState = (typeof consentStates)[number];
 export const auditActions = [
   "household_created",
   "child_created",
+  "child_updated",
   "consent_recorded",
   "record_created",
   "record_updated",

@@ -3,7 +3,12 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { createStructuredPayloadCrypto } from "@littlearc/crypto";
 import type { DeviceEnrollmentPersistenceError } from "@littlearc/database";
-import { createDatabaseConnection } from "@littlearc/database";
+import {
+  createDatabaseConnection,
+  createSyncCursorCodec,
+  createSyncPersistence,
+} from "@littlearc/database";
+import type { UuidV7 } from "@littlearc/domain";
 import { Client } from "pg";
 import { loadApiConfig } from "../src/config.js";
 import { createDeviceEnrollmentCommand } from "../src/device-enrollment.js";
@@ -16,6 +21,7 @@ import {
   type OwnerOnboardingRequest,
 } from "../src/owner-onboarding.js";
 import { createApiServer } from "../src/server.js";
+import { createSyncService, type SyncService } from "../src/sync.js";
 
 const migrationPaths = [
   "../../../packages/database/migrations/0001_fnd_05_database_foundation.sql",
@@ -24,6 +30,7 @@ const migrationPaths = [
 ].map((path) => fileURLToPath(new URL(path, import.meta.url)));
 const deviceMode = process.argv.includes("--device");
 const off03DeviceMode = process.argv.includes("--device-off03");
+const off04DeviceMode = process.argv.includes("--device-off04");
 const syntheticRequest: OwnerOnboardingRequest = {
   adultVerificationAssertion: "synthetic-approved-off-02",
   child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
@@ -128,6 +135,7 @@ async function runAutomated(
   deviceCommand: DeviceEnrollmentCommand,
   client: Client,
   currentUser: string,
+  syncService: SyncService,
 ): Promise<void> {
   const firstUser = "synthetic-off02-owner-one";
   const secondUser = "synthetic-off02-owner-two";
@@ -334,6 +342,229 @@ async function runAutomated(
   console.log("- Session-derived household enrollment and app-version replay passed.");
   console.log("- Cross-identity reuse, revoked reactivation, and forced rollback failed closed.");
   console.log("- RLS-bound device, minimized audit, and outbox evidence passed.");
+
+  await runSyncAutomated(syncService, client, {
+    firstChildId: first.childId,
+    firstHouseholdId: first.householdId,
+    firstUser,
+    secondUser,
+  });
+}
+
+async function runSyncAutomated(
+  syncService: SyncService,
+  client: Client,
+  input: {
+    readonly firstChildId: UuidV7;
+    readonly firstHouseholdId: UuidV7;
+    readonly firstUser: string;
+    readonly secondUser: string;
+  },
+): Promise<void> {
+  const initial = await syncService.pull({ identityUserId: input.firstUser, limit: 1 });
+  assert(
+    initial.kind === "resetRequired" && initial.reason === "initialSync",
+    "Initial sync did not require a reset.",
+  );
+  const snapshot = await syncService.snapshot({ identityUserId: input.firstUser, limit: 1 });
+  assert(snapshot.items.length === 1, "Initial child snapshot was incomplete.");
+  assert(snapshot.items[0]?.childId === input.firstChildId, "Snapshot returned another child.");
+
+  const mutationId = nextId();
+  const idempotencyKey = nextId();
+  const mutation = {
+    baseRevision: 1,
+    entityId: input.firstChildId,
+    idempotencyKey,
+    localDependencyIds: [],
+    mutationId,
+    payload: {
+      dateOfBirth: "2020-01-01",
+      preferredName: "Synthetic Synced Child",
+    },
+  };
+  const firstPush = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [mutation],
+  });
+  assert(firstPush.results[0]?.status === "applied", "Current child mutation did not apply.");
+  const evidenceAfterApply = await syncEvidenceCounts(client, mutationId);
+  assert(
+    evidenceAfterApply.audit === "1" &&
+      evidenceAfterApply.changes === "1" &&
+      evidenceAfterApply.idempotency === "1" &&
+      evidenceAfterApply.outbox === "1",
+    "Applied mutation evidence was not atomic.",
+  );
+
+  const replay = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [mutation],
+  });
+  assert(replay.results[0]?.status === "duplicate", "Exact mutation retry was not duplicate.");
+  assert(
+    JSON.stringify(await syncEvidenceCounts(client, mutationId)) ===
+      JSON.stringify(evidenceAfterApply),
+    "Duplicate mutation retry added evidence rows.",
+  );
+
+  const mismatch = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [
+      {
+        ...mutation,
+        payload: { ...mutation.payload, preferredName: "Changed Replay" },
+      },
+    ],
+  });
+  assert(
+    mismatch.results[0]?.status === "rejected" &&
+      mismatch.results[0].reason === "idempotencyMismatch",
+    "Changed idempotency replay did not fail closed.",
+  );
+
+  const stale = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [
+      {
+        ...mutation,
+        idempotencyKey: nextId(),
+        mutationId: nextId(),
+        payload: { ...mutation.payload, preferredName: "Stale Local Child" },
+      },
+    ],
+  });
+  assert(stale.results[0]?.status === "conflict", "Stale critical mutation did not conflict.");
+
+  const crossHousehold = await syncService.push({
+    identityUserId: input.secondUser,
+    mutations: [
+      {
+        ...mutation,
+        baseRevision: 2,
+        idempotencyKey: nextId(),
+        mutationId: nextId(),
+      },
+    ],
+  });
+  assert(
+    crossHousehold.results[0]?.status === "rejected" &&
+      crossHousehold.results[0].reason === "authorizationDenied",
+    "Cross-household child mutation did not fail closed.",
+  );
+
+  const incremental = await syncService.pull({
+    cursor: snapshot.capturedCursor,
+    identityUserId: input.firstUser,
+    limit: 1,
+  });
+  assert(incremental.kind === "changes", "Incremental sync did not return changes.");
+  if (incremental.kind === "changes") {
+    assert(incremental.changes.length <= 1, "Incremental page exceeded its requested limit.");
+    let page = incremental;
+    while (page.hasMore) {
+      const next = await syncService.pull({
+        cursor: page.nextCursor,
+        identityUserId: input.firstUser,
+        limit: 1,
+      });
+      assert(next.kind === "changes", "Incremental pagination unexpectedly reset.");
+      if (next.kind !== "changes") {
+        break;
+      }
+      page = next;
+    }
+  }
+
+  await client.query(`
+    create function littlearc.off04_force_rollback() returns trigger language plpgsql as $$
+    begin
+      raise exception 'synthetic OFF-04 forced rollback';
+    end $$;
+    create trigger off04_force_rollback before insert on littlearc.outbox_events
+    for each row execute function littlearc.off04_force_rollback();
+  `);
+  const rollbackMutationId = nextId();
+  try {
+    await syncService.push({
+      identityUserId: input.firstUser,
+      mutations: [
+        {
+          ...mutation,
+          baseRevision: 2,
+          idempotencyKey: nextId(),
+          mutationId: rollbackMutationId,
+          payload: { ...mutation.payload, preferredName: "Rollback Child" },
+        },
+      ],
+    });
+    throw new Error("Forced OFF-04 rollback unexpectedly succeeded.");
+  } catch (error) {
+    assert(
+      error instanceof Error &&
+        (error.message.includes("synthetic OFF-04 forced rollback") ||
+          error.message.includes("insert into littlearc.outbox_events")),
+      "Forced OFF-04 rollback returned the wrong error: " +
+        (error instanceof Error ? error.message : String(error)),
+    );
+  } finally {
+    await client.query("drop trigger off04_force_rollback on littlearc.outbox_events");
+    await client.query("drop function littlearc.off04_force_rollback()");
+  }
+  const rollbackEvidence = await syncEvidenceCounts(client, rollbackMutationId);
+  assert(
+    Object.values(rollbackEvidence).every((count) => count === "0"),
+    "Failed mutation left partial evidence.",
+  );
+  const revision = await client.query<{ readonly revision: number }>(
+    "select revision from littlearc.children where id = $1",
+    [input.firstChildId],
+  );
+  assert(revision.rows[0]?.revision === 2, "Failed mutation changed the child revision.");
+
+  const persisted = JSON.stringify(
+    (
+      await client.query(
+        `select encrypted_profile, metadata from littlearc.children
+         join littlearc.audit_events on audit_events.target_id = children.id
+         where children.id = $1`,
+        [input.firstChildId],
+      )
+    ).rows,
+  );
+  assert(!persisted.includes("Synthetic Synced Child"), "Sync plaintext reached PostgreSQL.");
+  console.log("OFF-04 PostgreSQL synchronization validation passed.");
+  console.log("- Initial snapshot, ordered pagination, and incremental cursor pull passed.");
+  console.log("- Atomic apply, exact duplicate, mismatch, stale conflict, and rollback passed.");
+  console.log("- Cross-household mutation rejection and plaintext canaries passed.");
+  console.log(`- Synchronization household: ${input.firstHouseholdId}.`);
+}
+
+async function syncEvidenceCounts(
+  client: Client,
+  mutationId: string,
+): Promise<{
+  readonly audit: string;
+  readonly changes: string;
+  readonly idempotency: string;
+  readonly outbox: string;
+}> {
+  const result = await client.query<{
+    readonly audit: string;
+    readonly changes: string;
+    readonly idempotency: string;
+    readonly outbox: string;
+  }>(
+    `select
+      (select count(*)::text from littlearc.audit_events where request_id = $1) audit,
+      (select count(*)::text from littlearc.change_events where mutation_id = $1) changes,
+      (select count(*)::text from littlearc.idempotency_results where mutation_id = $1) idempotency,
+      (select count(*)::text from littlearc.outbox_events where id = $1) outbox`,
+    [mutationId],
+  );
+  const row = result.rows[0];
+  assert(row, "OFF-04 mutation evidence counts were unavailable.");
+  return row;
 }
 
 function persistenceCode(error: unknown): string | undefined {
@@ -418,6 +649,189 @@ async function serveOff03Device(
   return async () => server.close();
 }
 
+async function serveOff04Device(
+  onboardingCommand: OwnerOnboardingCommand,
+  deviceCommand: DeviceEnrollmentCommand,
+  syncService: SyncService,
+  client: Client,
+): Promise<() => Promise<void>> {
+  const userId = "synthetic-off04-pixel8";
+  await insertAuthUser(client, userId, "synthetic.off04.pixel8@example.test");
+  const onboarding = await execute(onboardingCommand, userId);
+  const getSessionIdentity = async (headers: Headers) =>
+    headers.get("x-littlearc-synthetic-session") === "off04-pixel8" ? { userId } : null;
+  const validatingSyncService: SyncService = {
+    async pull(input) {
+      try {
+        return await syncService.pull(input);
+      } catch (error) {
+        console.error(
+          "OFF-04 synthetic pull failed: " +
+            (error instanceof Error ? error.message : "unknown persistence error"),
+        );
+        throw error;
+      }
+    },
+    async push(input) {
+      try {
+        return await syncService.push(input);
+      } catch (error) {
+        console.error(
+          "OFF-04 synthetic mutation failed: " +
+            (error instanceof Error ? error.message : "unknown persistence error"),
+        );
+        throw error;
+      }
+    },
+    async snapshot(input) {
+      return syncService.snapshot(input);
+    },
+  };
+  const server = await createApiServer(
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    undefined,
+    undefined,
+    undefined,
+    { command: deviceCommand, getSessionIdentity },
+    { getSessionIdentity, service: validatingSyncService },
+  );
+
+  server.get("/v1/validation/off04/bootstrap", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    return {
+      childId: onboarding.childId,
+      householdId: onboarding.householdId,
+    };
+  });
+  server.post("/v1/validation/off04/remote-edit", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const result = await syncService.push({
+      identityUserId: userId,
+      mutations: [
+        {
+          baseRevision: 2,
+          entityId: onboarding.childId,
+          idempotencyKey: nextId(),
+          localDependencyIds: [],
+          mutationId: nextId(),
+          payload: {
+            dateOfBirth: "2020-01-01",
+            preferredName: "Remote Synthetic Child",
+          },
+        },
+      ],
+    });
+    assert(result.results[0]?.status === "applied", "Synthetic remote edit did not apply.");
+    console.log("OFF-04 simulated remote writer applied revision 3.");
+    return result;
+  });
+  server.post("/v1/validation/off04/tombstone", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const tombstoneId = nextId();
+    await client.query("begin");
+    try {
+      await client.query(
+        `update littlearc.children
+         set deleted_at = now(), revision = revision + 1, updated_at = now()
+         where id = $1 and household_id = $2`,
+        [onboarding.childId, onboarding.householdId],
+      );
+      await client.query(
+        `insert into littlearc.audit_events (
+          id, household_id, actor_id, actor_role, action, target_type,
+          target_id, request_id, result, metadata
+        ) values ($1, $2, $3, 'owner', 'child_updated', 'child', $4, $1, 'success',
+          '{"validation":"synthetic_tombstone","revision":4}'::jsonb)`,
+        [tombstoneId, onboarding.householdId, onboarding.membershipId, onboarding.childId],
+      );
+      await client.query(
+        `insert into littlearc.change_events (
+          household_id, entity_type, entity_id, operation, revision, actor_id, mutation_id
+        ) values ($1, 'child', $2, 'delete', 4, $3, $4)`,
+        [onboarding.householdId, onboarding.childId, onboarding.membershipId, tombstoneId],
+      );
+      await client.query(
+        `insert into littlearc.outbox_events (
+          id, household_id, event_type, aggregate_type, aggregate_id, payload
+        ) values ($1, $2, 'synthetic_child_tombstoned', 'child', $3,
+          '{"schemaVersion":1,"revision":4}'::jsonb)`,
+        [tombstoneId, onboarding.householdId, onboarding.childId],
+      );
+      await client.query("commit");
+    } catch (error) {
+      await client.query("rollback");
+      throw error;
+    }
+    console.log("OFF-04 synthetic tombstone committed atomically.");
+    return { revision: 4, status: "tombstoned" };
+  });
+  server.post("/v1/validation/off04/expire-cursor", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    await client.query("delete from littlearc.change_events where household_id = $1", [
+      onboarding.householdId,
+    ]);
+    await client.query(
+      `insert into littlearc.change_events (
+        household_id, entity_type, entity_id, operation, revision, actor_id, mutation_id, payload
+      ) values
+        ($1, 'consent', $2, 'upsert', 1, $3, $4, '{"state":"granted"}'::jsonb),
+        ($1, 'consent', $2, 'upsert', 2, $3, $5, '{"state":"granted"}'::jsonb),
+        ($1, 'consent', $2, 'upsert', 3, $3, $6, '{"state":"granted"}'::jsonb)`,
+      [
+        onboarding.householdId,
+        onboarding.childId,
+        onboarding.membershipId,
+        nextId(),
+        nextId(),
+        nextId(),
+      ],
+    );
+    await client.query(
+      `delete from littlearc.change_events
+       where sequence = (
+         select min(sequence) from littlearc.change_events where household_id = $1
+       )`,
+      [onboarding.householdId],
+    );
+    console.log("OFF-04 retained sequence floor advanced for cursor-reset proof.");
+    return { status: "cursor_expired" };
+  });
+  server.get("/v1/validation/off04/evidence", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const evidence = await client.query<{
+      readonly audit: string;
+      readonly changes: string;
+      readonly outbox: string;
+      readonly revision: number;
+    }>(
+      `select
+        (select count(*)::text from littlearc.audit_events
+          where household_id = $1 and action = 'child_updated') audit,
+        (select count(*)::text from littlearc.change_events where household_id = $1) changes,
+        (select count(*)::text from littlearc.outbox_events
+          where household_id = $1 and event_type in
+            ('child_profile_updated', 'synthetic_child_tombstoned')) outbox,
+        (select revision from littlearc.children where id = $2) revision`,
+      [onboarding.householdId, onboarding.childId],
+    );
+    return evidence.rows[0];
+  });
+
+  await server.listen({ host: "127.0.0.1", port: 3000 });
+  console.log("OFF-04 synthetic device API listening on 127.0.0.1:3000.");
+  return async () => server.close();
+}
+
 async function run(): Promise<void> {
   const sourceUrl = process.env.DATABASE_URL;
   assert(sourceUrl, "DATABASE_URL must be loaded from the untracked .env.aiven file.");
@@ -455,8 +869,9 @@ async function run(): Promise<void> {
     }
     await databaseClient.query(`grant littlearc_app to ${quoteIdentifier(currentUser)}`);
     connection = createDatabaseConnection(databaseUrl);
+    const keyEncryptionKey = randomBytes(32);
     const crypto = createStructuredPayloadCrypto({
-      keyEncryptionKey: randomBytes(32),
+      keyEncryptionKey,
       wrappingKeyVersion: 1,
     });
     const command = createOwnerOnboardingCommand({
@@ -465,8 +880,18 @@ async function run(): Promise<void> {
       database: connection.database,
     });
     const deviceCommand = createDeviceEnrollmentCommand(connection.database);
+    const syncService = createSyncService({
+      cursorCodec: createSyncCursorCodec(keyEncryptionKey),
+      persistence: createSyncPersistence({ crypto, database: connection.database }),
+    });
 
-    if (off03DeviceMode) {
+    if (off04DeviceMode) {
+      closeServer = await serveOff04Device(command, deviceCommand, syncService, databaseClient);
+      await new Promise<void>((resolve) => {
+        process.once("SIGINT", resolve);
+        process.once("SIGTERM", resolve);
+      });
+    } else if (off03DeviceMode) {
       closeServer = await serveOff03Device(command, deviceCommand, databaseClient);
       await new Promise<void>((resolve) => {
         process.once("SIGINT", resolve);
@@ -479,7 +904,7 @@ async function run(): Promise<void> {
         process.once("SIGTERM", resolve);
       });
     } else {
-      await runAutomated(command, deviceCommand, databaseClient, currentUser);
+      await runAutomated(command, deviceCommand, databaseClient, currentUser, syncService);
     }
   } finally {
     await closeServer?.();

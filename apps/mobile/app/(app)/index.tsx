@@ -77,6 +77,12 @@ export default function LandingScreen() {
                 variant="secondary"
               />
               <Button
+                label="Open OFF-04 repository validation"
+                onPress={() => router.push("/off-04-validation")}
+                testID="open-off04-validation"
+                variant="secondary"
+              />
+              <Button
                 label="Open design-system gallery"
                 onPress={() => router.push("/design-system")}
                 variant="secondary"
