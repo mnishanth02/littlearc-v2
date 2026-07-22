@@ -16,6 +16,9 @@ export default function AppGroupLayout() {
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="status" options={{ title: "Runtime status" }} />
       {__DEV__ ? <Stack.Screen name="design-system" options={{ title: "Design system" }} /> : null}
+      {__DEV__ ? (
+        <Stack.Screen name="off-01-validation" options={{ title: "OFF-01 validation" }} />
+      ) : null}
     </Stack>
   );
 }

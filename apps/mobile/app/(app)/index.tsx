@@ -63,11 +63,19 @@ export default function LandingScreen() {
         <View style={styles.actions}>
           <Button label="Open runtime status" onPress={() => router.push("/status")} />
           {__DEV__ ? (
-            <Button
-              label="Open design-system gallery"
-              onPress={() => router.push("/design-system")}
-              variant="secondary"
-            />
+            <>
+              <Button
+                label="Open OFF-01 device validation"
+                onPress={() => router.push("/off-01-validation")}
+                testID="open-off01-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open design-system gallery"
+                onPress={() => router.push("/design-system")}
+                variant="secondary"
+              />
+            </>
           ) : null}
         </View>
       </View>

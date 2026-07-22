@@ -11,6 +11,7 @@
     "build:ios": "EXPO_ROUTER_APP_ROOT=app expo export --platform ios --output-dir dist/ios",
     "clean": "rm -rf dist .expo android ios",
     "dev": "EXPO_ROUTER_APP_ROOT=app expo start --dev-client",
+    "dev:mcp": "EXPO_UNSTABLE_MCP_SERVER=1 EXPO_ROUTER_APP_ROOT=app expo start --dev-client",
     "doctor": "expo-doctor",
     "ios": "EXPO_ROUTER_APP_ROOT=app expo run:ios",
     "native:prebuild": "EXPO_ROUTER_APP_ROOT=app expo prebuild --clean",
@@ -55,6 +56,7 @@
   "devDependencies": {
     "@types/react": "19.2.17",
     "babel-preset-expo": "57.0.3",
-    "expo-doctor": "1.20.1"
+    "expo-doctor": "1.20.1",
+    "expo-mcp": "0.2.4"
   }
 }

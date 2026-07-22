@@ -2,7 +2,7 @@
 
 > **Status:** Active delivery dashboard
 > **Version:** 1.0
-> **Last updated:** 20 July 2026
+> **Last updated:** 22 July 2026
 > **Execution plan:** [Implementation Plan and Roadmap](./impl-plan/roadmap.md)
 > **Core documents:** [Product plan](./core/littlearc-complete-product-plan.md),
 > [architecture](./core/littlearc-architecture-and-tech-stack.md),
@@ -69,7 +69,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | `FND-08` Design-system prototype reconciliation | `COMPLETE` | Engineering | Semantic tokens, three themes, accessible primitives, dev gallery, enforcement, exports, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
 | `FND-09` ADR and engineering documentation baseline | `COMPLETE` | Engineering | Eight foundation ADRs, six engineering notes, structural enforcement, context lookup, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
 | M2. Offline trust slice | `IN PROGRESS` | Engineering | `OFF-01` is complete; implement `OFF-02` next without crossing the real-provider or real-data gates |
-| `OFF-01` Consumer authentication and session lifecycle | `COMPLETE` | Engineering | Better Auth policy, reviewed schema/migration, API/SecureStore boundaries, 111-test root suite, and Aiven PostgreSQL lifecycle accepted; see [evidence](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) |
+| `OFF-01` Consumer authentication and session lifecycle | `COMPLETE` | Engineering | Better Auth policy, reviewed schema/migration, API/SecureStore boundaries, 111-test root suite, Aiven PostgreSQL lifecycle, and bounded Pixel 8 SecureStore/deep-link evidence accepted; see [evidence](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) |
 | M3 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
@@ -92,7 +92,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 20 Jul 2026 | [Gate 1 mobile device and accessibility matrix](./impl-plan/m1-foundation/gate-1-mobile-device-and-accessibility-evidence.md) | `COMPLETE` | Founder-approved iOS-simulator plus physical-Android development clients built, launched, and rendered; foundation reference states passed large-text, contrast, scroll, TalkBack-attachment, and native-semantic checks within the recorded evidence boundaries |
 | 20 Jul 2026 | [Gate 1 Aiven PostgreSQL RLS isolation](./impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md) | `COMPLETE` | Fresh temporary database, reviewed migration, two synthetic households, real `littlearc_app` execution, fail-closed no-context reads, cross-household filtering, blocked update, and SQLSTATE `42501` insert rejection passed |
 | 20 Jul 2026 | M1 Gate 1 close-out | `COMPLETE` | All Gate 1 criteria have linked passing evidence; M2 work-package planning is ready while real-data and pre-pilot gates remain unchanged |
-| 20 Jul 2026 | [`OFF-01` consumer authentication and session lifecycle](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) | `COMPLETE` | Passwordless OTP policy, PostgreSQL sessions/rate limits, remote revocation, Fastify and SecureStore boundaries, reviewed migration, Aiven lifecycle, 111 tests, root validation, and clean-checkout proof passed; live providers/devices remain gated |
+| 20 Jul 2026 | [`OFF-01` consumer authentication and session lifecycle](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) | `COMPLETE` | Passwordless OTP policy, PostgreSQL sessions/rate limits, remote revocation, Fastify and SecureStore boundaries, reviewed migration, Aiven lifecycle, 111 tests, root validation, and clean-checkout proof passed; 22 July follow-up added Expo MCP and bounded physical-Android SecureStore/deep-link evidence while live providers and the broader device matrix remain gated |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -139,6 +139,7 @@ roadmap. This section should show only the next few actionable packages.
 | Moderate `uuid` advisory in retained M0 harness | `DEFERRED` | The alert remains visible; automatic update returned `security_update_not_possible` because the transitive major is constrained, while the root production audit is clean | Reassess at the next harness dependency review and remove with harness retirement |
 | Renovate GitHub App authorization | `DEFERRED` | Validated configuration is committed; interactive App authorization was unavailable in this session and is not a CI baseline blocker | Install from the Renovate GitHub App page and confirm its dependency dashboard |
 | Production Railway environment skeleton | `DEFERRED` | Founder directed `FND-06` to staging only for now | Reopen a separate production setup package before real-data gates |
+| `openapi-typescript` TypeScript peer metadata | `DEFERRED` | Version 7.13.0 declares TypeScript `^5.x` while the accepted root pin is 6.0.3; generation, typechecks, builds, and clean-checkout validation pass | Recheck on the next OpenAPI/toolchain upgrade and remove only after the supported peer range includes the selected root compiler |
 
 ## 10. Implementation Plans
 

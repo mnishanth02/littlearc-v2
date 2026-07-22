@@ -25,6 +25,7 @@
     "clean": "turbo run clean",
     "dev:api": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/api dev",
     "dev:mobile": "pnpm --filter @littlearc/mobile dev",
+    "dev:mobile:mcp": "pnpm --filter @littlearc/mobile dev:mcp",
     "dev:ops-web": "pnpm --filter @littlearc/ops-web dev",
     "dev:worker": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/worker dev",
     "format": "biome check --write .",

@@ -1,7 +1,7 @@
 # LittleArc Local Development
 
 > **Status:** Active local-development setup
-> **Last updated:** 20 July 2026
+> **Last updated:** 22 July 2026
 
 ## Prerequisites
 
@@ -46,6 +46,41 @@ It does not remove the current checkout's modules, caches, or native projects.
 Application development commands are available as `pnpm dev:mobile`,
 `pnpm dev:api`, `pnpm dev:worker`, and `pnpm dev:ops-web`. Mobile uses a custom
 development client, not Expo Go.
+
+### Expo MCP and physical-device development
+
+Codex uses Expo's hosted MCP endpoint. Register and authenticate it once per
+Codex installation:
+
+```sh
+codex mcp add expo --url https://mcp.expo.dev/mcp
+codex mcp login expo
+codex mcp list
+```
+
+The final command must show `expo` as enabled with OAuth authentication. The
+Expo account used by Codex must match the account used by Expo CLI.
+
+Start the mobile development client with its project-local MCP capability:
+
+```sh
+pnpm dev:mobile:mcp
+```
+
+For a USB-connected Android device using a localhost Metro server, forward the
+port before opening the development-client URL:
+
+```sh
+adb reverse tcp:8081 tcp:8081
+```
+
+Only one MCP-enabled Expo development server should run at a time. Reconnect or
+restart the Codex session after starting or stopping that server so the local
+device tools are rediscovered. Expo MCP traffic passes through Expo's server;
+use synthetic fixtures only and never expose participant, child, credential,
+OTP, cookie, or health data. See the
+[official Expo MCP guide](https://docs.expo.dev/mcp/) for the current capability
+and platform boundaries.
 
 Markdownlint covers maintained repository guidance and engineering documents.
 The accepted long-form product-plan source is explicitly excluded because its
