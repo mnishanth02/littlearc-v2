@@ -3,6 +3,7 @@ import { createStructuredPayloadCrypto } from "@littlearc/crypto";
 import { createDatabaseConnection } from "@littlearc/database";
 import { createSafeLogger } from "@littlearc/observability";
 import { loadApiConfig } from "./config.js";
+import { createDeviceEnrollmentCommand } from "./device-enrollment.js";
 import {
   createOwnerOnboardingCommand,
   createSyntheticAdultVerification,
@@ -51,7 +52,20 @@ const ownerOnboarding =
         getSessionIdentity: consumerAuth.getSessionIdentity,
       }
     : undefined;
-const server = await createApiServer(config, logger, consumerAuth, ownerOnboarding);
+const deviceEnrollment =
+  consumerAuth && databaseConnection
+    ? {
+        command: createDeviceEnrollmentCommand(databaseConnection.database),
+        getSessionIdentity: consumerAuth.getSessionIdentity,
+      }
+    : undefined;
+const server = await createApiServer(
+  config,
+  logger,
+  consumerAuth,
+  ownerOnboarding,
+  deviceEnrollment,
+);
 
 if (databaseConnection) {
   server.addHook("onClose", () => databaseConnection.close());

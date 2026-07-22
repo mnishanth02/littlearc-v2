@@ -5,6 +5,8 @@ import {
   createMobileApiClient,
   createStaffApiClient,
   cursorSchema,
+  deviceEnrollmentRequestSchema,
+  deviceEnrollmentResponseSchema,
   openApiDocument,
   ownerOnboardingRequestSchema,
   problemDetailsSchema,
@@ -103,5 +105,36 @@ describe("LittleArc API contract", () => {
     const responseSchema = openApiDocument.components?.schemas?.OwnerOnboardingResponse;
     expect(JSON.stringify(responseSchema)).not.toContain("preferredName");
     expect(JSON.stringify(responseSchema)).not.toContain("adultVerification");
+  });
+
+  it("defines authority-neutral OFF-03 device enrollment", () => {
+    expect(
+      deviceEnrollmentRequestSchema.parse({
+        appVersion: "0.0.1",
+        deviceId: validUuidV7,
+        localSchemaVersion: 1,
+        platform: "android",
+      }),
+    ).toBeDefined();
+    expect(
+      deviceEnrollmentResponseSchema.parse({
+        deviceId: validUuidV7,
+        enrollmentStatus: "active",
+        householdId: validUuidV7,
+        localSchemaVersion: 1,
+        replayed: false,
+      }),
+    ).toBeDefined();
+    expect(openApiDocument.paths).toHaveProperty("/v1/devices/enrollment");
+    expect(JSON.stringify(openApiDocument.paths["/v1/devices/enrollment"])).not.toContain("userId");
+    expect(JSON.stringify(openApiDocument.paths["/v1/devices/enrollment"])).not.toContain("role");
+    expect(() =>
+      deviceEnrollmentRequestSchema.parse({
+        appVersion: "0.0.1\nunsafe",
+        deviceId: validUuidV7,
+        localSchemaVersion: 1,
+        platform: "android",
+      }),
+    ).toThrow();
   });
 });

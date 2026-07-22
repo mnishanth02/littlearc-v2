@@ -4,6 +4,8 @@ import {
   childIdentifierSchema,
   consentEventSchema,
   contractMetadataSchema,
+  deviceEnrollmentRequestSchema,
+  deviceEnrollmentResponseSchema,
   householdIdentifierSchema,
   idempotencyKeySchema,
   ownerOnboardingRequestSchema,
@@ -47,6 +49,63 @@ registry.register("RecordDescriptor", recordDescriptorSchema);
 registry.register("SyncMutation", syncMutationSchema);
 registry.register("OwnerOnboardingRequest", ownerOnboardingRequestSchema);
 registry.register("OwnerOnboardingResponse", ownerOnboardingResponseSchema);
+registry.register("DeviceEnrollmentRequest", deviceEnrollmentRequestSchema);
+registry.register("DeviceEnrollmentResponse", deviceEnrollmentResponseSchema);
+
+registry.registerPath({
+  method: "post",
+  path: "/v1/devices/enrollment",
+  tags: ["devices"],
+  summary: "Enroll the current authenticated installation",
+  security: [{ consumerSession: [] }],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: deviceEnrollmentRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Device installation enrolled",
+      content: {
+        "application/json": { schema: deviceEnrollmentResponseSchema },
+      },
+    },
+    200: {
+      description: "Active device enrollment replayed",
+      content: {
+        "application/json": { schema: deviceEnrollmentResponseSchema },
+      },
+    },
+    400: {
+      description: "Enrollment request is invalid",
+      content: {
+        "application/problem+json": { schema: problemDetailsSchema },
+      },
+    },
+    401: {
+      description: "Consumer session required",
+      content: {
+        "application/problem+json": { schema: problemDetailsSchema },
+      },
+    },
+    403: {
+      description: "Active household membership required",
+      content: {
+        "application/problem+json": { schema: problemDetailsSchema },
+      },
+    },
+    409: {
+      description: "Device identifier is unavailable or revoked",
+      content: {
+        "application/problem+json": { schema: problemDetailsSchema },
+      },
+    },
+  },
+});
 
 registry.registerPath({
   method: "get",
@@ -150,7 +209,7 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
     info: {
       title: "LittleArc API",
       version: "0.1.0",
-      description: "Versioned LittleArc API contract with OFF-02 household onboarding.",
+      description: "Versioned LittleArc API contract through OFF-03 local enrollment.",
     },
     servers: [
       {
@@ -166,6 +225,10 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
       {
         name: "households",
         description: "Session-authenticated household enrollment commands",
+      },
+      {
+        name: "devices",
+        description: "Authority-neutral authenticated installation enrollment",
       },
     ],
   }) as unknown as GeneratedOpenApiDocument;

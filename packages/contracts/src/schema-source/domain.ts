@@ -81,6 +81,24 @@ export const ownerOnboardingResponseSchema = z.object({
   replayed: z.boolean(),
 });
 
+export const deviceEnrollmentRequestSchema = z.object({
+  appVersion: z
+    .string()
+    .trim()
+    .regex(/^[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$/),
+  deviceId: uuidV7Schema,
+  localSchemaVersion: z.literal(1),
+  platform: z.enum(["android", "ios"]),
+});
+
+export const deviceEnrollmentResponseSchema = z.object({
+  deviceId: uuidV7Schema,
+  enrollmentStatus: z.literal("active"),
+  householdId: uuidV7Schema,
+  localSchemaVersion: z.literal(1),
+  replayed: z.boolean(),
+});
+
 export const mutableResourceSchema = z.object({
   id: uuidV7Schema,
   householdId: uuidV7Schema,

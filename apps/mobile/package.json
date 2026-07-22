@@ -16,6 +16,7 @@
     "ios": "EXPO_ROUTER_APP_ROOT=app expo run:ios",
     "native:prebuild": "EXPO_ROUTER_APP_ROOT=app expo prebuild --clean",
     "start": "EXPO_ROUTER_APP_ROOT=app expo start --dev-client",
+    "test": "vitest run src",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

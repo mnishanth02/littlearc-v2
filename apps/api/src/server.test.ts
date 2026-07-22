@@ -275,6 +275,77 @@ describe("API skeleton", () => {
     expect(dependencies.command.execute).not.toHaveBeenCalled();
   });
 
+  it("authenticates and validates authority-neutral OFF-03 device enrollment", async () => {
+    const deviceId = nextId();
+    const householdId = nextId();
+    const execute = vi.fn(async () => ({
+      deviceId,
+      enrollmentStatus: "active" as const,
+      householdId,
+      localSchemaVersion: 1 as const,
+      replayed: false,
+    }));
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "local" }),
+      undefined,
+      undefined,
+      undefined,
+      {
+        command: { execute },
+        async getSessionIdentity() {
+          return { userId: "synthetic-auth-user" };
+        },
+      },
+    );
+    const response = await server.inject({
+      method: "POST",
+      payload: {
+        appVersion: "0.0.1",
+        deviceId,
+        localSchemaVersion: 1,
+        platform: "android",
+      },
+      url: "/v1/devices/enrollment",
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toEqual({
+      deviceId,
+      enrollmentStatus: "active",
+      householdId,
+      localSchemaVersion: 1,
+      replayed: false,
+    });
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({ identityUserId: "synthetic-auth-user" }),
+    );
+    expect(JSON.stringify(response.json())).not.toContain("synthetic-auth-user");
+  });
+
+  it("rejects OFF-03 device enrollment without a session or valid body", async () => {
+    const dependencies = {
+      command: { execute: vi.fn() },
+      async getSessionIdentity() {
+        return null;
+      },
+    };
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "local" }),
+      undefined,
+      undefined,
+      undefined,
+      dependencies,
+    );
+    const response = await server.inject({
+      method: "POST",
+      payload: {},
+      url: "/v1/devices/enrollment",
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(dependencies.command.execute).not.toHaveBeenCalled();
+  });
+
   it("does not misclassify unexpected database errors as client policy failures", async () => {
     const server = await createApiServer(
       loadApiConfig({ APP_ENV: "local" }),

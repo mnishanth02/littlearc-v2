@@ -15,9 +15,14 @@ stable plans and their validation evidence.
 - [`OFF-01` implementation evidence](./off-01-implementation-evidence.md)
 - [`OFF-02` Household, parent, child, consent, and audit](./off-02-household-parent-child-consent-and-audit-plan.md)
 - [`OFF-02` implementation evidence](./off-02-implementation-evidence.md)
+- [`OFF-03` Local security and enrollment](./off-03-local-security-and-enrollment-plan.md)
+- [`OFF-03` implementation evidence](./off-03-implementation-evidence.md)
 
 `OFF-01` and `OFF-02` are planned together because identity IDs, household
 membership, role language, consent, and child-creation gates cross their
 boundary. Their implementations remain independently reviewable: `OFF-01`
 must not create household or child records, and `OFF-02` must consume the
 accepted identity/session boundary instead of reimplementing authentication.
+
+`OFF-03` consumes both boundaries to protect the device-local read model. It
+does not implement OFF-04 synchronization or OFF-05 emergency-card content.

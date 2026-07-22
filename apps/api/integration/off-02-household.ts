@@ -2,9 +2,12 @@ import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { createStructuredPayloadCrypto } from "@littlearc/crypto";
+import type { DeviceEnrollmentPersistenceError } from "@littlearc/database";
 import { createDatabaseConnection } from "@littlearc/database";
 import { Client } from "pg";
 import { loadApiConfig } from "../src/config.js";
+import { createDeviceEnrollmentCommand } from "../src/device-enrollment.js";
+import type { DeviceEnrollmentCommand } from "../src/device-enrollment-route.js";
 import {
   createOwnerOnboardingCommand,
   createSyntheticAdultVerification,
@@ -20,6 +23,7 @@ const migrationPaths = [
   "../../../packages/database/migrations/0003_off_02_household_consent_audit.sql",
 ].map((path) => fileURLToPath(new URL(path, import.meta.url)));
 const deviceMode = process.argv.includes("--device");
+const off03DeviceMode = process.argv.includes("--device-off03");
 const syntheticRequest: OwnerOnboardingRequest = {
   adultVerificationAssertion: "synthetic-approved-off-02",
   child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
@@ -121,6 +125,7 @@ async function assertDatabaseEvidence(client: Client): Promise<void> {
 
 async function runAutomated(
   command: OwnerOnboardingCommand,
+  deviceCommand: DeviceEnrollmentCommand,
   client: Client,
   currentUser: string,
 ): Promise<void> {
@@ -229,6 +234,112 @@ async function runAutomated(
   console.log("- Parent and child canaries were absent from persisted encrypted envelopes.");
   console.log("- Membership actors remain UUIDv7 while Better Auth user IDs remain strings.");
   console.log(`- Database execution role: ${currentUser} -> littlearc_app.`);
+
+  const deviceId = nextId();
+  const enrolled = await deviceCommand.execute({
+    identityUserId: firstUser,
+    request: { appVersion: "0.0.1", deviceId, localSchemaVersion: 1, platform: "android" },
+    requestId: nextId(),
+  });
+  const deviceReplay = await deviceCommand.execute({
+    identityUserId: firstUser,
+    request: { appVersion: "0.0.2", deviceId, localSchemaVersion: 1, platform: "android" },
+    requestId: nextId(),
+  });
+  assert(
+    !enrolled.replayed && deviceReplay.replayed,
+    "Device enrollment replay was not idempotent.",
+  );
+  assert(enrolled.householdId === first.householdId, "Device enrollment chose another household.");
+
+  let crossIdentityCode: string | undefined;
+  try {
+    await deviceCommand.execute({
+      identityUserId: secondUser,
+      request: { appVersion: "0.0.1", deviceId, localSchemaVersion: 1, platform: "android" },
+      requestId: nextId(),
+    });
+  } catch (error) {
+    crossIdentityCode = persistenceCode(error);
+  }
+  assert(crossIdentityCode === "device_unavailable", "Cross-identity device reuse did not fail.");
+
+  await client.query(
+    "update littlearc.devices set enrollment_status = 'revoked', revoked_at = now() where id = $1",
+    [deviceId],
+  );
+  let revokedCode: string | undefined;
+  try {
+    await deviceCommand.execute({
+      identityUserId: firstUser,
+      request: { appVersion: "0.0.2", deviceId, localSchemaVersion: 1, platform: "android" },
+      requestId: nextId(),
+    });
+  } catch (error) {
+    revokedCode = persistenceCode(error);
+  }
+  assert(revokedCode === "device_unavailable", "A revoked device was reactivated.");
+
+  const rollbackDeviceId = nextId();
+  await client.query(`
+    create function littlearc.off03_force_rollback() returns trigger language plpgsql as $$
+    begin
+      raise exception 'synthetic OFF-03 forced rollback';
+    end $$;
+    create trigger off03_force_rollback before insert on littlearc.outbox_events
+    for each row execute function littlearc.off03_force_rollback();
+  `);
+  try {
+    await deviceCommand.execute({
+      identityUserId: firstUser,
+      request: {
+        appVersion: "0.0.1",
+        deviceId: rollbackDeviceId,
+        localSchemaVersion: 1,
+        platform: "android",
+      },
+      requestId: nextId(),
+    });
+    throw new Error("Forced OFF-03 rollback unexpectedly succeeded.");
+  } catch (error) {
+    assert(
+      error instanceof Error &&
+        (error.message.includes("synthetic OFF-03 forced rollback") ||
+          error.message.includes("insert into littlearc.outbox_events")),
+      "Forced OFF-03 rollback returned the wrong error: " +
+        (error instanceof Error ? error.message : String(error)),
+    );
+  } finally {
+    await client.query("drop trigger off03_force_rollback on littlearc.outbox_events");
+    await client.query("drop function littlearc.off03_force_rollback()");
+  }
+  const rolledBackDevice = await client.query("select id from littlearc.devices where id = $1", [
+    rollbackDeviceId,
+  ]);
+  assert(rolledBackDevice.rowCount === 0, "Failed device enrollment left a device row.");
+  const deviceEvidence = await client.query<{ readonly audit: string; readonly outbox: string }>(
+    `select
+      (select count(*)::text from littlearc.audit_events
+        where action = 'device_enrolled' and target_id = $1) audit,
+      (select count(*)::text from littlearc.outbox_events
+        where event_type = 'device_enrolled' and aggregate_id = $1) outbox`,
+    [deviceId],
+  );
+  assert(deviceEvidence.rows[0]?.audit === "1", "Device enrollment audit evidence is incomplete.");
+  assert(
+    deviceEvidence.rows[0]?.outbox === "1",
+    "Device enrollment outbox evidence is incomplete.",
+  );
+  console.log("OFF-03 PostgreSQL device enrollment validation passed.");
+  console.log("- Session-derived household enrollment and app-version replay passed.");
+  console.log("- Cross-identity reuse, revoked reactivation, and forced rollback failed closed.");
+  console.log("- RLS-bound device, minimized audit, and outbox evidence passed.");
+}
+
+function persistenceCode(error: unknown): string | undefined {
+  return error && typeof error === "object" && "code" in error
+    ? String((error as DeviceEnrollmentPersistenceError).code)
+    : undefined;
 }
 
 async function serveDevice(
@@ -258,6 +369,52 @@ async function serveDevice(
   );
   await server.listen({ host: "127.0.0.1", port: 3000 });
   console.log("OFF-02 synthetic device API listening on 127.0.0.1:3000.");
+  return async () => server.close();
+}
+
+async function serveOff03Device(
+  onboardingCommand: OwnerOnboardingCommand,
+  deviceCommand: DeviceEnrollmentCommand,
+  client: Client,
+): Promise<() => Promise<void>> {
+  const userId = "synthetic-off03-pixel8";
+  await insertAuthUser(client, userId, "synthetic.off03.pixel8@example.test");
+  await execute(onboardingCommand, userId);
+  const validatingCommand: DeviceEnrollmentCommand = {
+    async execute(input) {
+      const result = await deviceCommand.execute(input);
+      const evidence = await client.query<{
+        readonly audit: string;
+        readonly devices: string;
+        readonly outbox: string;
+      }>(
+        `select
+          (select count(*)::text from littlearc.devices where id = $1 and enrollment_status = 'active') devices,
+          (select count(*)::text from littlearc.audit_events where target_id = $1 and action = 'device_enrolled') audit,
+          (select count(*)::text from littlearc.outbox_events where aggregate_id = $1 and event_type = 'device_enrolled') outbox`,
+        [result.deviceId],
+      );
+      assert(evidence.rows[0]?.devices === "1", "OFF-03 device row was not active.");
+      assert(evidence.rows[0]?.audit === "1", "OFF-03 device audit evidence was incomplete.");
+      assert(evidence.rows[0]?.outbox === "1", "OFF-03 device outbox evidence was incomplete.");
+      console.log("OFF-03 physical-device HTTP/database path passed.");
+      return result;
+    },
+  };
+  const server = await createApiServer(
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    undefined,
+    undefined,
+    undefined,
+    {
+      command: validatingCommand,
+      async getSessionIdentity(headers) {
+        return headers.get("x-littlearc-synthetic-session") === "off03-pixel8" ? { userId } : null;
+      },
+    },
+  );
+  await server.listen({ host: "127.0.0.1", port: 3000 });
+  console.log("OFF-03 synthetic device API listening on 127.0.0.1:3000.");
   return async () => server.close();
 }
 
@@ -307,15 +464,22 @@ async function run(): Promise<void> {
       crypto,
       database: connection.database,
     });
+    const deviceCommand = createDeviceEnrollmentCommand(connection.database);
 
-    if (deviceMode) {
+    if (off03DeviceMode) {
+      closeServer = await serveOff03Device(command, deviceCommand, databaseClient);
+      await new Promise<void>((resolve) => {
+        process.once("SIGINT", resolve);
+        process.once("SIGTERM", resolve);
+      });
+    } else if (deviceMode) {
       closeServer = await serveDevice(command, databaseClient);
       await new Promise<void>((resolve) => {
         process.once("SIGINT", resolve);
         process.once("SIGTERM", resolve);
       });
     } else {
-      await runAutomated(command, databaseClient, currentUser);
+      await runAutomated(command, deviceCommand, databaseClient, currentUser);
     }
   } finally {
     await closeServer?.();

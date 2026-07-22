@@ -13,6 +13,7 @@
     "test": "pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && vitest run src",
     "test:postgres": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts",
     "validate:device:off02": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device",
+    "validate:device:off03": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off03",
     "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.integration.json"
   },
   "dependencies": {

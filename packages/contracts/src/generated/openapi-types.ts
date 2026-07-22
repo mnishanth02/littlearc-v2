@@ -4,6 +4,195 @@
  */
 
 export interface paths {
+    "/v1/devices/enrollment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enroll the current authenticated installation */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        appVersion: string;
+                        /** @description UUIDv7 identifier */
+                        deviceId: string;
+                        /** @enum {number} */
+                        localSchemaVersion: 1;
+                        /** @enum {string} */
+                        platform: "android" | "ios";
+                    };
+                };
+            };
+            responses: {
+                /** @description Active device enrollment replayed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            deviceId: string;
+                            /** @enum {string} */
+                            enrollmentStatus: "active";
+                            /** @description UUIDv7 identifier */
+                            householdId: string;
+                            /** @enum {number} */
+                            localSchemaVersion: 1;
+                            replayed: boolean;
+                        };
+                    };
+                };
+                /** @description Device installation enrolled */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            deviceId: string;
+                            /** @enum {string} */
+                            enrollmentStatus: "active";
+                            /** @description UUIDv7 identifier */
+                            householdId: string;
+                            /** @enum {number} */
+                            localSchemaVersion: 1;
+                            replayed: boolean;
+                        };
+                    };
+                };
+                /** @description Enrollment request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Active household membership required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Device identifier is unavailable or revoked */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1": {
         parameters: {
             query?: never;
@@ -362,7 +551,7 @@ export interface components {
             /** @description UUIDv7 identifier */
             actorId: string;
             /** @enum {string} */
-            action: "household_created" | "child_created" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "staff_action_recorded";
+            action: "household_created" | "child_created" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "staff_action_recorded";
             targetType: string;
             /** @description UUIDv7 identifier */
             targetId: string;
@@ -443,6 +632,26 @@ export interface components {
             parentNoticeConsentId: string;
             /** @description UUIDv7 identifier */
             parentProfileId: string;
+            replayed: boolean;
+        };
+        DeviceEnrollmentRequest: {
+            appVersion: string;
+            /** @description UUIDv7 identifier */
+            deviceId: string;
+            /** @enum {number} */
+            localSchemaVersion: 1;
+            /** @enum {string} */
+            platform: "android" | "ios";
+        };
+        DeviceEnrollmentResponse: {
+            /** @description UUIDv7 identifier */
+            deviceId: string;
+            /** @enum {string} */
+            enrollmentStatus: "active";
+            /** @description UUIDv7 identifier */
+            householdId: string;
+            /** @enum {number} */
+            localSchemaVersion: 1;
             replayed: boolean;
         };
     };

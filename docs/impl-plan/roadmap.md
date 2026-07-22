@@ -599,6 +599,13 @@ through the production-shaped architecture.
 
 #### `OFF-03` Local security and enrollment
 
+> **Implementation status (22 July 2026): COMPLETE.** Authority-neutral device
+> enrollment, device-bound key custody, strong-biometric app lock, keyed
+> SQLCipher migrations, independent authenticated file encryption, invalidation
+> recovery, verified wipe, repository gates, Aiven PostgreSQL, and the bounded
+> Pixel 8 lifecycle pass. See the
+> [OFF-03 evidence dossier](./m2-offline-trust/off-03-implementation-evidence.md).
+
 - Generate and store a random SQLCipher key in SecureStore.
 - Create the encrypted local schema and forward migrations.
 - Add app lock, biometric policy, sign-out wipe behavior, and device enrollment.

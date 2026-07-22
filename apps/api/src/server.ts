@@ -15,6 +15,10 @@ import {
 import Fastify, { type FastifyInstance } from "fastify";
 import { registerConsumerAuthRoute } from "./auth-route.js";
 import type { ApiConfig } from "./config.js";
+import {
+  type DeviceEnrollmentRouteDependencies,
+  registerDeviceEnrollmentRoute,
+} from "./device-enrollment-route.js";
 import { nextId } from "./owner-onboarding.js";
 import {
   type OwnerOnboardingRouteDependencies,
@@ -50,6 +54,7 @@ export async function createApiServer(
   }),
   consumerAuth?: Pick<ConsumerAuth, "handler">,
   ownerOnboarding?: OwnerOnboardingRouteDependencies,
+  deviceEnrollment?: DeviceEnrollmentRouteDependencies,
 ): Promise<FastifyInstance> {
   const server = Fastify({
     genReqId: () => nextId(),
@@ -89,6 +94,9 @@ export async function createApiServer(
   }
   if (ownerOnboarding) {
     registerOwnerOnboardingRoute(server, ownerOnboarding);
+  }
+  if (deviceEnrollment) {
+    registerDeviceEnrollmentRoute(server, deviceEnrollment);
   }
 
   server.get("/v1", async () => contractMetadata);

@@ -4,7 +4,7 @@ export const openApiDocument = {
   "info": {
     "title": "LittleArc API",
     "version": "0.1.0",
-    "description": "Versioned LittleArc API contract with OFF-02 household onboarding."
+    "description": "Versioned LittleArc API contract through OFF-03 local enrollment."
   },
   "servers": [
     {
@@ -20,6 +20,10 @@ export const openApiDocument = {
     {
       "name": "households",
       "description": "Session-authenticated household enrollment commands"
+    },
+    {
+      "name": "devices",
+      "description": "Authority-neutral authenticated installation enrollment"
     }
   ],
   "components": {
@@ -345,6 +349,7 @@ export const openApiDocument = {
               "record_updated",
               "record_deleted",
               "membership_changed",
+              "device_enrolled",
               "staff_action_recorded"
             ]
           },
@@ -690,11 +695,607 @@ export const openApiDocument = {
           "parentProfileId",
           "replayed"
         ]
+      },
+      "DeviceEnrollmentRequest": {
+        "type": "object",
+        "properties": {
+          "appVersion": {
+            "type": "string",
+            "pattern": "^[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$"
+          },
+          "deviceId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "localSchemaVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "android",
+              "ios"
+            ]
+          }
+        },
+        "required": [
+          "appVersion",
+          "deviceId",
+          "localSchemaVersion",
+          "platform"
+        ]
+      },
+      "DeviceEnrollmentResponse": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "enrollmentStatus": {
+            "type": "string",
+            "enum": [
+              "active"
+            ]
+          },
+          "householdId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "localSchemaVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "deviceId",
+          "enrollmentStatus",
+          "householdId",
+          "localSchemaVersion",
+          "replayed"
+        ]
       }
     },
     "parameters": {}
   },
   "paths": {
+    "/v1/devices/enrollment": {
+      "post": {
+        "tags": [
+          "devices"
+        ],
+        "summary": "Enroll the current authenticated installation",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "appVersion": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$"
+                  },
+                  "deviceId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                    "description": "UUIDv7 identifier"
+                  },
+                  "localSchemaVersion": {
+                    "type": "number",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "platform": {
+                    "type": "string",
+                    "enum": [
+                      "android",
+                      "ios"
+                    ]
+                  }
+                },
+                "required": [
+                  "appVersion",
+                  "deviceId",
+                  "localSchemaVersion",
+                  "platform"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Active device enrollment replayed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deviceId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "enrollmentStatus": {
+                      "type": "string",
+                      "enum": [
+                        "active"
+                      ]
+                    },
+                    "householdId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "localSchemaVersion": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "replayed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "deviceId",
+                    "enrollmentStatus",
+                    "householdId",
+                    "localSchemaVersion",
+                    "replayed"
+                  ]
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Device installation enrolled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deviceId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "enrollmentStatus": {
+                      "type": "string",
+                      "enum": [
+                        "active"
+                      ]
+                    },
+                    "householdId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "localSchemaVersion": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "replayed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "deviceId",
+                    "enrollmentStatus",
+                    "householdId",
+                    "localSchemaVersion",
+                    "replayed"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Enrollment request is invalid",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Consumer session required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Active household membership required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Device identifier is unavailable or revoked",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1": {
       "get": {
         "tags": [
