@@ -136,6 +136,6 @@ pre-pilot device matrix, and the named privacy/legal/security gates.
 
 **Decision: COMPLETE.** OFF-01 meets its synthetic implementation boundary,
 has real PostgreSQL lifecycle evidence, and now has a bounded physical-Android
-SecureStore and deep-link proof. `OFF-02` is the next ready work package; it
-must consume this identity/session boundary rather than expanding OFF-01 into
-household authorization or real-data handling.
+SecureStore and deep-link proof. OFF-02 has consumed this identity/session
+boundary without expanding OFF-01 into household authorization or real-data
+handling; OFF-03 planning is next.

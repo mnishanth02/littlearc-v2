@@ -4,7 +4,13 @@ export type ApiConfig = {
   readonly appEnv: AppEnvironment;
   readonly consumerAuth?: ConsumerAuthConfig;
   readonly host: string;
+  readonly ownerOnboarding?: OwnerOnboardingConfig;
   readonly port: number;
+};
+
+export type OwnerOnboardingConfig = {
+  readonly keyEncryptionKey: string;
+  readonly wrappingKeyVersion: number;
 };
 
 export type ConsumerAuthConfig = {
@@ -31,12 +37,40 @@ export function loadApiConfig(environment: ApiEnvironment = process.env): ApiCon
   const appEnv = parseAppEnvironment(environment.APP_ENV);
 
   const consumerAuth = parseConsumerAuthConfig(environment);
+  const ownerOnboarding = parseOwnerOnboardingConfig(environment, appEnv, consumerAuth);
 
   return {
     appEnv,
     ...(consumerAuth ? { consumerAuth } : {}),
     host: environment.HOST?.trim() || "127.0.0.1",
+    ...(ownerOnboarding ? { ownerOnboarding } : {}),
     port: parsePort(environment.PORT),
+  };
+}
+
+function parseOwnerOnboardingConfig(
+  environment: ApiEnvironment,
+  appEnv: AppEnvironment,
+  consumerAuth: ConsumerAuthConfig | undefined,
+): OwnerOnboardingConfig | undefined {
+  const key = environment.KEY_WRAPPING_SECRET_V1?.trim();
+  const mode = environment.OFF02_ADULT_VERIFICATION_MODE?.trim();
+  if (!key && !mode) {
+    return undefined;
+  }
+  if (appEnv !== "local" || mode !== "synthetic") {
+    throw new Error("OFF-02 synthetic adult verification is restricted to APP_ENV=local.");
+  }
+  if (!consumerAuth) {
+    throw new Error("OFF-02 onboarding requires configured consumer authentication.");
+  }
+  const decoded = Buffer.from(requiredValue("KEY_WRAPPING_SECRET_V1", key), "base64url");
+  if (decoded.length !== 32) {
+    throw new Error("KEY_WRAPPING_SECRET_V1 must decode to exactly 32 bytes.");
+  }
+  return {
+    keyEncryptionKey: key as string,
+    wrappingKeyVersion: 1,
   };
 }
 

@@ -4,12 +4,14 @@ export const tenantContextSettings = {
   actorId: "littlearc.current_actor_id",
   actorRole: "littlearc.current_actor_role",
   householdId: "littlearc.current_household_id",
+  identityUserId: "littlearc.current_identity_user_id",
 } as const;
 
 export type TenantContext = {
   readonly householdId: UuidV7;
   readonly actorId: UuidV7;
   readonly actorRole: HouseholdRole;
+  readonly identityUserId: string;
 };
 
 export type TenantContextSetting = {
@@ -22,6 +24,7 @@ export function tenantContextValues(context: TenantContext): ReadonlyArray<Tenan
     { key: tenantContextSettings.householdId, value: context.householdId },
     { key: tenantContextSettings.actorId, value: context.actorId },
     { key: tenantContextSettings.actorRole, value: context.actorRole },
+    { key: tenantContextSettings.identityUserId, value: context.identityUserId },
   ];
 }
 

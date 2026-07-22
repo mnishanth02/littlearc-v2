@@ -1,4 +1,4 @@
-export const householdRoles = ["owner", "caregiver", "staff"] as const;
+export const householdRoles = ["owner", "caregiver"] as const;
 export type HouseholdRole = (typeof householdRoles)[number];
 
 export const householdCapabilities = [
@@ -38,13 +38,13 @@ const ownerCapabilities = new Set<HouseholdCapability>([
   "manageEntitlement",
 ]);
 
-const staffCapabilities = new Set<HouseholdCapability>(["manageEntitlement", "viewWorkflowStatus"]);
+export const staffCapabilities = ["manageEntitlement", "viewWorkflowStatus"] as const;
+export type StaffCapability = (typeof staffCapabilities)[number];
 
 export type HouseholdAuthorizationInput = {
   readonly role: HouseholdRole;
   readonly capability: HouseholdCapability;
   readonly grantedCapabilities?: ReadonlySet<HouseholdCapability>;
-  readonly purposeCodeRecorded?: boolean;
 };
 
 export function canPerformHouseholdCapability(input: HouseholdAuthorizationInput): boolean {
@@ -52,15 +52,14 @@ export function canPerformHouseholdCapability(input: HouseholdAuthorizationInput
     return ownerCapabilities.has(input.capability);
   }
 
-  if (input.role === "caregiver") {
-    return input.grantedCapabilities?.has(input.capability) ?? false;
-  }
+  return input.grantedCapabilities?.has(input.capability) ?? false;
+}
 
-  if (input.capability === "manageEntitlement") {
-    return input.purposeCodeRecorded === true;
-  }
-
-  return staffCapabilities.has(input.capability);
+export function canPerformStaffCapability(
+  capability: StaffCapability,
+  purposeCodeRecorded: boolean,
+): boolean {
+  return capability === "viewWorkflowStatus" || purposeCodeRecorded;
 }
 
 export const consentPurposes = [

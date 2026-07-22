@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createUtcTimestamp,
+  createUuidV7,
   DomainValidationError,
   initialRevision,
   nextRevision,
@@ -55,5 +56,14 @@ describe("domain primitives", () => {
   it("treats cursors as opaque base64url tokens", () => {
     expect(parseCursor("cursor_019f742b")).toBe("cursor_019f742b");
     expect(() => parseCursor("short")).toThrow(DomainValidationError);
+  });
+
+  it("creates UUIDv7 identifiers from injected entropy and time", () => {
+    const id = createUuidV7(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 1_721_390_400_000);
+
+    expect(parseUuidV7(id)).toBe(id);
+    expect(id.slice(14, 15)).toBe("7");
+    expect(["8", "9", "a", "b"]).toContain(id.slice(19, 20));
+    expect(() => createUuidV7(new Uint8Array(9))).toThrow(DomainValidationError);
   });
 });

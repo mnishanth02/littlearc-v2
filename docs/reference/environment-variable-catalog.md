@@ -1,7 +1,7 @@
 # LittleArc Environment Variable Catalog
 
 > **Status:** Active runtime contract
-> **Last updated:** 20 July 2026
+> **Last updated:** 22 July 2026
 > **Machine-readable source:** `tooling/environment/variables.mjs`
 
 ## Rules
@@ -37,6 +37,7 @@
 | `APPLE_CLIENT_SECRET` | Secret | `OFF-01` | Optional Apple consumer-auth client secret |
 | `GOOGLE_CLIENT_ID` | Public | `OFF-01` | Optional Google consumer-auth client identifier |
 | `GOOGLE_CLIENT_SECRET` | Secret | `OFF-01` | Optional Google consumer-auth client secret |
+| `OFF02_ADULT_VERIFICATION_MODE` | Public | `OFF-02` | Local-only synthetic verification selector; staging and production reject it |
 | `S3_ENDPOINT` | Sensitive | `FND-06` | Private bucket endpoint |
 | `S3_ACCESS_KEY_ID` | Secret | `FND-06` | Private bucket access identifier |
 | `S3_SECRET_ACCESS_KEY` | Secret | `FND-06` | Private bucket access secret |

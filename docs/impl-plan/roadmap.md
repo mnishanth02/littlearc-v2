@@ -2,7 +2,7 @@
 
 > **Status:** Accepted execution baseline — see the [Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) for live delivery state
 > **Version:** 1.2
-> **Last updated:** 18 July 2026
+> **Last updated:** 22 July 2026
 > **Product source:** [LittleArc Complete Product Plan](../core/littlearc-complete-product-plan.md)
 > **Architecture source:** [LittleArc Architecture and Technology Stack](../core/littlearc-architecture-and-tech-stack.md)
 > **Design-system source:** [LittleArc Design System](../core/design-system.md)
@@ -584,6 +584,11 @@ through the production-shaped architecture.
   settings.
 
 #### `OFF-02` Household, parent, child, consent, and audit
+
+> **Implementation status (22 July 2026): COMPLETE.** The synthetic-only
+> implementation, reviewed migration, Aiven PostgreSQL integration, automated
+> repository gates, and bounded Pixel 8 UI/HTTP/database acceptance pass. See the
+> [OFF-02 evidence dossier](./m2-offline-trust/off-02-implementation-evidence.md).
 
 - Implement the first household owner, parent profile, and one child.
 - Record versioned notice and consent acceptance before child creation.

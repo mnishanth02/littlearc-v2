@@ -200,10 +200,12 @@ domains:
       - docs/core/backend-data-model-and-database-schema.md
       - docs/reference/environment-variable-catalog.md
       - docs/adr/0009-consumer-authentication-and-session-boundary.md
+      - docs/adr/0010-household-membership-encryption-and-consent-boundary.md
       - docs/impl-plan/m2-offline-trust/README.md
       - docs/impl-plan/m2-offline-trust/off-01-consumer-authentication-and-session-lifecycle-plan.md
       - docs/impl-plan/m2-offline-trust/off-01-implementation-evidence.md
       - docs/impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md
+      - docs/impl-plan/m2-offline-trust/off-02-implementation-evidence.md
     code:
       - packages/auth/**
       - apps/api/**
@@ -214,9 +216,13 @@ domains:
       - packages/auth/integration/off-01-auth.ts
       - apps/api/src/**/*.test.ts
       - packages/database/src/**/*.test.ts
+      - packages/domain/src/**/*.test.ts
+      - packages/crypto/src/**/*.test.ts
+      - apps/api/integration/off-02-household.ts
     validation:
       - pnpm --filter @littlearc/auth test
       - pnpm test:database:auth
+      - pnpm test:database:household
       - pnpm validate
 
   database:
@@ -236,14 +242,21 @@ domains:
       - docs/core/backend-data-model-and-database-schema.md
       - docs/core/m0-readiness-and-evidence.md
       - docs/reference/environment-variable-catalog.md
+      - docs/adr/0010-household-membership-encryption-and-consent-boundary.md
+      - docs/impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md
+      - docs/impl-plan/m2-offline-trust/off-02-implementation-evidence.md
     code:
       - packages/database/**
       - packages/crypto/**
       - apps/api/**
       - apps/worker/**
-    tests: []
+    tests:
+      - packages/database/src/**/*.test.ts
+      - packages/crypto/src/**/*.test.ts
+      - apps/api/integration/off-02-household.ts
     validation:
       - pnpm test:contract
+      - pnpm test:database:household
       - pnpm typecheck
 
   design-system:

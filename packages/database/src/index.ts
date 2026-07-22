@@ -3,6 +3,7 @@ export * from "./client.js";
 export * from "./idempotency.js";
 export * from "./migrations/metadata.js";
 export * from "./outbox.js";
+export * from "./owner-onboarding.js";
 export * from "./readiness.js";
 export * from "./roles.js";
 export * from "./schema/index.js";

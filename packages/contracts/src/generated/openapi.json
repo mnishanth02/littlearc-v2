@@ -3,7 +3,7 @@
   "info": {
     "title": "LittleArc API",
     "version": "0.1.0",
-    "description": "Versioned LittleArc API contract established by FND-04."
+    "description": "Versioned LittleArc API contract with OFF-02 household onboarding."
   },
   "servers": [
     {
@@ -15,9 +15,20 @@
     {
       "name": "meta",
       "description": "Contract metadata and generated OpenAPI access"
+    },
+    {
+      "name": "households",
+      "description": "Session-authenticated household enrollment commands"
     }
   ],
   "components": {
+    "securitySchemes": {
+      "consumerSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "better-auth.session_token"
+      }
+    },
     "schemas": {
       "ProblemDetails": {
         "type": "object",
@@ -456,8 +467,7 @@
                 "type": "string",
                 "enum": [
                   "owner",
-                  "caregiver",
-                  "staff"
+                  "caregiver"
                 ]
               },
               "capabilities": {
@@ -555,6 +565,130 @@
           "baseRevision",
           "localDependencyIds"
         ]
+      },
+      "OwnerOnboardingRequest": {
+        "type": "object",
+        "properties": {
+          "adultVerificationAssertion": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 512
+          },
+          "child": {
+            "type": "object",
+            "properties": {
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date"
+              },
+              "preferredName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "dateOfBirth",
+              "preferredName"
+            ]
+          },
+          "childDataConsentVersion": {
+            "type": "string",
+            "enum": [
+              "child-data-processing-v1"
+            ]
+          },
+          "countryCode": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "parent": {
+            "type": "object",
+            "properties": {
+              "displayName": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "relationship": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              }
+            },
+            "required": [
+              "displayName",
+              "relationship"
+            ]
+          },
+          "parentNoticeVersion": {
+            "type": "string",
+            "enum": [
+              "parent-notice-v1"
+            ]
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "adultVerificationAssertion",
+          "child",
+          "childDataConsentVersion",
+          "countryCode",
+          "parent",
+          "parentNoticeVersion",
+          "timeZone"
+        ]
+      },
+      "OwnerOnboardingResponse": {
+        "type": "object",
+        "properties": {
+          "childDataConsentId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "childId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "householdId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "membershipId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "parentNoticeConsentId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "parentProfileId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "replayed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "childDataConsentId",
+          "childId",
+          "householdId",
+          "membershipId",
+          "parentNoticeConsentId",
+          "parentProfileId",
+          "replayed"
+        ]
       }
     },
     "parameters": {}
@@ -630,6 +764,513 @@
                     "generatedAt",
                     "resourceGroups"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/households/onboarding": {
+      "post": {
+        "tags": [
+          "households"
+        ],
+        "summary": "Create the first synthetic owner household and child atomically",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "Client-generated UUIDv7 idempotency key"
+            },
+            "required": true,
+            "description": "Client-generated UUIDv7 idempotency key",
+            "name": "idempotency-key",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "adultVerificationAssertion": {
+                    "type": "string",
+                    "minLength": 16,
+                    "maxLength": 512
+                  },
+                  "child": {
+                    "type": "object",
+                    "properties": {
+                      "dateOfBirth": {
+                        "type": "string",
+                        "format": "date"
+                      },
+                      "preferredName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      }
+                    },
+                    "required": [
+                      "dateOfBirth",
+                      "preferredName"
+                    ]
+                  },
+                  "childDataConsentVersion": {
+                    "type": "string",
+                    "enum": [
+                      "child-data-processing-v1"
+                    ]
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{2}$"
+                  },
+                  "parent": {
+                    "type": "object",
+                    "properties": {
+                      "displayName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 120
+                      },
+                      "relationship": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      }
+                    },
+                    "required": [
+                      "displayName",
+                      "relationship"
+                    ]
+                  },
+                  "parentNoticeVersion": {
+                    "type": "string",
+                    "enum": [
+                      "parent-notice-v1"
+                    ]
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "adultVerificationAssertion",
+                  "child",
+                  "childDataConsentVersion",
+                  "countryCode",
+                  "parent",
+                  "parentNoticeVersion",
+                  "timeZone"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exact idempotent replay",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "childDataConsentId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "childId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "householdId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "membershipId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "parentNoticeConsentId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "parentProfileId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "replayed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "childDataConsentId",
+                    "childId",
+                    "householdId",
+                    "membershipId",
+                    "parentNoticeConsentId",
+                    "parentProfileId",
+                    "replayed"
+                  ]
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Household onboarding aggregate created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "childDataConsentId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "childId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "householdId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "membershipId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "parentNoticeConsentId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "parentProfileId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "replayed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "childDataConsentId",
+                    "childId",
+                    "householdId",
+                    "membershipId",
+                    "parentNoticeConsentId",
+                    "parentProfileId",
+                    "replayed"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request or policy validation failed",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Consumer session required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency replay or existing-household conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
                 }
               }
             }

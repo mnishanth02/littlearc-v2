@@ -71,6 +71,12 @@ export default function LandingScreen() {
                 variant="secondary"
               />
               <Button
+                label="Open OFF-02 synthetic onboarding"
+                onPress={() => router.push("/off-02-validation")}
+                testID="open-off02-validation"
+                variant="secondary"
+              />
+              <Button
                 label="Open design-system gallery"
                 onPress={() => router.push("/design-system")}
                 variant="secondary"

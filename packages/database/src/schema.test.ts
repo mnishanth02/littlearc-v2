@@ -10,11 +10,16 @@ import {
   auth_verification,
   changeEvents,
   children,
+  consentEvents,
+  devices,
+  householdKeys,
+  householdMemberships,
   households,
   idempotencyResults,
   littlearcSchemaName,
   outboxEvents,
   schemaMigrations,
+  userProfiles,
 } from "./schema/index.js";
 
 describe("database schema", () => {
@@ -62,5 +67,33 @@ describe("database schema", () => {
       expect(config.columns.map((column) => column.name)).not.toContain("household_id");
       expect(config.columns.map((column) => column.name)).not.toContain("child_id");
     }
+  });
+
+  it("exports the OFF-02 household boundary and removes the silent country default", () => {
+    expect(
+      [householdMemberships, userProfiles, devices, consentEvents, householdKeys].map(getTableName),
+    ).toEqual([
+      "household_memberships",
+      "user_profiles",
+      "devices",
+      "consent_events",
+      "household_keys",
+    ]);
+    const country = getTableConfig(households).columns.find(
+      (column) => column.name === "default_country_code",
+    );
+    expect(country?.hasDefault).toBe(false);
+  });
+
+  it("models same-household membership and child references as composite keys", () => {
+    expect(getTableConfig(children).foreignKeys.map((key) => key.getName())).toEqual(
+      expect.arrayContaining([
+        "children_created_by_membership_fk",
+        "children_updated_by_membership_fk",
+      ]),
+    );
+    expect(getTableConfig(consentEvents).foreignKeys.map((key) => key.getName())).toEqual(
+      expect.arrayContaining(["consent_events_actor_fk", "consent_events_child_fk"]),
+    );
   });
 });

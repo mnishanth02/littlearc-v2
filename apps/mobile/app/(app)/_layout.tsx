@@ -19,6 +19,9 @@ export default function AppGroupLayout() {
       {__DEV__ ? (
         <Stack.Screen name="off-01-validation" options={{ title: "OFF-01 validation" }} />
       ) : null}
+      {__DEV__ ? (
+        <Stack.Screen name="off-02-validation" options={{ title: "OFF-02 validation" }} />
+      ) : null}
     </Stack>
   );
 }

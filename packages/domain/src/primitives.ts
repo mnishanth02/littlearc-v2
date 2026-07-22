@@ -88,3 +88,31 @@ export function parseCursor(value: string, field = "cursor"): Cursor {
 
   return value as Cursor;
 }
+
+export function createUuidV7(randomBytes: Uint8Array, timestampMilliseconds = Date.now()): UuidV7 {
+  if (randomBytes.length !== 10) {
+    throw validationError("randomBytes", "exactly 10 cryptographically random bytes");
+  }
+  if (
+    !Number.isSafeInteger(timestampMilliseconds) ||
+    timestampMilliseconds < 0 ||
+    timestampMilliseconds > 0xffff_ffff_ffff
+  ) {
+    throw validationError("timestampMilliseconds", "a non-negative 48-bit integer");
+  }
+
+  const bytes = new Uint8Array(16);
+  let timestamp = timestampMilliseconds;
+  for (let index = 5; index >= 0; index -= 1) {
+    bytes[index] = timestamp & 0xff;
+    timestamp = Math.floor(timestamp / 256);
+  }
+  bytes.set(randomBytes, 6);
+  bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x70;
+  bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80;
+
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return parseUuidV7(
+    `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`,
+  );
+}

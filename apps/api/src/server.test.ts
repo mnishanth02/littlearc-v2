@@ -1,6 +1,7 @@
 import { createSafeLogger, type SafeLogRecord } from "@littlearc/observability";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { loadApiConfig } from "./config.js";
+import { nextId } from "./owner-onboarding.js";
 import { createApiServer } from "./server.js";
 
 describe("API skeleton", () => {
@@ -173,6 +174,20 @@ describe("API skeleton", () => {
         APPLE_CLIENT_ID: "synthetic-client",
       }),
     ).toThrow("AUTH_BASE_URL is required");
+    expect(() =>
+      loadApiConfig({
+        APP_ENV: "staging",
+        KEY_WRAPPING_SECRET_V1: "synthetic",
+        OFF02_ADULT_VERIFICATION_MODE: "synthetic",
+      }),
+    ).toThrow("restricted to APP_ENV=local");
+    expect(() =>
+      loadApiConfig({
+        APP_ENV: "local",
+        KEY_WRAPPING_SECRET_V1: "synthetic",
+        OFF02_ADULT_VERIFICATION_MODE: "synthetic",
+      }),
+    ).toThrow("requires configured consumer authentication");
   });
 
   it("returns Problem Details for missing routes", async () => {
@@ -191,6 +206,108 @@ describe("API skeleton", () => {
       title: "Not Found",
       type: "https://littlearc.app/problems/not-found",
     });
+  });
+
+  it("authenticates and validates the atomic OFF-02 onboarding route", async () => {
+    const execute = vi.fn(async () => ({
+      childDataConsentId: nextId(),
+      childId: nextId(),
+      householdId: nextId(),
+      membershipId: nextId(),
+      parentNoticeConsentId: nextId(),
+      parentProfileId: nextId(),
+      replayed: false,
+    }));
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "local" }),
+      undefined,
+      undefined,
+      {
+        command: { execute },
+        async getSessionIdentity() {
+          return { userId: "synthetic-auth-user" };
+        },
+      },
+    );
+    const response = await server.inject({
+      headers: { "idempotency-key": nextId() },
+      method: "POST",
+      payload: {
+        adultVerificationAssertion: "synthetic-approved-off-02",
+        child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
+        childDataConsentVersion: "child-data-processing-v1",
+        countryCode: "IN",
+        parent: { displayName: "Synthetic Parent", relationship: "parent" },
+        parentNoticeVersion: "parent-notice-v1",
+        timeZone: "Asia/Kolkata",
+      },
+      url: "/v1/households/onboarding",
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({ replayed: false });
+    expect(execute).toHaveBeenCalledWith(
+      expect.objectContaining({ identityUserId: "synthetic-auth-user" }),
+    );
+    expect(JSON.stringify(response.json())).not.toContain("Synthetic Child");
+  });
+
+  it("rejects OFF-02 onboarding without a session or valid request", async () => {
+    const dependencies = {
+      command: { execute: vi.fn() },
+      async getSessionIdentity() {
+        return null;
+      },
+    };
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "local" }),
+      undefined,
+      undefined,
+      dependencies,
+    );
+    const response = await server.inject({
+      headers: { "idempotency-key": nextId() },
+      method: "POST",
+      payload: {},
+      url: "/v1/households/onboarding",
+    });
+    expect(response.statusCode).toBe(401);
+    expect(dependencies.command.execute).not.toHaveBeenCalled();
+  });
+
+  it("does not misclassify unexpected database errors as client policy failures", async () => {
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "local" }),
+      undefined,
+      undefined,
+      {
+        command: {
+          async execute() {
+            throw Object.assign(new Error("synthetic database detail"), { code: "23505" });
+          },
+        },
+        async getSessionIdentity() {
+          return { userId: "synthetic-auth-user" };
+        },
+      },
+    );
+    const response = await server.inject({
+      headers: { "idempotency-key": nextId() },
+      method: "POST",
+      payload: {
+        adultVerificationAssertion: "synthetic-approved-off-02",
+        child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
+        childDataConsentVersion: "child-data-processing-v1",
+        countryCode: "IN",
+        parent: { displayName: "Synthetic Parent", relationship: "parent" },
+        parentNoticeVersion: "parent-notice-v1",
+        timeZone: "Asia/Kolkata",
+      },
+      url: "/v1/households/onboarding",
+    });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).not.toContain("synthetic database detail");
   });
 
   it("logs request completion through the shared bounded logger", async () => {

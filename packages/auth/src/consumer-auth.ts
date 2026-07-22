@@ -34,6 +34,12 @@ export type ConsumerAuthOptions = {
 
 export type ConsumerAuth = {
   readonly handler: (request: Request) => Promise<Response>;
+  readonly getSessionIdentity: (headers: Headers) => Promise<ConsumerSessionIdentity | null>;
+};
+
+export type ConsumerSessionIdentity = {
+  readonly authenticatedAt: Date;
+  readonly userId: string;
 };
 
 export function createConsumerAuth(options: ConsumerAuthOptions): ConsumerAuth {
@@ -108,6 +114,16 @@ export function createConsumerAuth(options: ConsumerAuthOptions): ConsumerAuth {
   const trustedOrigins = new Set(options.trustedOrigins.map(normalizeOrigin));
 
   return {
+    async getSessionIdentity(headers) {
+      const result = await auth.api.getSession({ headers });
+      if (!result) {
+        return null;
+      }
+      return {
+        authenticatedAt: result.session.createdAt,
+        userId: result.user.id,
+      };
+    },
     async handler(request) {
       const origin = request.headers.get("origin");
       if (origin && !trustedOrigins.has(normalizeOrigin(origin))) {

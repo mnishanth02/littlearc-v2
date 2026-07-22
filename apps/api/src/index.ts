@@ -1,7 +1,12 @@
 import { createConsumerAuth, createResendOtpDelivery } from "@littlearc/auth";
+import { createStructuredPayloadCrypto } from "@littlearc/crypto";
 import { createDatabaseConnection } from "@littlearc/database";
 import { createSafeLogger } from "@littlearc/observability";
 import { loadApiConfig } from "./config.js";
+import {
+  createOwnerOnboardingCommand,
+  createSyntheticAdultVerification,
+} from "./owner-onboarding.js";
 import { createApiServer } from "./server.js";
 
 const config = loadApiConfig();
@@ -32,7 +37,21 @@ const consumerAuth =
         trustedOrigins: config.consumerAuth.trustedOrigins,
       })
     : undefined;
-const server = await createApiServer(config, logger, consumerAuth);
+const ownerOnboarding =
+  config.ownerOnboarding && consumerAuth && databaseConnection
+    ? {
+        command: createOwnerOnboardingCommand({
+          adultVerification: createSyntheticAdultVerification(),
+          crypto: createStructuredPayloadCrypto({
+            keyEncryptionKey: Buffer.from(config.ownerOnboarding.keyEncryptionKey, "base64url"),
+            wrappingKeyVersion: config.ownerOnboarding.wrappingKeyVersion,
+          }),
+          database: databaseConnection.database,
+        }),
+        getSessionIdentity: consumerAuth.getSessionIdentity,
+      }
+    : undefined;
+const server = await createApiServer(config, logger, consumerAuth, ownerOnboarding);
 
 if (databaseConnection) {
   server.addHook("onClose", () => databaseConnection.close());

@@ -125,6 +125,9 @@ describe("consumer authentication", () => {
     expect(sessions.map((session) => session.token)).toEqual(
       expect.arrayContaining([first.token, second.token]),
     );
+    const identity = await fixture.auth.getSessionIdentity(new Headers({ cookie: second.cookie }));
+    expect(identity).toMatchObject({ userId: expect.any(String) });
+    expect(identity?.authenticatedAt).toBeInstanceOf(Date);
 
     const revokeResponse = await authRequest(
       fixture.auth,

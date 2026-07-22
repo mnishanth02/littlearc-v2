@@ -12,6 +12,7 @@ export const environmentCatalog = {
     GOOGLE_CLIENT_ID: { classification: "public", owner: "OFF-01", secret: false },
     GOOGLE_CLIENT_SECRET: { classification: "secret", owner: "OFF-01", secret: true },
     KEY_WRAPPING_SECRET_V1: { classification: "secret", owner: "FND-06", secret: true },
+    OFF02_ADULT_VERIFICATION_MODE: { classification: "public", owner: "OFF-02", secret: false },
     PORT: { classification: "public", owner: "FND-03", secret: false },
     RESEND_API_KEY: { classification: "secret", owner: "OFF-01", secret: true },
     S3_ACCESS_KEY_ID: { classification: "secret", owner: "FND-06", secret: true },

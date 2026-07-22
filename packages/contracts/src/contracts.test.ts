@@ -6,6 +6,7 @@ import {
   createStaffApiClient,
   cursorSchema,
   openApiDocument,
+  ownerOnboardingRequestSchema,
   problemDetailsSchema,
   syncMutationSchema,
   utcTimestampSchema,
@@ -84,5 +85,23 @@ describe("LittleArc API contract", () => {
   it("exports generated mobile and staff client factories", () => {
     expect(createMobileApiClient({ baseUrl: "http://127.0.0.1:3000" })).toBeDefined();
     expect(createStaffApiClient({ baseUrl: "http://127.0.0.1:3000" })).toBeDefined();
+  });
+
+  it("defines the bounded OFF-02 onboarding contract without verification decisions in responses", () => {
+    expect(
+      ownerOnboardingRequestSchema.parse({
+        adultVerificationAssertion: "synthetic-approved-off-02",
+        child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
+        childDataConsentVersion: "child-data-processing-v1",
+        countryCode: "IN",
+        parent: { displayName: "Synthetic Parent", relationship: "parent" },
+        parentNoticeVersion: "parent-notice-v1",
+        timeZone: "Asia/Kolkata",
+      }),
+    ).toBeDefined();
+    expect(openApiDocument.paths).toHaveProperty("/v1/households/onboarding");
+    const responseSchema = openApiDocument.components?.schemas?.OwnerOnboardingResponse;
+    expect(JSON.stringify(responseSchema)).not.toContain("preferredName");
+    expect(JSON.stringify(responseSchema)).not.toContain("adultVerification");
   });
 });

@@ -54,6 +54,187 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/households/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create the first synthetic owner household and child atomically */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Client-generated UUIDv7 idempotency key */
+                    "idempotency-key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        adultVerificationAssertion: string;
+                        child: {
+                            /** Format: date */
+                            dateOfBirth: string;
+                            preferredName: string;
+                        };
+                        /** @enum {string} */
+                        childDataConsentVersion: "child-data-processing-v1";
+                        countryCode: string;
+                        parent: {
+                            displayName: string;
+                            relationship: string;
+                        };
+                        /** @enum {string} */
+                        parentNoticeVersion: "parent-notice-v1";
+                        timeZone: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Exact idempotent replay */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            childDataConsentId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            /** @description UUIDv7 identifier */
+                            householdId: string;
+                            /** @description UUIDv7 identifier */
+                            membershipId: string;
+                            /** @description UUIDv7 identifier */
+                            parentNoticeConsentId: string;
+                            /** @description UUIDv7 identifier */
+                            parentProfileId: string;
+                            replayed: boolean;
+                        };
+                    };
+                };
+                /** @description Household onboarding aggregate created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            childDataConsentId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            /** @description UUIDv7 identifier */
+                            householdId: string;
+                            /** @description UUIDv7 identifier */
+                            membershipId: string;
+                            /** @description UUIDv7 identifier */
+                            parentNoticeConsentId: string;
+                            /** @description UUIDv7 identifier */
+                            parentProfileId: string;
+                            replayed: boolean;
+                        };
+                    };
+                };
+                /** @description Request or policy validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Idempotency replay or existing-household conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/openapi.json": {
         parameters: {
             query?: never;
@@ -214,7 +395,7 @@ export interface components {
             confirmationState: "draft" | "suggested" | "confirmed" | "archived";
             accessPolicy: {
                 /** @enum {string} */
-                role: "owner" | "caregiver" | "staff";
+                role: "owner" | "caregiver";
                 capabilities: ("viewEmergencyCard" | "viewSelectedHealthRecords" | "viewIdentityDocuments" | "addRecords" | "editConfirmedRecords" | "manageTasks" | "inviteMembers" | "exportHousehold" | "deleteHousehold" | "manageEntitlement" | "viewWorkflowStatus")[];
             };
         };
@@ -230,6 +411,39 @@ export interface components {
             /** @description Mutable entity revision */
             baseRevision: number | null;
             localDependencyIds: string[];
+        };
+        OwnerOnboardingRequest: {
+            adultVerificationAssertion: string;
+            child: {
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+            };
+            /** @enum {string} */
+            childDataConsentVersion: "child-data-processing-v1";
+            countryCode: string;
+            parent: {
+                displayName: string;
+                relationship: string;
+            };
+            /** @enum {string} */
+            parentNoticeVersion: "parent-notice-v1";
+            timeZone: string;
+        };
+        OwnerOnboardingResponse: {
+            /** @description UUIDv7 identifier */
+            childDataConsentId: string;
+            /** @description UUIDv7 identifier */
+            childId: string;
+            /** @description UUIDv7 identifier */
+            householdId: string;
+            /** @description UUIDv7 identifier */
+            membershipId: string;
+            /** @description UUIDv7 identifier */
+            parentNoticeConsentId: string;
+            /** @description UUIDv7 identifier */
+            parentProfileId: string;
+            replayed: boolean;
         };
     };
     responses: never;

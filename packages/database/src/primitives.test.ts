@@ -24,12 +24,14 @@ describe("database primitives", () => {
       actorId: "littlearc.current_actor_id",
       actorRole: "littlearc.current_actor_role",
       householdId: "littlearc.current_household_id",
+      identityUserId: "littlearc.current_identity_user_id",
     });
     expect(
       tenantContextSetSql({
         actorId,
         actorRole: "owner",
         householdId,
+        identityUserId: "synthetic-auth-user",
       }),
     ).toEqual({
       params: [
@@ -39,11 +41,14 @@ describe("database primitives", () => {
         actorId,
         "littlearc.current_actor_role",
         "owner",
+        "littlearc.current_identity_user_id",
+        "synthetic-auth-user",
       ],
       sql: [
         "select set_config($1, $2, true);",
         "select set_config($3, $4, true);",
         "select set_config($5, $6, true);",
+        "select set_config($7, $8, true);",
       ].join("\n"),
     });
   });

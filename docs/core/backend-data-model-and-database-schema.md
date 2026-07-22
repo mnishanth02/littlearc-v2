@@ -1,10 +1,10 @@
 # LittleArc Backend Data Model and Database Schema
 
 > **Status:** Active core data-model baseline
-> **Last updated:** 2026-07-20
+> **Last updated:** 2026-07-22
 > **Owner:** Engineering
 > **Applies to:** Server-side PostgreSQL schema from M1 foundation through M5 trust operations
-> **Current delivery boundary:** FND-05 and Gate 1 are complete; M2 work-package planning is ready
+> **Current delivery boundary:** FND-05, OFF-01, and OFF-02 are complete; OFF-03 planning is ready
 > **Authority boundary:** Implemented structures follow executable schema; planned structures require their owning work-package acceptance
 
 ---
@@ -19,7 +19,8 @@ and PostgreSQL row-level security (RLS).
 
 This document separates three levels of certainty:
 
-- **Implemented:** the seven FND-05 tables and migration in
+- **Implemented:** the FND-05 foundation, Better Auth provider schema, and
+  OFF-02 household/membership/profile/consent/key structures and migrations in
   `packages/database`.
 - **Planned:** an implementation-ready target for approved M2-M5 product scope,
   subject to the named work-package plan and acceptance gate.
@@ -47,13 +48,17 @@ status, roadmap order, architecture, or any accepted ADR.
 | [Implementation roadmap](../impl-plan/roadmap.md) | M2-M5 ownership, sequence, and acceptance gates |
 | [FND-05 plan](../impl-plan/m1-foundation/fnd-05-database-and-migration-foundation-plan.md) | Foundation scope and residual obligations |
 | [FND-05 evidence](../impl-plan/m1-foundation/fnd-05-implementation-evidence.md) | Implemented schema and validation boundary |
+| [OFF-01 evidence](../impl-plan/m2-offline-trust/off-01-implementation-evidence.md) | Implemented global identity/session provider boundary |
+| [OFF-02 evidence](../impl-plan/m2-offline-trust/off-02-implementation-evidence.md) | Implemented household, membership, encryption, consent, audit, and RLS boundary |
 | [ADR-0004](../adr/0004-fastify-drizzle-modular-monolith.md) | Fastify/Drizzle modular-monolith decision |
 | [ADR-0005](../adr/0005-postgresql-rls-migrations-and-pg-boss.md) | PostgreSQL, RLS, migration, role, and job decisions |
 | [ADR-0007](../adr/0007-privacy-safe-observability-boundary.md) | Telemetry and restricted-data boundary |
+| [ADR-0010](../adr/0010-household-membership-encryption-and-consent-boundary.md) | Membership, encryption, consent, and synthetic-validation decisions |
 | [Data classification](../reference/engineering/data-classification.md) | Repository, telemetry, and restricted-data handling |
 | [Database migrations](../reference/engineering/database-migrations.md) | Authoritative schema sources and release procedure |
 | [`packages/database`](../../packages/database/src/schema/index.ts) | Current executable Drizzle schema |
 | [Foundation migration](../../packages/database/migrations/0001_fnd_05_database_foundation.sql) | Current reviewed SQL, roles, grants, and RLS policies |
+| [OFF-02 migration](../../packages/database/migrations/0003_off_02_household_consent_audit.sql) | Current household/membership/profile/consent/key DDL, grants, and RLS policies |
 | [Gate 1 RLS evidence](../impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md) | Real PostgreSQL cross-household isolation result and evidence boundaries |
 
 ## 3. Assumptions and Open Decisions
@@ -78,15 +83,15 @@ status, roadmap order, architecture, or any accepted ADR.
 | O-01 | Better Auth 1.6.23 owns five global identity/session tables in the `littlearc` schema; household RLS starts at membership in `OFF-02`. | [ADR-0009](../adr/0009-consumer-authentication-and-session-boundary.md) and the reviewed `OFF-01` schema/migration |
 | O-02 | Persist `owner` and `caregiver`; MVP co-parent is a caregiver capability bundle rather than a third stored role. | Accepted [`OFF-02` plan](../impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) |
 | O-03 | Remove the silent US default in `OFF-02` and require an explicit country during household creation. | Accepted [`OFF-02` plan](../impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) |
+| O-07 | Use exact EncryptedEnvelopeV1 JSON and versioned AES-256-GCM household-key metadata with per-object DEKs and context-bound AAD. | [ADR-0010](../adr/0010-household-membership-encryption-and-consent-boundary.md) and accepted [`OFF-02` evidence](../impl-plan/m2-offline-trust/off-02-implementation-evidence.md) |
 
 ### 3.3 Open decisions that block final migration design
 
 | ID | Decision required | Owner / work package |
 | --- | --- | --- |
-| O-04 | Approve adult/parent verification provider, evidence fields, and retention; no verification-document schema is proposed before that decision. | Pre-real-data gate / `OFF-02` |
+| O-04 | Approve adult/parent verification provider, evidence fields, and retention; no verification-document schema is proposed before that decision. | Pre-real-data provider follow-up |
 | O-05 | Approve retention durations for audit, consent, tombstones, processor payloads, exports, backups, and support data. | Privacy/legal review before real data |
 | O-06 | Decide whether emergency-card versions share the generic record/version aggregate or remain a dedicated aggregate optimized for offline access. This draft recommends dedicated versions. | `OFF-05` |
-| O-07 | Define the exact encrypted-envelope JSON schema and key-table layout before adding real restricted data. | `OFF-02`, `VLT-01` |
 | O-08 | Define cursor lifetime and reset threshold using observed device inactivity and storage growth. | `OFF-04` |
 | O-09 | Confirm whether email reminders are promoted into M4. Email remains account/essential-operation only by default. | `UTL-02` |
 | O-10 | Approve external processor raw-payload retention. Default is not to retain raw health/document payloads. | Integration-specific plan |
@@ -152,13 +157,13 @@ Status values: `IMPLEMENTED`, `PLANNED`, `PROVIDER`, or `FUTURE`.
 | `outbox_events` | Durable event | Operations | IMPLEMENTED | Until dispatch plus operations retention |
 | `schema_migrations` | Bookkeeping | Database | IMPLEMENTED | Database lifetime |
 | Better Auth user/account/session/verification | Provider tables | Identity | PROVIDER / M2 | Provider contract; session/verification expiry |
-| `user_profiles` | Aggregate child | Identity | M2 | Encrypted adult profile; account lifetime |
-| `household_memberships` | Aggregate child | Household | M2 | Access relationship; retain audit after revocation |
-| `membership_capabilities` | Junction | Household | M2/M4 | Active grant rows plus audit history |
+| `user_profiles` | Aggregate child | Identity | IMPLEMENTED | Encrypted adult profile; account lifetime |
+| `household_memberships` | Aggregate child | Household | IMPLEMENTED | Access relationship; retain audit after revocation |
+| `membership_capabilities` | Junction | Household | IMPLEMENTED | Active grant rows plus audit history; invitation behavior remains M4 |
 | `household_invitations` | Workflow | Household | M4 | Expire; minimize rejected/expired invites |
-| `devices` | Aggregate child | Identity | M2 | Enrollment/session support; purge on account deletion |
-| `consent_events` | Append-only event | Consent | M2 | Regulatory evidence; duration open |
-| `household_keys` | Key metadata | Crypto | M2 | While encrypted household data or recovery copy exists |
+| `devices` | Aggregate child | Identity | IMPLEMENTED | Authorization-neutral metadata; enrollment behavior remains OFF-03 |
+| `consent_events` | Append-only event | Consent | IMPLEMENTED | Regulatory evidence; duration open |
+| `household_keys` | Key metadata | Crypto | IMPLEMENTED | While encrypted household data or recovery copy exists |
 | `emergency_cards` | Aggregate root | Emergency | M2 | Restricted current pointer and access mode |
 | `emergency_card_versions` | Immutable version | Emergency | M2 | Restricted; correction/deletion policy |
 | `records` | Aggregate root | Records | M3 | Restricted metadata; tombstone then purge |
@@ -342,11 +347,13 @@ provider-owned tables are not LittleArc API contracts.
 
 | Table | Columns | Constraints and indexes |
 | --- | --- | --- |
-| `user_profiles` | `user_id uuid PK`, `encrypted_profile jsonb NN`, `country_code text`, `time_zone text NN`, `created_at`, `updated_at`, `deleted_at` | Valid IANA timezone at service boundary; country ISO check; encrypted envelope check |
-| `household_memberships` | `id uuid PK`, `household_id uuid NN`, `user_id uuid NN`, `role text NN`, `status text NN`, `invited_by uuid`, `accepted_at`, `revoked_at`, base audit columns | Unique active `(household_id,user_id)`; one active owner minimum enforced transactionally; indexes by user/status and household/status |
-| `membership_capabilities` | `membership_id uuid`, `capability text`, `granted_by uuid`, `granted_at`, `revoked_at` | PK `(membership_id,capability,granted_at)`; capability check; only caregiver-grantable values accepted |
+| `user_profiles` | `id uuid PK`, `household_id uuid NN`, `user_id text NN`, `membership_id uuid NN`, `encrypted_profile jsonb NN`, `country_code text NN`, `time_zone text NN`, timestamps/deletion | Better Auth string user unique; same-household membership FK; ISO country, IANA time zone, and exact encrypted envelope checks |
+| `household_memberships` | `id uuid PK`, `household_id uuid NN`, `user_id text NN`, `role text NN`, `status text NN`, `invited_by uuid`, `accepted_at`, `revoked_at`, `created_at` | Roles owner/caregiver; one active membership per user for MVP; same-household unique key and user/household status indexes |
+| `membership_capabilities` | `household_id uuid`, `membership_id uuid`, `capability text`, `granted_by uuid`, `granted_at`, `revoked_at` | PK `(membership_id,capability,granted_at)`; same-household membership and granting-actor FKs; append-only application grants |
 | `household_invitations` | `id`, `household_id`, `normalized_email_hash`, `role_template`, `token_hash`, `status`, `expires_at`, `accepted_by`, audit columns | Unique token hash; pending household/email partial unique; no raw invite token |
-| `devices` | `id`, `user_id`, `household_id`, `platform`, `app_version`, `enrollment_status`, `last_seen_at`, `revoked_at`, timestamps | User/status and household/status indexes; device ID is not authority by itself |
+| `devices` | `id`, `user_id text`, `household_id`, `platform`, `app_version`, `enrollment_status`, `last_seen_at`, `revoked_at`, timestamps | Better Auth user FK plus user/status and household/status indexes; device ID is not authority by itself |
+| `consent_events` | `id`, `household_id`, `actor_membership_id`, nullable `child_id`, `purpose`, `state`, `notice_version`, `request_id`, `disclosure`, `occurred_at` | Same-household actor/child FKs, versioned notice, bounded disclosure, household/time and actor indexes, append-only application grants |
+| `household_keys` | `id`, `household_id`, `key_version`, `wrapped_key`, `wrap_nonce`, `wrapping_key_version`, `algorithm`, `status`, timestamps | Unique household/version, household/status index, exact AES-256-GCM metadata checks, restricted key access |
 | `staff_profiles` | `user_id PK`, `status`, `role`, `allowlisted_by`, `last_reauthenticated_at`, timestamps | Separate staff auth context; no household membership implication |
 
 Authorization matrix:
@@ -367,15 +374,14 @@ Authorization matrix:
 
 ### 11.1 Implemented household and child tables
 
-`households` and `children` remain exactly as FND-05 until an owning migration
-changes them. `children.encrypted_profile` is restricted child data;
-`access_policy` is a schema-validated authorization envelope.
+OFF-02 removes the household country default, requires exact encrypted-envelope
+shape for child profiles, and adds same-household actor constraints while
+preserving the FND-05 aggregate IDs and lifecycle columns.
 
 ### 11.2 Planned child/emergency/record tables
 
 | Table | Core columns | Invariants / access patterns |
 | --- | --- | --- |
-| `household_keys` | `id`, `household_id`, `key_version`, `wrapped_key bytea`, `wrap_nonce bytea`, `wrapping_key_version`, `status`, `created_at`, `retired_at` | Unique `(household_id,key_version)`; one active key; worker-only rewrap fields |
 | `emergency_cards` | base columns, `child_id`, `current_version_id`, `access_mode`, `status` | Unique active child card; access mode `standard` or `quick_access`; current version same aggregate |
 | `emergency_card_versions` | `id`, `household_id`, `emergency_card_id`, `version_number`, `encrypted_payload`, `confirmed_by`, `confirmed_at`, `source_revision`, `created_at` | Immutable; unique card/version; no unconfirmed value in quick access |
 | `records` | base columns, `child_id`, `category`, `source_type`, `confirmation_state`, `event_at`, `current_version_id`, `access_policy`, `ai_assisted` | Category/source/state checks; current version same record; partial indexes exclude deleted rows |
@@ -466,10 +472,9 @@ Three concepts remain separate:
 - **Security audit:** append-only `audit_events`, never displayed as child content.
 
 The implemented `audit_events` fields are `id`, `household_id`, `actor_id`,
-`actor_role`, `action`, nullable `purpose_code`, JSONB `metadata`, and
-`occurred_at`. `OFF-02` should migrate toward the contract-required safe fields:
-`target_type`, `target_id`, `request_id`, `result`, and optional stable
-`failure_code`. Before/after values must be minimized field-name/revision
+`actor_role`, `action`, `target_type`, `target_id`, `request_id`, `result`,
+nullable stable `failure_code` and `purpose_code`, JSONB `metadata`, and
+`occurred_at`. Before/after values remain minimized field-name/revision
 snapshots, never decrypted payloads, credentials, tokens, filenames, OCR text,
 or provider responses.
 
@@ -1058,8 +1063,8 @@ their work packages.
 | Risk | Recommendation |
 | --- | --- |
 | Cross-tenant relationship points to another household | Add composite tenant FKs before product tables multiply |
-| Current role names conflict with product co-parent language | Resolve in `OFF-02`; avoid a new role framework until needed |
-| Current country default is inappropriate | Make onboarding explicit or deployment-configured in reviewed migration |
+| Product co-parent language could create an unchecked role | Keep persisted owner/caregiver roles and map co-parent to a reviewed caregiver capability bundle |
+| Country inference could silently create a US household | Require an explicit ISO country at the contract and database boundary |
 | Encrypted JSON becomes an ungoverned blob | Version a strict envelope and category payload schemas; never query inside ciphertext |
 | Audit JSON leaks restricted content | Positive allowlist metadata and canary tests; append-only grants |
 | Change/outbox cascades erase lifecycle evidence | Define deletion retention and anonymization before broad delete implementation |
@@ -1077,16 +1082,22 @@ their work packages.
   formally replanned iOS-simulator plus physical-Android matrix.
 - [x] Gate 1 seeded cross-household RLS reads and writes are blocked by real
   Aiven PostgreSQL when executed as `littlearc_app`.
-- [x] `OFF-01` and `OFF-02` have standalone accepted plans.
+- [x] `OFF-01` and `OFF-02` have standalone accepted plans and evidence.
 - [x] Better Auth schema is generated from the pinned version and reviewed.
 - [x] Role/co-parent model and country-default conflict are resolved.
-- [ ] Encrypted envelope and child/profile/record payload schemas are versioned.
-- [ ] Every proposed FK has verified cardinality and same-tenant enforcement.
-- [ ] RLS policies and grants exist for every tenant table and database role.
+- [x] OFF-02 encrypted-envelope and child/profile payload schemas are versioned;
+  later record payload schemas remain with their owning packages.
+- [x] OFF-02 FKs have verified cardinality and same-tenant enforcement; later
+  proposed tables remain with their owning packages.
+- [x] RLS policies and grants exist for every implemented OFF-02 tenant table
+  and database role.
 - [ ] Retention/deletion values have privacy/legal approval before real data.
-- [ ] Migration is split into safe forward steps with backfill/rollback strategy.
-- [ ] Drizzle, SQL DDL, API contracts, and ER diagrams agree.
-- [ ] Container-backed RLS, migration, transaction, idempotency, and sync tests pass.
+- [x] The OFF-02 forward migration includes the required audit backfill and
+  rollback/atomicity evidence.
+- [x] OFF-02 Drizzle, SQL DDL, and API contracts agree; later diagrams remain
+  planning views for their owning packages.
+- [x] Real PostgreSQL OFF-02 RLS, migration, transaction, and idempotency tests
+  pass; synchronization remains OFF-04.
 - [ ] Only synthetic fixtures are used until every pre-real-data gate passes.
 
 ### Explicitly deferred

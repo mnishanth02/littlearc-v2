@@ -5,6 +5,9 @@ import {
   consentEventSchema,
   contractMetadataSchema,
   householdIdentifierSchema,
+  idempotencyKeySchema,
+  ownerOnboardingRequestSchema,
+  ownerOnboardingResponseSchema,
   paginatedResponseSchema,
   problemDetailsSchema,
   recordDescriptorSchema,
@@ -13,6 +16,12 @@ import {
 } from "../schema-source/index.js";
 
 const registry = new OpenAPIRegistry();
+
+registry.registerComponent("securitySchemes", "consumerSession", {
+  type: "apiKey",
+  in: "cookie",
+  name: "better-auth.session_token",
+});
 
 export type GeneratedOpenApiDocument = {
   readonly openapi: "3.1.0";
@@ -36,6 +45,8 @@ registry.register("ConsentEvent", consentEventSchema);
 registry.register("AuditEvent", auditEventSchema);
 registry.register("RecordDescriptor", recordDescriptorSchema);
 registry.register("SyncMutation", syncMutationSchema);
+registry.register("OwnerOnboardingRequest", ownerOnboardingRequestSchema);
+registry.register("OwnerOnboardingResponse", ownerOnboardingResponseSchema);
 
 registry.registerPath({
   method: "get",
@@ -49,6 +60,62 @@ registry.registerPath({
         "application/json": {
           schema: contractMetadataSchema,
         },
+      },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/v1/households/onboarding",
+  tags: ["households"],
+  summary: "Create the first synthetic owner household and child atomically",
+  security: [{ consumerSession: [] }],
+  request: {
+    headers: z.object({
+      "idempotency-key": idempotencyKeySchema,
+    }),
+    body: {
+      content: {
+        "application/json": {
+          schema: ownerOnboardingRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Household onboarding aggregate created",
+      content: {
+        "application/json": {
+          schema: ownerOnboardingResponseSchema,
+        },
+      },
+    },
+    200: {
+      description: "Exact idempotent replay",
+      content: {
+        "application/json": {
+          schema: ownerOnboardingResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Request or policy validation failed",
+      content: {
+        "application/problem+json": { schema: problemDetailsSchema },
+      },
+    },
+    401: {
+      description: "Consumer session required",
+      content: {
+        "application/problem+json": { schema: problemDetailsSchema },
+      },
+    },
+    409: {
+      description: "Idempotency replay or existing-household conflict",
+      content: {
+        "application/problem+json": { schema: problemDetailsSchema },
       },
     },
   },
@@ -83,7 +150,7 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
     info: {
       title: "LittleArc API",
       version: "0.1.0",
-      description: "Versioned LittleArc API contract established by FND-04.",
+      description: "Versioned LittleArc API contract with OFF-02 household onboarding.",
     },
     servers: [
       {
@@ -95,6 +162,10 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
       {
         name: "meta",
         description: "Contract metadata and generated OpenAPI access",
+      },
+      {
+        name: "households",
+        description: "Session-authenticated household enrollment commands",
       },
     ],
   }) as unknown as GeneratedOpenApiDocument;

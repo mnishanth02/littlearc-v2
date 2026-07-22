@@ -1,7 +1,7 @@
 # LittleArc Repository Knowledge Index
 
 > **Status:** Active context index
-> **Last updated:** 2026-07-20
+> **Last updated:** 2026-07-22
 > **Owner:** Engineering
 
 ---
@@ -42,7 +42,7 @@
 | `FND-08` design-system prototype reconciliation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-08-design-system-prototype-reconciliation-plan.md), [evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
 | `FND-09` ADR and engineering documentation baseline | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-09-adr-and-engineering-documentation-baseline-plan.md), [evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
 | `OFF-01` consumer authentication and session lifecycle | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-01-consumer-authentication-and-session-lifecycle-plan.md), [evidence](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) |
-| `OFF-02` household, parent, child, consent, and audit | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) |
+| `OFF-02` household, parent, child, consent, and audit | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md), [evidence](./impl-plan/m2-offline-trust/off-02-implementation-evidence.md) |
 
 ## Engineering Baseline
 

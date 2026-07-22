@@ -55,6 +55,32 @@ export const accessPolicySchema = z.object({
   capabilities: z.array(householdCapabilitySchema),
 });
 
+export const ownerOnboardingRequestSchema = z.object({
+  adultVerificationAssertion: z.string().min(16).max(512),
+  child: z.object({
+    dateOfBirth: z.string().date(),
+    preferredName: z.string().trim().min(1).max(120),
+  }),
+  childDataConsentVersion: z.literal("child-data-processing-v1"),
+  countryCode: z.string().regex(/^[A-Z]{2}$/),
+  parent: z.object({
+    displayName: z.string().trim().min(1).max(120),
+    relationship: z.string().trim().min(1).max(80),
+  }),
+  parentNoticeVersion: z.literal("parent-notice-v1"),
+  timeZone: z.string().trim().min(1).max(80),
+});
+
+export const ownerOnboardingResponseSchema = z.object({
+  childDataConsentId: uuidV7Schema,
+  childId: uuidV7Schema,
+  householdId: uuidV7Schema,
+  membershipId: uuidV7Schema,
+  parentNoticeConsentId: uuidV7Schema,
+  parentProfileId: uuidV7Schema,
+  replayed: z.boolean(),
+});
+
 export const mutableResourceSchema = z.object({
   id: uuidV7Schema,
   householdId: uuidV7Schema,

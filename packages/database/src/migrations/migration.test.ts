@@ -13,6 +13,11 @@ if (!auth) {
   throw new Error("Expected the OFF-01 auth migration to be registered.");
 }
 const generatedAuthSql = readFileSync(join("migrations", auth.filename), "utf8");
+const household = databaseMigrations()[2];
+if (!household) {
+  throw new Error("Expected the OFF-02 household migration to be registered.");
+}
+const generatedHouseholdSql = readFileSync(join("migrations", household.filename), "utf8");
 
 describe("database migration foundation", () => {
   it("keeps the generated migration artifact in sync with the reviewed source", () => {
@@ -97,5 +102,38 @@ describe("OFF-01 consumer auth migration", () => {
     expect(auth.sql).toContain("grant select, insert, update, delete on");
     expect(auth.sql).toContain("to littlearc_app");
     expect(auth.sql).toContain("from littlearc_worker, littlearc_ops_readonly");
+  });
+});
+
+describe("OFF-02 household migration", () => {
+  it("keeps the reviewed source and generated artifact synchronized", () => {
+    expect(generatedHouseholdSql).toBe(`${household.sql}\n`);
+  });
+
+  it("adds identity, membership, consent, key, and encrypted-profile boundaries", () => {
+    for (const table of [
+      "household_memberships",
+      "user_profiles",
+      "membership_capabilities",
+      "devices",
+      "consent_events",
+      "household_keys",
+    ]) {
+      expect(household.sql).toContain(`create table littlearc.${table}`);
+      expect(household.sql).toContain(`alter table littlearc.${table} enable row level security`);
+    }
+    expect(household.sql).toContain("alter column default_country_code drop default");
+    expect(household.sql).toContain("household_memberships_one_active_user_idx");
+    expect(household.sql).toContain("current_identity_user_id()");
+    expect(household.sql).toContain("children_envelope_check");
+  });
+
+  it("keeps consent and audit append-only and keys unavailable to worker and ops", () => {
+    expect(household.sql).toContain(
+      "revoke update, delete on littlearc.consent_events, littlearc.audit_events",
+    );
+    expect(household.sql).toContain(
+      "revoke all on littlearc.household_keys from littlearc_worker, littlearc_ops_readonly",
+    );
   });
 });

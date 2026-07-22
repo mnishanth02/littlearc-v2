@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canPerformHouseholdCapability,
+  canPerformStaffCapability,
   type HouseholdCapability,
   requiredConsentForProcessing,
 } from "./index.js";
@@ -34,20 +35,10 @@ describe("household capability policy", () => {
     ).toBe(false);
   });
 
-  it("keeps staff child-record visibility denied by default", () => {
-    expect(
-      canPerformHouseholdCapability({
-        capability: "viewSelectedHealthRecords",
-        role: "staff",
-      }),
-    ).toBe(false);
-    expect(
-      canPerformHouseholdCapability({
-        capability: "manageEntitlement",
-        purposeCodeRecorded: true,
-        role: "staff",
-      }),
-    ).toBe(true);
+  it("keeps staff outside household roles and requires purpose for overrides", () => {
+    expect(canPerformStaffCapability("manageEntitlement", false)).toBe(false);
+    expect(canPerformStaffCapability("manageEntitlement", true)).toBe(true);
+    expect(canPerformStaffCapability("viewWorkflowStatus", false)).toBe(true);
   });
 
   it("maps sensitive processing to purpose-specific consent", () => {

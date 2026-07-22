@@ -1,7 +1,7 @@
 # Architecture Decision Records
 
 > **Status:** Active index
-> **Last updated:** 2026-07-20
+> **Last updated:** 2026-07-22
 > **Owner:** Engineering
 
 Use ADRs for important decisions that affect system structure, quality
@@ -30,6 +30,7 @@ decision with a new ADR and link both records through `Supersedes` and
 | [ADR-0007](./0007-privacy-safe-observability-boundary.md) | Accepted | Allowlisted and scrubbed observability wrapper boundary | 2026-07-19 | 2026-10-19 |
 | [ADR-0008](./0008-semantic-design-system-boundary.md) | Accepted | Platform-neutral semantic tokens and app-owned theme mapping | 2026-07-19 | 2027-01-19 |
 | [ADR-0009](./0009-consumer-authentication-and-session-boundary.md) | Accepted | Self-hosted passwordless consumer auth with PostgreSQL sessions and SecureStore | 2026-07-20 | 2026-10-20 |
+| [ADR-0010](./0010-household-membership-encryption-and-consent-boundary.md) | Accepted | Membership actors, atomic consented onboarding, tenant RLS, and envelope encryption | 2026-07-22 | 2026-10-22 |
 
 Architecture candidates not represented here have not yet been implemented.
 Create their ADRs with the owning work package rather than treating the core

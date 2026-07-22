@@ -32,6 +32,7 @@
     "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.integration.json"
   },
   "dependencies": {
+    "@littlearc/crypto": "workspace:*",
     "@littlearc/domain": "workspace:*",
     "drizzle-orm": "0.45.2",
     "pg": "8.22.0"

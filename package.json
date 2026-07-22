@@ -32,6 +32,7 @@
     "test": "pnpm test:unit && pnpm test:contract",
     "test:contract": "turbo run test:contract",
     "test:database:auth": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/auth test:postgres",
+    "test:database:household": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/api test:postgres",
     "test:database:rls": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/database test:rls",
     "test:design-system": "vitest run packages/design-tokens/src tooling/design-system",
     "test:unit": "vitest run tooling && turbo run test",

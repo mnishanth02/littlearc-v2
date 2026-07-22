@@ -68,8 +68,9 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | `FND-07` Observability and privacy guards | `COMPLETE` | Engineering | Safe logger, allowlisted analytics/flags, Sentry scrubbing, kill switches, and leakage canaries accepted; see [evidence](./impl-plan/m1-foundation/fnd-07-implementation-evidence.md) |
 | `FND-08` Design-system prototype reconciliation | `COMPLETE` | Engineering | Semantic tokens, three themes, accessible primitives, dev gallery, enforcement, exports, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-08-implementation-evidence.md) |
 | `FND-09` ADR and engineering documentation baseline | `COMPLETE` | Engineering | Eight foundation ADRs, six engineering notes, structural enforcement, context lookup, and clean-checkout proof accepted; see [evidence](./impl-plan/m1-foundation/fnd-09-implementation-evidence.md) |
-| M2. Offline trust slice | `IN PROGRESS` | Engineering | `OFF-01` is complete; implement `OFF-02` next without crossing the real-provider or real-data gates |
+| M2. Offline trust slice | `IN PROGRESS` | Engineering | `OFF-01` and `OFF-02` are complete; plan `OFF-03` next without crossing the real-provider or real-data gates |
 | `OFF-01` Consumer authentication and session lifecycle | `COMPLETE` | Engineering | Better Auth policy, reviewed schema/migration, API/SecureStore boundaries, 111-test root suite, Aiven PostgreSQL lifecycle, and bounded Pixel 8 SecureStore/deep-link evidence accepted; see [evidence](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) |
+| `OFF-02` Household, parent, child, consent, and audit | `COMPLETE` | Engineering | Encryption, atomic onboarding, RLS, append-only evidence, 126 tests, Aiven PostgreSQL, builds, validation, clean-checkout, and bounded Pixel 8 UI/HTTP/database proof accepted; see [evidence](./impl-plan/m2-offline-trust/off-02-implementation-evidence.md) |
 | M3 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
@@ -93,6 +94,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 20 Jul 2026 | [Gate 1 Aiven PostgreSQL RLS isolation](./impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md) | `COMPLETE` | Fresh temporary database, reviewed migration, two synthetic households, real `littlearc_app` execution, fail-closed no-context reads, cross-household filtering, blocked update, and SQLSTATE `42501` insert rejection passed |
 | 20 Jul 2026 | M1 Gate 1 close-out | `COMPLETE` | All Gate 1 criteria have linked passing evidence; M2 work-package planning is ready while real-data and pre-pilot gates remain unchanged |
 | 20 Jul 2026 | [`OFF-01` consumer authentication and session lifecycle](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) | `COMPLETE` | Passwordless OTP policy, PostgreSQL sessions/rate limits, remote revocation, Fastify and SecureStore boundaries, reviewed migration, Aiven lifecycle, 111 tests, root validation, and clean-checkout proof passed; 22 July follow-up added Expo MCP and bounded physical-Android SecureStore/deep-link evidence while live providers and the broader device matrix remain gated |
+| 22 Jul 2026 | [`OFF-02` household, parent, child, consent, and audit](./impl-plan/m2-offline-trust/off-02-implementation-evidence.md) | `COMPLETE` | AES-GCM envelope encryption, explicit country and owner/caregiver policy, atomic idempotent onboarding, same-household RLS/FKs, append-only consent/audit, 126 tests, Aiven PostgreSQL, builds, validation, clean-checkout, and bounded Pixel 8 UI/HTTP/database evidence passed |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -106,13 +108,13 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 
 ## 6. In-Progress Register
 
-No work package is currently in progress. `OFF-02` is the next ready package.
+No work package is currently in progress.
 
 ## 7. Ready Queue
 
-| Item | Tag | Owner | Next action |
+| Item | Tag | Owner | Entry action |
 | --- | --- | --- | --- |
-| [`OFF-02` household, parent, child, consent, and audit](./impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) | `READY` | Engineering | Implement against the accepted OFF-01 identity/session boundary; retain real-provider and real-data gates |
+| `OFF-03` Local security and enrollment | `READY` | Engineering | Create and review a standalone plan against the accepted OFF-02 household/device boundary before implementation |
 
 The complete dependency order remains in Section 25 of the implementation
 roadmap. This section should show only the next few actionable packages.
@@ -158,7 +160,7 @@ roadmap. This section should show only the next few actionable packages.
 | [Gate 1 mobile device and accessibility matrix](./impl-plan/m1-foundation/gate-1-mobile-device-and-accessibility-evidence.md) | `COMPLETE` | Accepted only for the recorded Gate 1 platform matrix; broader physical-device checks remain pre-pilot |
 | [Gate 1 Aiven PostgreSQL RLS isolation](./impl-plan/m1-foundation/gate-1-aiven-rls-evidence.md) | `COMPLETE` | Real PostgreSQL execution proves the remaining seeded cross-household Gate 1 criterion |
 | [`OFF-01` Consumer authentication and session lifecycle](./impl-plan/m2-offline-trust/off-01-consumer-authentication-and-session-lifecycle-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-01-implementation-evidence.md) |
-| [`OFF-02` Household, parent, child, consent, and audit](./impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) | `ACCEPTED` | Shared role, country, verification, and schema boundaries resolved; implementation not started |
+| [`OFF-02` Household, parent, child, consent, and audit](./impl-plan/m2-offline-trust/off-02-household-parent-child-consent-and-audit-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-02-implementation-evidence.md) |
 
 ## 11. Agent Workflow
 
@@ -188,5 +190,5 @@ For every status change:
 7. Keep the matching implementation plan's status header and module-status
    table in sync with this dashboard.
 
-The next status change should record the start of OFF-02. Its real-provider and
-real-data gates remain unchanged.
+The next status change should record the start of OFF-03 planning. The real-
+provider and real-data gates remain unchanged.

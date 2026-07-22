@@ -15,6 +15,11 @@ import {
 import Fastify, { type FastifyInstance } from "fastify";
 import { registerConsumerAuthRoute } from "./auth-route.js";
 import type { ApiConfig } from "./config.js";
+import { nextId } from "./owner-onboarding.js";
+import {
+  type OwnerOnboardingRouteDependencies,
+  registerOwnerOnboardingRoute,
+} from "./owner-onboarding-route.js";
 import { registerProblemDetails } from "./problem.js";
 
 export type HealthResponse = {
@@ -44,9 +49,10 @@ export async function createApiServer(
     version: "0.0.0",
   }),
   consumerAuth?: Pick<ConsumerAuth, "handler">,
+  ownerOnboarding?: OwnerOnboardingRouteDependencies,
 ): Promise<FastifyInstance> {
   const server = Fastify({
-    genReqId: () => crypto.randomUUID(),
+    genReqId: () => nextId(),
     logger: false,
   });
   const requestStartTimes = new WeakMap<object, number>();
@@ -80,6 +86,9 @@ export async function createApiServer(
 
   if (consumerAuth && config.consumerAuth) {
     registerConsumerAuthRoute(server, consumerAuth, config.consumerAuth.baseUrl);
+  }
+  if (ownerOnboarding) {
+    registerOwnerOnboardingRoute(server, ownerOnboarding);
   }
 
   server.get("/v1", async () => contractMetadata);
