@@ -67,12 +67,59 @@ Start the mobile development client with its project-local MCP capability:
 pnpm dev:mobile:mcp
 ```
 
-For a USB-connected Android device using a localhost Metro server, forward the
-port before opening the development-client URL:
+That default command uses LAN discovery. For a USB-connected Android device on
+a different or isolated Wi-Fi network, prepare the reverse tunnel and start
+Metro explicitly in localhost mode:
 
 ```sh
-adb reverse tcp:8081 tcp:8081
+pnpm dev:mobile:android:usb
 ```
+
+This command requires exactly one authorized physical Android device. It checks
+for Stay awake while USB-powered, 0.5x animations, and 60 Hz for daily
+iteration, then configures these reverse rules:
+
+```text
+tcp:8081 -> tcp:8081  # Metro
+tcp:3000 -> tcp:3000  # local API
+```
+
+The API rule is required because the local mobile configuration uses
+`http://127.0.0.1:3000`; without the rule, that address refers to the phone
+instead of the Mac. Reverse rules disappear after some disconnects or reboots,
+so rerun the preparation command at the beginning of a device session. Run
+`pnpm dev:android:usb` by itself when the reverse tunnel is needed without
+starting Metro.
+
+OxygenOS denies the ADB shell `WRITE_SECURE_SETTINGS` and `WRITE_SETTINGS`
+permissions used to change these display/developer values. The helper reports
+any mismatch without bypassing that device security boundary. Apply the named
+values manually in Developer options and Display settings when the daily
+profile is wanted.
+
+Use the read-only doctor before a long validation run:
+
+```sh
+pnpm dev:android:doctor
+```
+
+Before recording acceptance evidence, manually restore normal 1x animations,
+120 Hz, and standard screen timeout behavior, then verify the profile:
+
+```sh
+pnpm dev:android:acceptance
+```
+
+After forced Doze/App Standby or other device testing, remove the reverse rules,
+reset synthetic battery/idle state, and verify the acceptance profile:
+
+```sh
+pnpm dev:android:cleanup
+```
+
+For a true offline test, remove the API reverse rule and use an installed build
+with an embedded JavaScript bundle. Airplane mode alone does not block traffic
+that still crosses an active ADB reverse rule.
 
 Only one MCP-enabled Expo development server should run at a time. Reconnect or
 restart the Codex session after starting or stopping that server so the local
