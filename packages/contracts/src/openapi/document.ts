@@ -17,6 +17,9 @@ import {
   paginatedResponseSchema,
   problemDetailsSchema,
   recordDescriptorSchema,
+  recordProjectionSchema,
+  recordVersionPageSchema,
+  recordVersionProjectionSchema,
   syncMutationPushRequestSchema,
   syncMutationPushResponseSchema,
   syncMutationResultSchema,
@@ -70,6 +73,71 @@ registry.register("DeviceEnrollmentRequest", deviceEnrollmentRequestSchema);
 registry.register("DeviceEnrollmentResponse", deviceEnrollmentResponseSchema);
 registry.register("EmergencyCardProjection", emergencyCardProjectionSchema);
 registry.register("EmergencyCardPutRequest", emergencyCardPutRequestSchema);
+registry.register("RecordProjection", recordProjectionSchema);
+registry.register("RecordVersionProjection", recordVersionProjectionSchema);
+registry.register("RecordVersionPage", recordVersionPageSchema);
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/records/{recordId}",
+  tags: ["records"],
+  summary: "Read the current authorized record projection",
+  security: [{ consumerSession: [] }],
+  request: {
+    params: z.object({ recordId: uuidV7Schema }),
+  },
+  responses: {
+    200: {
+      description: "Current record projection",
+      content: { "application/json": { schema: recordProjectionSchema } },
+    },
+    401: {
+      description: "Consumer session required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    403: {
+      description: "Record capability required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    404: {
+      description: "Record not found",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/records/{recordId}/versions",
+  tags: ["records"],
+  summary: "Read immutable authorized record version history",
+  security: [{ consumerSession: [] }],
+  request: {
+    params: z.object({ recordId: uuidV7Schema }),
+    query: z.object({
+      cursor: z.string().optional(),
+      limit: z.coerce.number().int().min(1).max(50).default(20),
+    }),
+  },
+  responses: {
+    200: {
+      description: "Immutable record version page",
+      content: { "application/json": { schema: recordVersionPageSchema } },
+    },
+    401: {
+      description: "Consumer session required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    403: {
+      description: "Record capability required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    404: {
+      description: "Record not found",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
 
 registry.registerPath({
   method: "get",

@@ -1,7 +1,7 @@
 # LittleArc Repository Knowledge Index
 
 > **Status:** Active context index
-> **Last updated:** 2026-07-23
+> **Last updated:** 2026-07-24
 > **Owner:** Engineering
 
 ---
@@ -32,6 +32,7 @@
 | Work | Status source | Detailed plan or evidence |
 | --- | --- | --- |
 | iOS Simulator cross-milestone parity validation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/ios-simulator-parity-validation-plan.md), [evidence](./impl-plan/ios-simulator-parity-validation-evidence.md) |
+| `VLT-01` record model, versions, provenance, and Timeline projection | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md), [evidence](./impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md) |
 | M1 foundation queue | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [impl-plan/roadmap.md](./impl-plan/roadmap.md) |
 | `FND-01` monorepo and toolchain | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-01-monorepo-and-toolchain-plan.md), [evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
 | `FND-02` CI and supply-chain baseline | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-02-ci-and-supply-chain-plan.md), [evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |

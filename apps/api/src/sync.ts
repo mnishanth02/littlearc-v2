@@ -8,6 +8,8 @@ import { parseCursor, type UuidV7 } from "@littlearc/domain";
 
 export type SyncService = {
   readonly readEmergencyCard: SyncPersistence["readEmergencyCard"];
+  readonly readRecord: SyncPersistence["readRecord"];
+  readonly readRecordVersions: SyncPersistence["readRecordVersions"];
   readonly pull: (input: {
     readonly cursor?: string;
     readonly identityUserId: string;
@@ -52,6 +54,8 @@ export function createSyncService(options: {
 }): SyncService {
   return {
     readEmergencyCard: options.persistence.readEmergencyCard,
+    readRecord: options.persistence.readRecord,
+    readRecordVersions: options.persistence.readRecordVersions,
     async pull(input) {
       const serverTime = new Date().toISOString();
       if (!input.cursor) {

@@ -1,14 +1,18 @@
 import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { createStructuredPayloadCrypto } from "@littlearc/crypto";
+import {
+  createStructuredPayloadCrypto,
+  type StructuredPayloadCrypto,
+  type WrappedHouseholdKey,
+} from "@littlearc/crypto";
 import type { DeviceEnrollmentPersistenceError } from "@littlearc/database";
 import {
   createDatabaseConnection,
   createSyncCursorCodec,
   createSyncPersistence,
 } from "@littlearc/database";
-import type { EmergencyCardContent, UuidV7 } from "@littlearc/domain";
+import type { EmergencyCardContent, RecordVersionContentV1, UuidV7 } from "@littlearc/domain";
 import { Client } from "pg";
 import { loadApiConfig } from "../src/config.js";
 import { createDeviceEnrollmentCommand } from "../src/device-enrollment.js";
@@ -28,12 +32,14 @@ const migrationPaths = [
   "../../../packages/database/migrations/0002_off_01_consumer_auth.sql",
   "../../../packages/database/migrations/0003_off_02_household_consent_audit.sql",
   "../../../packages/database/migrations/0004_off_05_emergency_card.sql",
+  "../../../packages/database/migrations/0005_vlt_01_record_foundation.sql",
 ].map((path) => fileURLToPath(new URL(path, import.meta.url)));
 const deviceMode = process.argv.includes("--device");
 const off03DeviceMode = process.argv.includes("--device-off03");
 const off04DeviceMode = process.argv.includes("--device-off04");
 const off05DeviceMode = process.argv.includes("--device-off05");
 const off06DeviceMode = process.argv.includes("--device-off06");
+const vlt01DeviceMode = process.argv.includes("--device-vlt01");
 const syntheticRequest: OwnerOnboardingRequest = {
   adultVerificationAssertion: "synthetic-approved-off-02",
   child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
@@ -156,6 +162,7 @@ async function runAutomated(
   client: Client,
   currentUser: string,
   syncService: SyncService,
+  crypto: StructuredPayloadCrypto,
 ): Promise<void> {
   const firstUser = "synthetic-off02-owner-one";
   const secondUser = "synthetic-off02-owner-two";
@@ -375,6 +382,443 @@ async function runAutomated(
     firstUser,
     secondUser,
   });
+  await runRecordAutomated(syncService, client, crypto, {
+    firstChildId: first.childId,
+    firstHouseholdId: first.householdId,
+    firstMembershipId: first.membershipId,
+    firstUser,
+    secondUser,
+  });
+}
+
+const syntheticRecordContent: RecordVersionContentV1 = {
+  details: {
+    documentKind: { state: "confirmed", value: "Synthetic discharge summary" },
+    schema: "document.v1",
+  },
+  notes: {
+    state: "confirmed",
+    value: "VLT01_CANARY_SYNTHETIC_NOTE",
+  },
+  providerFacility: {
+    state: "confirmed",
+    value: "VLT01_CANARY_SYNTHETIC_CLINIC",
+  },
+  schemaVersion: 1,
+  title: "VLT01_CANARY_SYNTHETIC_RECORD",
+};
+
+async function runRecordAutomated(
+  syncService: SyncService,
+  client: Client,
+  crypto: StructuredPayloadCrypto,
+  input: {
+    readonly firstChildId: UuidV7;
+    readonly firstHouseholdId: UuidV7;
+    readonly firstMembershipId: UuidV7;
+    readonly firstUser: string;
+    readonly secondUser: string;
+  },
+): Promise<void> {
+  const recordId = nextId();
+  const createMutation = {
+    baseRevision: null,
+    entityId: recordId,
+    entityType: "record" as const,
+    idempotencyKey: nextId(),
+    localDependencyIds: [],
+    mutationId: nextId(),
+    operation: "create" as const,
+    payload: {
+      category: "document" as const,
+      childId: input.firstChildId,
+      content: syntheticRecordContent,
+      eventAt: null,
+      sourceType: "manual" as const,
+    },
+  };
+  const created = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [createMutation],
+  });
+  assert(created.results[0]?.status === "applied", "VLT-01 record create did not apply.");
+  const replay = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [createMutation],
+  });
+  assert(replay.results[0]?.status === "duplicate", "VLT-01 exact replay was not duplicate.");
+  const mismatch = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [
+      {
+        ...createMutation,
+        payload: {
+          ...createMutation.payload,
+          content: { ...syntheticRecordContent, title: "Changed replay" },
+        },
+      },
+    ],
+  });
+  assert(
+    mismatch.results[0]?.status === "rejected" &&
+      mismatch.results[0].reason === "idempotencyMismatch",
+    "VLT-01 changed replay did not fail closed.",
+  );
+
+  const updateMutation = {
+    ...createMutation,
+    baseRevision: 1,
+    idempotencyKey: nextId(),
+    mutationId: nextId(),
+    operation: "update" as const,
+    payload: {
+      ...createMutation.payload,
+      content: {
+        ...syntheticRecordContent,
+        notes: {
+          state: "confirmed" as const,
+          value: "VLT01_CANARY_SYNTHETIC_CORRECTION",
+        },
+      },
+      eventAt: "2026-07-20T09:30:00.000Z",
+    },
+  };
+  const updated = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [updateMutation],
+  });
+  assert(updated.results[0]?.status === "applied", "VLT-01 correction did not apply.");
+  const stale = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [
+      {
+        ...updateMutation,
+        idempotencyKey: nextId(),
+        mutationId: nextId(),
+      },
+    ],
+  });
+  assert(stale.results[0]?.status === "conflict", "VLT-01 stale correction did not conflict.");
+
+  const current = await syncService.readRecord({
+    identityUserId: input.firstUser,
+    recordId,
+  });
+  assert(
+    current?.revision === 2 &&
+      current.version === 2 &&
+      current.eventAt === "2026-07-20T09:30:00.000Z",
+    "VLT-01 current projection is invalid.",
+  );
+  const history = await syncService.readRecordVersions({
+    identityUserId: input.firstUser,
+    limit: 20,
+    recordId,
+  });
+  assert(
+    history.length === 2 &&
+      history[0]?.version === 2 &&
+      history[1]?.version === 1 &&
+      history[0].supersedesVersionId === history[1].versionId,
+    "VLT-01 immutable version history is invalid.",
+  );
+  const crossHousehold = await syncService.readRecord({
+    identityUserId: input.secondUser,
+    recordId,
+  });
+  assert(crossHousehold === null, "Cross-household VLT-01 record was visible.");
+
+  const wrapped = await client.query<WrappedHouseholdKey>(
+    `select
+       key_version as "keyVersion",
+       wrap_nonce as "wrapNonce",
+       wrapped_key as "wrappedKey",
+       wrapping_key_version as "wrappingKeyVersion"
+     from littlearc.household_keys
+     where household_id = $1 and status = 'active'
+     order by key_version desc limit 1`,
+    [input.firstHouseholdId],
+  );
+  const householdKey = wrapped.rows[0];
+  assert(householdKey, "VLT-01 household key was unavailable.");
+  const plaintextKey = crypto.unwrapHouseholdKey(householdKey);
+  const suggestionId = nextId();
+  try {
+    const encryptedSuggestion = crypto.encrypt(
+      { value: "VLT01_CANARY_SYNTHETIC_SUGGESTION" },
+      {
+        aadSchemaVersion: 1,
+        householdId: input.firstHouseholdId,
+        objectId: suggestionId,
+        objectType: "record_suggestion",
+      },
+      plaintextKey,
+      householdKey.keyVersion,
+    );
+    const encryptedSourceSpan = crypto.encrypt(
+      { value: "VLT01_CANARY_SYNTHETIC_SOURCE_SPAN" },
+      {
+        aadSchemaVersion: 1,
+        householdId: input.firstHouseholdId,
+        objectId: suggestionId,
+        objectType: "record_suggestion",
+      },
+      plaintextKey,
+      householdKey.keyVersion,
+    );
+    await client.query("begin");
+    try {
+      await client.query("set local role littlearc_app");
+      await client.query(
+        `select
+          set_config('littlearc.current_household_id', $1, true),
+          set_config('littlearc.current_actor_id', $2, true),
+          set_config('littlearc.current_actor_role', 'owner', true),
+          set_config('littlearc.current_identity_user_id', $3, true)`,
+        [input.firstHouseholdId, input.firstMembershipId, input.firstUser],
+      );
+      await client.query(
+        `insert into littlearc.record_suggestions (
+           id, household_id, record_id, record_version_id, field_path,
+           encrypted_suggestion, encrypted_source_span, confidence_bucket,
+           extractor_type, review_state, expires_at
+         ) values ($1, $2, $3, $4, 'details.documentKind', $5::jsonb, $6::jsonb,
+           'medium', 'local_ocr', 'pending', now() + interval '1 day')`,
+        [
+          suggestionId,
+          input.firstHouseholdId,
+          recordId,
+          history[0]?.versionId,
+          JSON.stringify(encryptedSuggestion),
+          JSON.stringify(encryptedSourceSpan),
+        ],
+      );
+      await client.query("commit");
+    } catch (error) {
+      await client.query("rollback");
+      throw error;
+    }
+  } finally {
+    plaintextKey.fill(0);
+  }
+  const suggestionAuthority = await client.query<{
+    readonly activeTimeline: string;
+    readonly suggestions: string;
+    readonly versions: string;
+  }>(
+    `select
+       (select count(*)::text from littlearc.record_suggestions
+         where record_id = $1 and review_state = 'pending') suggestions,
+       (select count(*)::text from littlearc.record_versions
+         where record_id = $1) versions,
+       (select count(*)::text from littlearc.timeline_entries
+         where source_record_id = $1 and projection_state = 'active') "activeTimeline"`,
+    [recordId],
+  );
+  assert(
+    suggestionAuthority.rows[0]?.suggestions === "1" &&
+      suggestionAuthority.rows[0].versions === "2" &&
+      suggestionAuthority.rows[0].activeTimeline === "1",
+    "VLT-01 suggestion changed confirmed or Timeline authority.",
+  );
+
+  let immutableCode: string | undefined;
+  await client.query("begin");
+  try {
+    await client.query("set local role littlearc_app");
+    await client.query(
+      `select
+        set_config('littlearc.current_household_id', $1, true),
+        set_config('littlearc.current_actor_id', $2, true),
+        set_config('littlearc.current_actor_role', 'owner', true),
+        set_config('littlearc.current_identity_user_id', $3, true)`,
+      [input.firstHouseholdId, input.firstMembershipId, input.firstUser],
+    );
+    await client.query(
+      "update littlearc.record_versions set version_number = 9 where record_id = $1",
+      [recordId],
+    );
+  } catch (error) {
+    immutableCode =
+      error && typeof error === "object" && "code" in error ? String(error.code) : undefined;
+  } finally {
+    await client.query("rollback");
+  }
+  assert(immutableCode === "42501", "VLT-01 immutable version accepted an update.");
+
+  const rollbackRecordId = nextId();
+  await client.query(`
+    create function littlearc.vlt01_force_rollback() returns trigger language plpgsql as $$
+    begin
+      raise exception 'synthetic VLT-01 forced rollback';
+    end $$;
+    create trigger vlt01_force_rollback before insert on littlearc.outbox_events
+    for each row execute function littlearc.vlt01_force_rollback();
+  `);
+  try {
+    await syncService.push({
+      identityUserId: input.firstUser,
+      mutations: [
+        {
+          ...createMutation,
+          entityId: rollbackRecordId,
+          idempotencyKey: nextId(),
+          mutationId: nextId(),
+        },
+      ],
+    });
+    throw new Error("Forced VLT-01 rollback unexpectedly succeeded.");
+  } catch (error) {
+    assert(
+      error instanceof Error &&
+        (error.message.includes("synthetic VLT-01 forced rollback") ||
+          error.message.includes("insert into littlearc.outbox_events")),
+      "Forced VLT-01 rollback returned the wrong error: " +
+        (error instanceof Error ? error.message : String(error)),
+    );
+  } finally {
+    await client.query("drop trigger vlt01_force_rollback on littlearc.outbox_events");
+    await client.query("drop function littlearc.vlt01_force_rollback()");
+  }
+  const rollbackCounts = await client.query<{ readonly count: string }>(
+    `select (
+       (select count(*) from littlearc.records where id = $1) +
+       (select count(*) from littlearc.record_versions where record_id = $1) +
+       (select count(*) from littlearc.timeline_entries where source_record_id = $1)
+     )::text count`,
+    [rollbackRecordId],
+  );
+  assert(rollbackCounts.rows[0]?.count === "0", "VLT-01 rollback left partial state.");
+
+  const deleteMutation = {
+    baseRevision: 2,
+    entityId: recordId,
+    entityType: "record" as const,
+    idempotencyKey: nextId(),
+    localDependencyIds: [],
+    mutationId: nextId(),
+    operation: "delete" as const,
+  };
+  const deleted = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [deleteMutation],
+  });
+  assert(deleted.results[0]?.status === "applied", "VLT-01 delete did not apply.");
+  const deleteReplay = await syncService.push({
+    identityUserId: input.firstUser,
+    mutations: [deleteMutation],
+  });
+  assert(deleteReplay.results[0]?.status === "duplicate", "VLT-01 delete replay duplicated.");
+  assert(
+    (await syncService.readRecord({ identityUserId: input.firstUser, recordId })) === null,
+    "Deleted VLT-01 record remained readable.",
+  );
+
+  const evidence = await client.query<{
+    readonly activeTimeline: string;
+    readonly audit: string;
+    readonly outbox: string;
+    readonly purge: string;
+    readonly recordChanges: string;
+    readonly timelineChanges: string;
+    readonly tombstonedTimeline: string;
+    readonly versions: string;
+  }>(
+    `select
+       (select count(*)::text from littlearc.record_versions
+         where record_id = $1) versions,
+       (select count(*)::text from littlearc.audit_events
+         where target_id = $1 and result = 'success') audit,
+       (select count(*)::text from littlearc.change_events
+         where entity_id = $1 and entity_type = 'record') "recordChanges",
+       (select count(*)::text from littlearc.change_events
+         where entity_type = 'timelineEntry'
+           and mutation_id in (
+             select request_id from littlearc.audit_events where target_id = $1
+           )) "timelineChanges",
+       (select count(*)::text from littlearc.outbox_events
+         where aggregate_id = $1 and aggregate_type = 'record') outbox,
+       (select count(*)::text from littlearc.outbox_events
+         where aggregate_id = $1 and event_type = 'record.purge_requested') purge,
+       (select count(*)::text from littlearc.timeline_entries
+         where source_record_id = $1 and projection_state = 'active') "activeTimeline",
+       (select count(*)::text from littlearc.timeline_entries
+         where source_record_id = $1 and projection_state = 'tombstoned') "tombstonedTimeline"`,
+    [recordId],
+  );
+  const row = evidence.rows[0];
+  assert(
+    row?.versions === "2" &&
+      row.audit === "3" &&
+      row.recordChanges === "3" &&
+      row.timelineChanges === "4" &&
+      row.outbox === "3" &&
+      row.purge === "1" &&
+      row.activeTimeline === "0" &&
+      row.tombstonedTimeline === "1",
+    "VLT-01 version/Timeline/delete evidence is incomplete.",
+  );
+
+  const plaintext = JSON.stringify(
+    (
+      await client.query(
+        `select payload from (
+           select encrypted_payload::text payload
+             from littlearc.record_versions where record_id = $1
+           union all
+           select encrypted_suggestion::text
+             from littlearc.record_suggestions where record_id = $1
+           union all
+           select encrypted_source_span::text
+             from littlearc.record_suggestions where record_id = $1
+           union all
+           select encrypted_payload::text
+             from littlearc.timeline_entries where source_record_id = $1
+           union all
+           select metadata::text
+             from littlearc.audit_events where target_id = $1
+           union all
+           select payload::text
+             from littlearc.change_events
+             where entity_id = $1 or mutation_id in (
+               select request_id from littlearc.audit_events where target_id = $1
+             )
+           union all
+           select payload::text
+             from littlearc.outbox_events where aggregate_id = $1
+         ) evidence`,
+        [recordId],
+      )
+    ).rows,
+  );
+  for (const canary of [
+    "VLT01_CANARY_SYNTHETIC_RECORD",
+    "VLT01_CANARY_SYNTHETIC_NOTE",
+    "VLT01_CANARY_SYNTHETIC_CLINIC",
+    "VLT01_CANARY_SYNTHETIC_CORRECTION",
+    "VLT01_CANARY_SYNTHETIC_SUGGESTION",
+    "VLT01_CANARY_SYNTHETIC_SOURCE_SPAN",
+  ]) {
+    assert(!plaintext.includes(canary), `VLT-01 plaintext canary leaked: ${canary}`);
+  }
+
+  const indexes = await client.query<{ readonly indexname: string }>(
+    `select indexname from pg_indexes
+     where schemaname = 'littlearc'
+       and indexname in (
+         'records_child_event_idx',
+         'record_versions_record_created_idx',
+         'timeline_entries_child_event_idx',
+         'timeline_entries_one_active_record_idx'
+       )`,
+  );
+  assert(indexes.rowCount === 4, "VLT-01 target query indexes are incomplete.");
+
+  console.log("VLT-01 PostgreSQL record-foundation validation passed.");
+  console.log("- Encrypted create, exact replay, correction, history, and stale conflict passed.");
+  console.log("- Suggestions remained separate from confirmed and Timeline authority.");
+  console.log("- RLS/BOLA, immutable versions, rollback, tombstone, and one purge request passed.");
+  console.log("- Record, suggestion, source-span, and Timeline plaintext canaries were absent.");
 }
 
 async function runEmergencyCardAutomated(
@@ -852,6 +1296,8 @@ async function serveOff04Device(
     headers.get("x-littlearc-synthetic-session") === "off04-device-validation" ? { userId } : null;
   const validatingSyncService: SyncService = {
     readEmergencyCard: syncService.readEmergencyCard,
+    readRecord: syncService.readRecord,
+    readRecordVersions: syncService.readRecordVersions,
     async pull(input) {
       try {
         return await syncService.pull(input);
@@ -1144,6 +1590,149 @@ async function serveOff05Device(
   return async () => server.close();
 }
 
+async function serveVlt01Device(
+  onboardingCommand: OwnerOnboardingCommand,
+  deviceCommand: DeviceEnrollmentCommand,
+  syncService: SyncService,
+  client: Client,
+): Promise<() => Promise<void>> {
+  const userId = "synthetic-vlt01-device";
+  await insertAuthUser(client, userId, "synthetic.vlt01.device@example.test");
+  const onboarding = await execute(onboardingCommand, userId);
+  const recordId = nextId();
+  const getSessionIdentity = async (headers: Headers) =>
+    headers.get("x-littlearc-synthetic-session") === "vlt01-device-validation" ? { userId } : null;
+  const server = await createApiServer(
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    undefined,
+    undefined,
+    undefined,
+    { command: deviceCommand, getSessionIdentity },
+    { getSessionIdentity, service: syncService },
+  );
+  let apiAvailable = true;
+
+  server.addHook("onRequest", async (request, reply) => {
+    if (!apiAvailable && request.url !== "/v1/validation/vlt01/connectivity") {
+      return reply.status(503).send({ error: "synthetic_api_unavailable" });
+    }
+  });
+
+  server.get("/v1/validation/vlt01/connectivity", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    return { available: apiAvailable };
+  });
+  server.post("/v1/validation/vlt01/connectivity", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const body = request.body as { readonly available?: unknown };
+    if (typeof body.available !== "boolean") {
+      return reply.status(400).send({ error: "invalid_availability" });
+    }
+    apiAvailable = body.available;
+    console.log(`VLT-01 synthetic API ${apiAvailable ? "restored" : "unavailable"}.`);
+    return { available: apiAvailable };
+  });
+
+  server.get("/v1/validation/vlt01/bootstrap", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    return {
+      childId: onboarding.childId,
+      householdId: onboarding.householdId,
+      recordId,
+    };
+  });
+  server.post("/v1/validation/vlt01/remote-edit", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const result = await syncService.push({
+      identityUserId: userId,
+      mutations: [
+        {
+          baseRevision: 2,
+          entityId: recordId,
+          entityType: "record",
+          idempotencyKey: nextId(),
+          localDependencyIds: [],
+          mutationId: nextId(),
+          operation: "update",
+          payload: {
+            category: "doctor_visit",
+            childId: onboarding.childId,
+            content: {
+              details: {
+                documentKind: {
+                  state: "confirmed",
+                  value: "Synthetic remote visit summary",
+                },
+                schema: "document.v1",
+              },
+              notes: {
+                state: "confirmed",
+                value: "Synthetic remote correction",
+              },
+              providerFacility: {
+                state: "confirmed",
+                value: "Synthetic Clinic",
+              },
+              schemaVersion: 1,
+              title: "Synthetic remote visit",
+            },
+            eventAt: "2026-07-20T09:00:00.000Z",
+            sourceType: "manual",
+          },
+        },
+      ],
+    });
+    assert(result.results[0]?.status === "applied", "VLT-01 remote edit did not apply.");
+    console.log("VLT-01 simulated remote writer applied record revision 3.");
+    return result;
+  });
+  server.get("/v1/validation/vlt01/evidence", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const result = await client.query<{
+      readonly activeTimeline: string;
+      readonly audit: string;
+      readonly recordChanges: string;
+      readonly revision: number;
+      readonly timelineChanges: string;
+      readonly versions: string;
+    }>(
+      `select
+        (select count(*)::text from littlearc.record_versions
+          where record_id = $1) versions,
+        (select count(*)::text from littlearc.audit_events
+          where target_id = $1 and result = 'success') audit,
+        (select count(*)::text from littlearc.change_events
+          where entity_id = $1 and entity_type = 'record') "recordChanges",
+        (select count(*)::text from littlearc.change_events
+          where entity_type = 'timelineEntry'
+            and entity_id in (
+              select id from littlearc.timeline_entries where source_record_id = $1
+            )) "timelineChanges",
+        (select count(*)::text from littlearc.timeline_entries
+          where source_record_id = $1
+            and projection_state = 'active'
+            and deleted_at is null) "activeTimeline",
+        (select revision from littlearc.records where id = $1) revision`,
+      [recordId],
+    );
+    return result.rows[0];
+  });
+
+  await server.listen({ host: "127.0.0.1", port: 3000 });
+  console.log("VLT-01 synthetic device API listening on 127.0.0.1:3000.");
+  return async () => server.close();
+}
+
 async function serveOff06Device(
   onboardingCommand: OwnerOnboardingCommand,
   deviceCommand: DeviceEnrollmentCommand,
@@ -1276,7 +1865,13 @@ async function run(): Promise<void> {
       persistence: createSyncPersistence({ crypto, database: connection.database }),
     });
 
-    if (off06DeviceMode) {
+    if (vlt01DeviceMode) {
+      closeServer = await serveVlt01Device(command, deviceCommand, syncService, databaseClient);
+      await new Promise<void>((resolve) => {
+        process.once("SIGINT", resolve);
+        process.once("SIGTERM", resolve);
+      });
+    } else if (off06DeviceMode) {
       closeServer = await serveOff06Device(command, deviceCommand, syncService, databaseClient);
       await new Promise<void>((resolve) => {
         process.once("SIGINT", resolve);
@@ -1307,7 +1902,7 @@ async function run(): Promise<void> {
         process.once("SIGTERM", resolve);
       });
     } else {
-      await runAutomated(command, deviceCommand, databaseClient, currentUser, syncService);
+      await runAutomated(command, deviceCommand, databaseClient, currentUser, syncService, crypto);
     }
   } finally {
     await closeServer?.();

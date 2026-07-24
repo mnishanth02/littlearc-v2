@@ -10,6 +10,8 @@ import {
   openApiDocument,
   ownerOnboardingRequestSchema,
   problemDetailsSchema,
+  recordProjectionSchema,
+  recordVersionPageSchema,
   syncMutationPushRequestSchema,
   syncMutationResultSchema,
   syncMutationSchema,
@@ -183,5 +185,99 @@ describe("LittleArc API contract", () => {
         status: "conflict",
       }),
     ).toMatchObject({ status: "conflict" });
+  });
+
+  it("defines bounded VLT-01 record, version, provenance, and mutation contracts", () => {
+    const content = {
+      details: {
+        documentKind: { state: "confirmed", value: "Synthetic summary" },
+        schema: "document.v1",
+      },
+      notes: { state: "notProvided" },
+      providerFacility: { state: "confirmed", value: "Synthetic Clinic" },
+      schemaVersion: 1,
+      title: "Synthetic record",
+    };
+    expect(Object.keys(openApiDocument.paths)).toEqual(
+      expect.arrayContaining(["/v1/records/{recordId}", "/v1/records/{recordId}/versions"]),
+    );
+    expect(
+      recordProjectionSchema.parse({
+        accessScope: "selectedHealthRecords",
+        category: "document",
+        childId: validUuidV7,
+        confirmationState: "confirmed",
+        content,
+        eventAt: null,
+        provenance: { sourceType: "manual", trustedIssuer: false },
+        recordId: validUuidV7,
+        revision: 1,
+        updatedAt: "2026-07-24T12:00:00.000Z",
+        version: 1,
+        versionId: validUuidV7,
+      }),
+    ).toBeDefined();
+    expect(
+      recordVersionPageSchema.parse({
+        items: [
+          {
+            confirmedAt: "2026-07-24T12:00:00.000Z",
+            confirmationState: "confirmed",
+            content,
+            createdAt: "2026-07-24T12:00:00.000Z",
+            provenance: { sourceType: "manual", trustedIssuer: false },
+            recordId: validUuidV7,
+            supersedesVersionId: null,
+            version: 1,
+            versionId: validUuidV7,
+          },
+        ],
+        nextCursor: null,
+      }),
+    ).toBeDefined();
+    expect(
+      syncMutationPushRequestSchema.parse({
+        mutations: [
+          {
+            baseRevision: null,
+            entityId: validUuidV7,
+            entityType: "record",
+            idempotencyKey: validUuidV7,
+            localDependencyIds: [],
+            mutationId: validUuidV7,
+            operation: "create",
+            payload: {
+              category: "document",
+              childId: validUuidV7,
+              content,
+              eventAt: null,
+              sourceType: "manual",
+            },
+          },
+        ],
+      }),
+    ).toBeDefined();
+    expect(() =>
+      syncMutationPushRequestSchema.parse({
+        mutations: [
+          {
+            baseRevision: null,
+            entityId: validUuidV7,
+            entityType: "record",
+            idempotencyKey: validUuidV7,
+            localDependencyIds: [],
+            mutationId: validUuidV7,
+            operation: "create",
+            payload: {
+              category: "document",
+              childId: validUuidV7,
+              content: { ...content, title: "x".repeat(161) },
+              eventAt: null,
+              sourceType: "manual",
+            },
+          },
+        ],
+      }),
+    ).toThrow();
   });
 });

@@ -8,7 +8,7 @@ export type ChangeFeedCursorPayload = {
 };
 
 export type SnapshotCursorPayload = {
-  readonly afterEntityType?: "child" | "emergencyCard" | null;
+  readonly afterEntityType?: "child" | "emergencyCard" | "record" | "timelineEntry" | null;
   readonly afterId: string | null;
   readonly kind: "snapshot";
   readonly sequence: number;
@@ -20,7 +20,7 @@ export type SyncCursorPayload = ChangeFeedCursorPayload | SnapshotCursorPayload;
 export type SyncCursorCodec = {
   readonly createChangesCursor: (sequence: number) => Cursor;
   readonly createSnapshotCursor: (input: {
-    readonly afterEntityType?: "child" | "emergencyCard" | null;
+    readonly afterEntityType?: "child" | "emergencyCard" | "record" | "timelineEntry" | null;
     readonly afterId: string | null;
     readonly sequence: number;
   }) => Cursor;
@@ -40,6 +40,14 @@ export function createSyncCursorCodec(keyMaterial: Buffer): SyncCursorCodec {
     assertSequence(payload.sequence);
     if (payload.kind === "snapshot" && payload.afterId !== null && !isUuidV7(payload.afterId)) {
       throw new Error("Snapshot cursor afterId must be a UUIDv7 or null.");
+    }
+    if (
+      payload.kind === "snapshot" &&
+      payload.afterEntityType !== undefined &&
+      payload.afterEntityType !== null &&
+      !isSnapshotEntityType(payload.afterEntityType)
+    ) {
+      throw new Error("Snapshot cursor entity type is invalid.");
     }
     const encodedPayload = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
     const signature = sign(encodedPayload, signingKey).toString("base64url");
@@ -103,6 +111,14 @@ export function createSyncCursorCodec(keyMaterial: Buffer): SyncCursorCodec {
     ) {
       throw invalidCursor();
     }
+    if (
+      candidate.kind === "snapshot" &&
+      candidate.afterEntityType !== undefined &&
+      candidate.afterEntityType !== null &&
+      !isSnapshotEntityType(candidate.afterEntityType)
+    ) {
+      throw invalidCursor();
+    }
     return candidate;
   }
 
@@ -151,4 +167,10 @@ function invalidCursor(): Error {
 
 function isUuidV7(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function isSnapshotEntityType(
+  value: string,
+): value is "child" | "emergencyCard" | "record" | "timelineEntry" {
+  return ["child", "emergencyCard", "record", "timelineEntry"].includes(value);
 }

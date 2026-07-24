@@ -6,6 +6,7 @@ import {
   listReadyMutations,
   queueChildProfileUpdate,
   queueEmergencyCardUpdate,
+  queueRecordUpsert,
 } from "./repository";
 
 const childId = "019f742b-de82-7292-86cd-5475a1388313";
@@ -13,6 +14,18 @@ const mutationId = "019f742b-de82-7292-86cd-5475a1388314";
 const dependencyId = "019f742b-de82-7292-86cd-5475a1388315";
 const idempotencyKey = "019f742b-de82-7292-86cd-5475a1388316";
 const cardId = "019f742b-de82-7292-86cd-5475a1388317";
+const recordId = "019f742b-de82-7292-86cd-5475a1388318";
+const versionId = "019f742b-de82-7292-86cd-5475a1388319";
+const recordContent = {
+  details: {
+    documentKind: { state: "confirmed" as const, value: "Synthetic discharge summary" },
+    schema: "document.v1" as const,
+  },
+  notes: { state: "notProvided" as const },
+  providerFacility: { state: "confirmed" as const, value: "Synthetic Clinic" },
+  schemaVersion: 1 as const,
+  title: "Synthetic visit record",
+};
 const emergencyContent = {
   allergies: { state: "noneConfirmed" as const },
   bloodGroup: { state: "confirmed" as const, value: "O+" },
@@ -283,5 +296,128 @@ describe("OFF-05 local emergency-card repository", () => {
     expect(JSON.stringify(scripted.runAsync.mock.calls)).toContain("local_emergency_cards");
     expect(JSON.stringify(scripted.runAsync.mock.calls)).toContain("Synthetic remote note");
     expect(scripted.runAsync.mock.calls.some((call) => call.includes(localPayload))).toBe(true);
+  });
+});
+
+describe("VLT-01 local record repository", () => {
+  it("queues a manual record and projects its provisional Timeline entry atomically", async () => {
+    const scripted = scriptedDatabase({ first: [null] });
+
+    await queueRecordUpsert(scripted.database, {
+      category: "doctor_visit",
+      childId,
+      content: recordContent,
+      eventAt: "2026-07-20T09:00:00.000Z",
+      idempotencyKey,
+      localDependencyIds: [],
+      mutationId: versionId,
+      now: "2026-07-22T12:00:00.000Z",
+      recordId,
+      sourceType: "manual",
+    });
+
+    expect(scripted.runAsync).toHaveBeenCalledTimes(4);
+    expect(scripted.runAsync.mock.calls[0]).toEqual(
+      expect.arrayContaining([versionId, recordId, "create", null]),
+    );
+    expect(String(scripted.runAsync.mock.calls[1]?.[0])).toContain("local_records");
+    expect(String(scripted.runAsync.mock.calls[3]?.[0])).toContain("local_timeline_entries");
+    expect(JSON.stringify(scripted.runAsync.mock.calls[3])).toContain("recordEventAt");
+  });
+
+  it("keeps the local correction and stores the authoritative record on conflict", async () => {
+    const localPayload = JSON.stringify({
+      category: "doctor_visit",
+      childId,
+      content: { ...recordContent, title: "Synthetic local correction" },
+      eventAt: "2026-07-20T09:00:00.000Z",
+      sourceType: "manual",
+    });
+    const scripted = scriptedDatabase({
+      first: [
+        {
+          attempts: 1,
+          baseRevision: 1,
+          dependencyIdsJson: "[]",
+          entityId: recordId,
+          entityType: "record",
+          idempotencyKey,
+          mutationId,
+          nextAttemptAt: null,
+          operation: "update",
+          payloadJson: localPayload,
+          status: "pushing",
+        },
+      ],
+    });
+
+    await applyMutationResults(
+      scripted.database,
+      [
+        {
+          current: {
+            accessScope: "selectedHealthRecords",
+            category: "doctor_visit",
+            childId,
+            confirmationState: "confirmed",
+            content: { ...recordContent, title: "Synthetic remote correction" },
+            eventAt: "2026-07-20T09:00:00.000Z",
+            provenance: { sourceType: "manual", trustedIssuer: false },
+            recordId,
+            revision: 2,
+            updatedAt: "2026-07-22T12:01:00.000Z",
+            version: 2,
+            versionId,
+          },
+          entityId: recordId,
+          mutationId,
+          reason: "staleCriticalRevision",
+          status: "conflict",
+        },
+      ],
+      "2026-07-22T12:02:00.000Z",
+    );
+
+    expect(JSON.stringify(scripted.runAsync.mock.calls)).toContain("local_records");
+    expect(JSON.stringify(scripted.runAsync.mock.calls)).toContain("Synthetic remote correction");
+    expect(scripted.runAsync.mock.calls.some((call) => call.includes(localPayload))).toBe(true);
+  });
+
+  it("accepts generated Timeline entries only as server projections", async () => {
+    const scripted = scriptedDatabase({ first: [null] });
+    await applyChangePage(scripted.database, {
+      changes: [
+        {
+          changedAt: "2026-07-22T12:00:00.000Z",
+          entity: {
+            childId,
+            content: {
+              category: "doctor_visit",
+              dateAuthority: "recordEventAt",
+              title: "Synthetic visit record",
+            },
+            entryId: versionId,
+            eventAt: "2026-07-20T09:00:00.000Z",
+            recordId,
+            revision: 1,
+            sourceVersionId: versionId,
+            updatedAt: "2026-07-22T12:00:00.000Z",
+          },
+          entityId: versionId,
+          entityType: "timelineEntry",
+          operation: "upsert",
+          revision: 1,
+        },
+      ],
+      householdId: childId,
+      nextCursor: "synthetic-record-cursor",
+      now: "2026-07-22T12:00:00.000Z",
+    });
+
+    expect(
+      scripted.runAsync.mock.calls.some((call) =>
+        String(call[0]).includes("insert into local_timeline_entries"),
+      ),
+    ).toBe(true);
   });
 });

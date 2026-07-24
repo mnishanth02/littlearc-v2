@@ -6,6 +6,7 @@ export * from "./migrations/metadata.js";
 export * from "./outbox.js";
 export * from "./owner-onboarding.js";
 export * from "./readiness.js";
+export * from "./record-persistence.js";
 export * from "./roles.js";
 export * from "./schema/index.js";
 export * from "./sync.js";

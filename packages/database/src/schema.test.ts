@@ -20,7 +20,11 @@ import {
   idempotencyResults,
   littlearcSchemaName,
   outboxEvents,
+  recordSuggestions,
+  records,
+  recordVersions,
   schemaMigrations,
+  timelineEntries,
   userProfiles,
 } from "./schema/index.js";
 
@@ -115,6 +119,33 @@ describe("database schema", () => {
       expect.arrayContaining([
         "emergency_card_versions_card_fk",
         "emergency_card_versions_confirmed_by_fk",
+      ]),
+    );
+  });
+
+  it("models the VLT-01 record foundation with same-household ownership", () => {
+    expect([records, recordVersions, recordSuggestions, timelineEntries].map(getTableName)).toEqual(
+      ["records", "record_versions", "record_suggestions", "timeline_entries"],
+    );
+    expect(getTableConfig(records).foreignKeys.map((key) => key.getName())).toEqual(
+      expect.arrayContaining([
+        "records_child_fk",
+        "records_created_by_fk",
+        "records_updated_by_fk",
+      ]),
+    );
+    expect(getTableConfig(recordVersions).foreignKeys.map((key) => key.getName())).toEqual(
+      expect.arrayContaining([
+        "record_versions_record_fk",
+        "record_versions_confirmed_by_fk",
+        "record_versions_created_by_fk",
+      ]),
+    );
+    expect(getTableConfig(timelineEntries).foreignKeys.map((key) => key.getName())).toEqual(
+      expect.arrayContaining([
+        "timeline_entries_child_fk",
+        "timeline_entries_record_fk",
+        "timeline_entries_version_fk",
       ]),
     );
   });

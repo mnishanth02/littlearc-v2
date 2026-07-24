@@ -712,9 +712,23 @@ M3 feature breadth is authorized when:
 **Goal:** Let a parent reliably capture, store, confirm, search, retrieve, and
 correct the MVP's core child records.
 
+> **Delivery note — 24 July 2026:** Founder direction authorizes only the
+> bounded `VLT-01` record-foundation package to proceed before Gate 2 closes.
+> This exception retires record/version/projection architecture risk but does
+> not close Gate 2, authorize `VLT-02` or later M3 feature breadth, or broaden
+> real-data, provider, physical-iOS, low-end-Android, two-device, or pilot
+> claims. See the [reviewed VLT-01 plan](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md).
+
 ### 12.1 Ordered work packages
 
-#### `VLT-01` Record model, versions, provenance, and timeline projection
+#### [`VLT-01` Record model, versions, provenance, and timeline projection](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md)
+
+> **Delivery status — 24 July 2026:** Implementation, 193 root tests,
+> disposable Aiven validation, Android/iOS release containment, and the bounded
+> iOS Simulator plus physical Pixel 8 lifecycle/accessibility checks passed.
+> Package acceptance is `COMPLETE` within the recorded synthetic and device
+> boundaries. Gate 2 remains open and `VLT-02+` remain blocked. See the
+> [implementation evidence](./m3-vault-wedge/vlt-01-implementation-evidence.md).
 
 - Implement common record metadata and encrypted versioned payloads.
 - Keep suggestions separate from confirmed values.

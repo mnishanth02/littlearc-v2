@@ -74,16 +74,27 @@ export function registerSyncRoutes(
             ),
             mutationId: parseUuidV7(mutation.mutationId, "mutationId"),
           };
-          return mutation.entityType === "emergencyCard"
-            ? {
-                ...mutation,
-                ...common,
-                payload: {
-                  ...mutation.payload,
-                  childId: parseUuidV7(mutation.payload.childId, "childId"),
-                },
-              }
-            : { ...mutation, ...common };
+          if (mutation.entityType === "emergencyCard") {
+            return {
+              ...mutation,
+              ...common,
+              payload: {
+                ...mutation.payload,
+                childId: parseUuidV7(mutation.payload.childId, "childId"),
+              },
+            };
+          }
+          if (mutation.entityType === "record" && mutation.operation !== "delete") {
+            return {
+              ...mutation,
+              ...common,
+              payload: {
+                ...mutation.payload,
+                childId: parseUuidV7(mutation.payload.childId, "childId"),
+              },
+            };
+          }
+          return { ...mutation, ...common };
         }),
       }),
     );

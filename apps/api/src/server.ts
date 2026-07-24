@@ -26,6 +26,7 @@ import {
   registerOwnerOnboardingRoute,
 } from "./owner-onboarding-route.js";
 import { registerProblemDetails } from "./problem.js";
+import { registerRecordRoutes } from "./record-route.js";
 import { registerSyncRoutes, type SyncRouteDependencies } from "./sync-route.js";
 
 export type HealthResponse = {
@@ -104,6 +105,7 @@ export async function createApiServer(
   if (sync) {
     registerSyncRoutes(server, sync);
     registerEmergencyCardRoutes(server, sync);
+    registerRecordRoutes(server, sync);
   }
 
   server.get("/v1", async () => contractMetadata);

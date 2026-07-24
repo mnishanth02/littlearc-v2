@@ -10,6 +10,12 @@ function persistence(overrides: Partial<SyncPersistence> = {}): SyncPersistence 
     async readEmergencyCard() {
       return null;
     },
+    async readRecord() {
+      return null;
+    },
+    async readRecordVersions() {
+      return [];
+    },
     async pull() {
       return {
         changes: [],

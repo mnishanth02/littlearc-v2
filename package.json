@@ -38,6 +38,7 @@
     "test:contract": "turbo run test:contract",
     "test:database:auth": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/auth test:postgres",
     "test:database:household": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/api test:postgres",
+    "test:database:record": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/api test:postgres",
     "test:database:sync": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/api test:postgres",
     "test:database:emergency-card": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/api test:postgres",
     "test:database:rls": "node --env-file=.env.aiven scripts/run-with-aiven-env.mjs pnpm --filter @littlearc/database test:rls",

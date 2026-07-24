@@ -351,6 +351,8 @@ describe("API skeleton", () => {
     const cursor = "eyJzeW50aGV0aWMiOiJvZmYwNC1jdXJzb3IifQ";
     const service = {
       readEmergencyCard: vi.fn(async () => null),
+      readRecord: vi.fn(async () => null),
+      readRecordVersions: vi.fn(async () => []),
       pull: vi.fn(async () => ({
         changes: [],
         hasMore: false,
@@ -470,6 +472,8 @@ describe("API skeleton", () => {
     };
     const service = {
       readEmergencyCard: vi.fn(async () => projection),
+      readRecord: vi.fn(async () => null),
+      readRecordVersions: vi.fn(async () => []),
       pull: vi.fn(async () => ({
         changes: [],
         hasMore: false,
@@ -529,6 +533,116 @@ describe("API skeleton", () => {
     expect(write.json()).toMatchObject({ cardId, revision: 1, version: 1 });
     expect(service.push).toHaveBeenCalledWith(
       expect.objectContaining({ identityUserId: "synthetic-auth-user" }),
+    );
+  });
+
+  it("reads VLT-01 records and paginates immutable version history", async () => {
+    const recordId = nextId();
+    const childId = nextId();
+    const firstVersionId = nextId();
+    const secondVersionId = nextId();
+    const content = {
+      details: {
+        documentKind: { state: "confirmed" as const, value: "Synthetic visit summary" },
+        schema: "document.v1" as const,
+      },
+      notes: { state: "notProvided" as const },
+      providerFacility: { state: "confirmed" as const, value: "Synthetic Clinic" },
+      schemaVersion: 1 as const,
+      title: "Synthetic corrected visit",
+    };
+    const projection = {
+      accessScope: "selectedHealthRecords" as const,
+      category: "doctor_visit" as const,
+      childId,
+      confirmationState: "confirmed" as const,
+      content,
+      eventAt: "2026-07-20T09:00:00.000Z",
+      provenance: { sourceType: "manual" as const, trustedIssuer: false },
+      recordId,
+      revision: 2,
+      updatedAt: "2026-07-22T12:01:00.000Z",
+      version: 2,
+      versionId: secondVersionId,
+    };
+    const versions = [
+      {
+        confirmedAt: "2026-07-22T12:01:00.000Z",
+        confirmationState: "confirmed" as const,
+        content,
+        createdAt: "2026-07-22T12:01:00.000Z",
+        provenance: projection.provenance,
+        recordId,
+        supersedesVersionId: firstVersionId,
+        version: 2,
+        versionId: secondVersionId,
+      },
+      {
+        confirmedAt: "2026-07-22T12:00:00.000Z",
+        confirmationState: "confirmed" as const,
+        content: { ...content, title: "Synthetic original visit" },
+        createdAt: "2026-07-22T12:00:00.000Z",
+        provenance: projection.provenance,
+        recordId,
+        supersedesVersionId: null,
+        version: 1,
+        versionId: firstVersionId,
+      },
+    ];
+    const service = {
+      readEmergencyCard: vi.fn(async () => null),
+      readRecord: vi.fn(async () => projection),
+      readRecordVersions: vi.fn(async (input: { readonly beforeVersion?: number }) =>
+        input.beforeVersion === 2 ? versions.slice(1) : versions,
+      ),
+      pull: vi.fn(),
+      push: vi.fn(),
+      snapshot: vi.fn(),
+    };
+    const server = await createApiServer(
+      loadApiConfig({ APP_ENV: "local" }),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        async getSessionIdentity() {
+          return { userId: "synthetic-auth-user" };
+        },
+        service,
+      },
+    );
+
+    const read = await server.inject({ method: "GET", url: `/v1/records/${recordId}` });
+    const firstPage = await server.inject({
+      method: "GET",
+      url: `/v1/records/${recordId}/versions?limit=1`,
+    });
+    const cursor = firstPage.json().nextCursor as string;
+    const secondPage = await server.inject({
+      method: "GET",
+      url: `/v1/records/${recordId}/versions?limit=1&cursor=${encodeURIComponent(cursor)}`,
+    });
+    const invalidCursor = await server.inject({
+      method: "GET",
+      url: `/v1/records/${recordId}/versions?cursor=not-a-cursor`,
+    });
+
+    expect(read.statusCode).toBe(200);
+    expect(read.json()).toMatchObject({ recordId, revision: 2, version: 2 });
+    expect(firstPage.statusCode).toBe(200);
+    expect(firstPage.json()).toMatchObject({
+      items: [{ version: 2, versionId: secondVersionId }],
+    });
+    expect(cursor).toEqual(expect.any(String));
+    expect(secondPage.statusCode).toBe(200);
+    expect(secondPage.json()).toMatchObject({
+      items: [{ version: 1, versionId: firstVersionId }],
+      nextCursor: null,
+    });
+    expect(invalidCursor.statusCode).toBe(400);
+    expect(service.readRecordVersions).toHaveBeenCalledWith(
+      expect.objectContaining({ beforeVersion: 2, identityUserId: "synthetic-auth-user" }),
     );
   });
 

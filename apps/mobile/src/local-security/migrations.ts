@@ -137,6 +137,67 @@ export const localMigrations: ReadonlyArray<LocalMigration> = [
       );
     `,
   },
+  {
+    version: 4,
+    sql: `
+      CREATE TABLE local_records (
+        record_id TEXT PRIMARY KEY NOT NULL,
+        child_id TEXT NOT NULL,
+        category TEXT NOT NULL,
+        source_type TEXT NOT NULL,
+        confirmation_state TEXT NOT NULL,
+        event_at TEXT,
+        access_scope TEXT NOT NULL,
+        revision INTEGER NOT NULL CHECK (revision > 0),
+        version INTEGER NOT NULL CHECK (version > 0),
+        version_id TEXT NOT NULL,
+        payload_json TEXT NOT NULL,
+        server_payload_json TEXT,
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT,
+        sync_status TEXT NOT NULL,
+        FOREIGN KEY (child_id) REFERENCES local_children(child_id) ON DELETE CASCADE
+      );
+      CREATE TABLE local_record_versions (
+        version_id TEXT PRIMARY KEY NOT NULL,
+        record_id TEXT NOT NULL,
+        version INTEGER NOT NULL CHECK (version > 0),
+        payload_json TEXT NOT NULL,
+        provenance_json TEXT NOT NULL,
+        confirmed_at TEXT,
+        created_at TEXT NOT NULL,
+        supersedes_version_id TEXT,
+        UNIQUE (record_id, version),
+        FOREIGN KEY (record_id) REFERENCES local_records(record_id) ON DELETE CASCADE
+      );
+      CREATE TABLE local_timeline_entries (
+        entry_id TEXT PRIMARY KEY NOT NULL,
+        child_id TEXT NOT NULL,
+        record_id TEXT NOT NULL,
+        source_version_id TEXT NOT NULL,
+        event_at TEXT NOT NULL,
+        payload_json TEXT NOT NULL,
+        revision INTEGER NOT NULL CHECK (revision > 0),
+        updated_at TEXT NOT NULL,
+        deleted_at TEXT,
+        FOREIGN KEY (record_id) REFERENCES local_records(record_id) ON DELETE CASCADE
+      );
+      CREATE TABLE local_snapshot_records (
+        record_id TEXT PRIMARY KEY NOT NULL,
+        payload_json TEXT NOT NULL
+      );
+      CREATE TABLE local_snapshot_timeline_entries (
+        entry_id TEXT PRIMARY KEY NOT NULL,
+        payload_json TEXT NOT NULL
+      );
+      CREATE INDEX local_records_child_event_idx
+        ON local_records(child_id, event_at DESC, record_id DESC);
+      CREATE INDEX local_record_versions_record_version_idx
+        ON local_record_versions(record_id, version DESC);
+      CREATE INDEX local_timeline_child_event_idx
+        ON local_timeline_entries(child_id, event_at DESC, entry_id DESC);
+    `,
+  },
 ] as const;
 
 export async function applyLocalMigrations(database: LocalMigrationDatabase): Promise<number> {

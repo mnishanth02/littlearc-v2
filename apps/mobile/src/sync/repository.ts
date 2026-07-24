@@ -1,8 +1,14 @@
 import {
+  assertConsumerRecordSource,
   dependencyReadiness,
   type EmergencyCardContent,
+  type GeneratedRecordTimelineContent,
   type LocalMutationStatus,
   parseMutationId,
+  type RecordAccessScope,
+  type RecordCategory,
+  type RecordSourceType,
+  type RecordVersionContentV1,
 } from "@littlearc/domain";
 
 export type LocalSyncDatabase = {
@@ -46,6 +52,52 @@ export type LocalEmergencyCard = EmergencyCard & {
   readonly syncStatus: "conflict" | "pending" | "rejected" | "synced";
 };
 
+export type RecordProjection = {
+  readonly accessScope: RecordAccessScope;
+  readonly category: RecordCategory;
+  readonly childId: string;
+  readonly confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+  readonly content: RecordVersionContentV1;
+  readonly eventAt: string | null;
+  readonly provenance: {
+    readonly sourceType: RecordSourceType;
+    readonly trustedIssuer: boolean;
+  };
+  readonly recordId: string;
+  readonly revision: number;
+  readonly updatedAt: string;
+  readonly version: number;
+  readonly versionId: string;
+};
+
+export type LocalRecordProjection = RecordProjection & {
+  readonly deletedAt: string | null;
+  readonly syncStatus: "conflict" | "pending" | "rejected" | "synced";
+};
+
+export type RecordVersionProjection = {
+  readonly confirmedAt: string | null;
+  readonly confirmationState: RecordProjection["confirmationState"];
+  readonly content: RecordVersionContentV1;
+  readonly createdAt: string;
+  readonly provenance: RecordProjection["provenance"];
+  readonly recordId: string;
+  readonly supersedesVersionId: string | null;
+  readonly version: number;
+  readonly versionId: string;
+};
+
+export type TimelineProjection = {
+  readonly childId: string;
+  readonly content: GeneratedRecordTimelineContent;
+  readonly entryId: string;
+  readonly eventAt: string;
+  readonly recordId: string;
+  readonly revision: number;
+  readonly sourceVersionId: string;
+  readonly updatedAt: string;
+};
+
 export type QueuedChildMutation = {
   readonly attempts: number;
   readonly baseRevision: number;
@@ -81,7 +133,30 @@ export type QueuedEmergencyCardMutation = {
   readonly status: LocalMutationStatus;
 };
 
-export type QueuedMutation = QueuedChildMutation | QueuedEmergencyCardMutation;
+export type QueuedRecordMutation = {
+  readonly attempts: number;
+  readonly baseRevision: number | null;
+  readonly entityId: string;
+  readonly entityType: "record";
+  readonly idempotencyKey: string;
+  readonly localDependencyIds: ReadonlyArray<string>;
+  readonly mutationId: string;
+  readonly nextAttemptAt: string | null;
+  readonly operation: "create" | "update" | "delete";
+  readonly payload?: {
+    readonly category: RecordCategory;
+    readonly childId: string;
+    readonly content: RecordVersionContentV1;
+    readonly eventAt: string | null;
+    readonly sourceType: RecordSourceType;
+  };
+  readonly status: LocalMutationStatus;
+};
+
+export type QueuedMutation =
+  | QueuedChildMutation
+  | QueuedEmergencyCardMutation
+  | QueuedRecordMutation;
 
 export type RemoteChange =
   | {
@@ -113,17 +188,47 @@ export type RemoteChange =
       readonly entityType: "emergencyCard";
       readonly operation: "delete";
       readonly revision: number;
+    }
+  | {
+      readonly changedAt: string;
+      readonly entity: RecordProjection;
+      readonly entityId: string;
+      readonly entityType: "record";
+      readonly operation: "upsert";
+      readonly revision: number;
+    }
+  | {
+      readonly changedAt: string;
+      readonly entityId: string;
+      readonly entityType: "record";
+      readonly operation: "delete";
+      readonly revision: number;
+    }
+  | {
+      readonly changedAt: string;
+      readonly entity: TimelineProjection;
+      readonly entityId: string;
+      readonly entityType: "timelineEntry";
+      readonly operation: "upsert";
+      readonly revision: number;
+    }
+  | {
+      readonly changedAt: string;
+      readonly entityId: string;
+      readonly entityType: "timelineEntry";
+      readonly operation: "delete";
+      readonly revision: number;
     };
 
 export type MutationResult =
   | {
-      readonly entity: ChildProfile | EmergencyCard;
+      readonly entity: ChildProfile | EmergencyCard | RecordProjection;
       readonly entityId: string;
       readonly mutationId: string;
       readonly status: "applied" | "duplicate";
     }
   | {
-      readonly current: ChildProfile | EmergencyCard;
+      readonly current: ChildProfile | EmergencyCard | RecordProjection;
       readonly entityId: string;
       readonly mutationId: string;
       readonly reason: "staleCriticalRevision";
@@ -175,6 +280,249 @@ export async function readLocalEmergencyCard(
     cardId,
   );
   return row ? localEmergencyCard(row) : null;
+}
+
+export async function readLocalRecord(
+  database: LocalSyncDatabase,
+  recordId: string,
+): Promise<LocalRecordProjection | null> {
+  const row = await database.getFirstAsync<LocalRecordRow>(
+    `select
+      record_id as "recordId",
+      child_id as "childId",
+      category,
+      source_type as "sourceType",
+      confirmation_state as "confirmationState",
+      event_at as "eventAt",
+      access_scope as "accessScope",
+      revision,
+      version,
+      version_id as "versionId",
+      payload_json as "payloadJson",
+      updated_at as "updatedAt",
+      deleted_at as "deletedAt",
+      sync_status as "syncStatus"
+    from local_records
+    where record_id = ?`,
+    recordId,
+  );
+  return row ? localRecord(row) : null;
+}
+
+export async function readLocalTimeline(
+  database: LocalSyncDatabase,
+  childId: string,
+): Promise<ReadonlyArray<TimelineProjection>> {
+  const rows = await database.getAllAsync<LocalTimelineRow>(
+    `select
+      entry_id as "entryId",
+      child_id as "childId",
+      record_id as "recordId",
+      source_version_id as "sourceVersionId",
+      event_at as "eventAt",
+      payload_json as "payloadJson",
+      revision,
+      updated_at as "updatedAt"
+    from local_timeline_entries
+    where child_id = ? and deleted_at is null
+    order by event_at desc, entry_id desc`,
+    childId,
+  );
+  return rows.map(localTimeline);
+}
+
+export async function readLocalRecordVersions(
+  database: LocalSyncDatabase,
+  recordId: string,
+): Promise<ReadonlyArray<RecordVersionProjection>> {
+  const rows = await database.getAllAsync<LocalRecordVersionRow>(
+    `select
+      version_id as "versionId",
+      record_id as "recordId",
+      version,
+      payload_json as "payloadJson",
+      provenance_json as "provenanceJson",
+      confirmed_at as "confirmedAt",
+      created_at as "createdAt",
+      supersedes_version_id as "supersedesVersionId"
+    from local_record_versions
+    where record_id = ?
+    order by version desc`,
+    recordId,
+  );
+  return rows.map(localRecordVersion);
+}
+
+export async function cacheRecordVersions(
+  database: LocalSyncDatabase,
+  versions: ReadonlyArray<RecordVersionProjection>,
+): Promise<void> {
+  await database.withTransactionAsync(async () => {
+    for (const version of versions) {
+      await database.runAsync(
+        `insert or replace into local_record_versions (
+          version_id, record_id, version, payload_json, provenance_json,
+          confirmed_at, created_at, supersedes_version_id
+        ) values (?, ?, ?, ?, ?, ?, ?, ?)`,
+        version.versionId,
+        version.recordId,
+        version.version,
+        JSON.stringify(version.content),
+        JSON.stringify({
+          confirmationState: version.confirmationState,
+          ...version.provenance,
+        }),
+        version.confirmedAt,
+        version.createdAt,
+        version.supersedesVersionId,
+      );
+    }
+  });
+}
+
+export async function queueRecordUpsert(
+  database: LocalSyncDatabase,
+  input: {
+    readonly category: RecordCategory;
+    readonly childId: string;
+    readonly content: RecordVersionContentV1;
+    readonly eventAt: string | null;
+    readonly idempotencyKey: string;
+    readonly localDependencyIds: ReadonlyArray<string>;
+    readonly mutationId: string;
+    readonly now: string;
+    readonly recordId: string;
+    readonly sourceType: RecordSourceType;
+  },
+): Promise<void> {
+  assertConsumerRecordSource(input.sourceType);
+  await database.withTransactionAsync(async () => {
+    const current = await database.getFirstAsync<{ readonly revision: number }>(
+      "select revision from local_records where record_id = ? and deleted_at is null",
+      input.recordId,
+    );
+    const operation = current ? "update" : "create";
+    const baseRevision = current?.revision ?? null;
+    const payload = {
+      category: input.category,
+      childId: input.childId,
+      content: input.content,
+      eventAt: input.eventAt,
+      sourceType: input.sourceType,
+    };
+    await database.runAsync(
+      `insert into local_mutations (
+        mutation_id, entity_type, entity_id, operation, payload_json, status,
+        created_at, base_revision, idempotency_key, dependency_ids_json,
+        attempts, next_attempt_at, last_error_code, updated_at
+      ) values (?, 'record', ?, ?, ?, 'pending', ?, ?, ?, ?, 0, null, null, ?)`,
+      input.mutationId,
+      input.recordId,
+      operation,
+      JSON.stringify(payload),
+      input.now,
+      baseRevision,
+      input.idempotencyKey,
+      JSON.stringify(input.localDependencyIds),
+      input.now,
+    );
+    await database.runAsync(
+      `insert into local_records (
+        record_id, child_id, category, source_type, confirmation_state,
+        event_at, access_scope, revision, version, version_id,
+        payload_json, server_payload_json, updated_at, deleted_at, sync_status
+      ) values (?, ?, ?, ?, 'confirmed', ?, ?, ?, ?, ?, ?, null, ?, null, 'pending')
+      on conflict(record_id) do update set
+        child_id = excluded.child_id,
+        category = excluded.category,
+        source_type = excluded.source_type,
+        confirmation_state = excluded.confirmation_state,
+        event_at = excluded.event_at,
+        access_scope = excluded.access_scope,
+        version_id = excluded.version_id,
+        version = excluded.version,
+        payload_json = excluded.payload_json,
+        updated_at = excluded.updated_at,
+        deleted_at = null,
+        sync_status = 'pending'`,
+      input.recordId,
+      input.childId,
+      input.category,
+      input.sourceType,
+      input.eventAt,
+      input.category === "identity" ? "identityDocuments" : "selectedHealthRecords",
+      baseRevision ?? 1,
+      (baseRevision ?? 0) + 1,
+      input.mutationId,
+      JSON.stringify(input.content),
+      input.now,
+    );
+    await database.runAsync(
+      "delete from local_timeline_entries where record_id = ?",
+      input.recordId,
+    );
+    await database.runAsync(
+      `insert into local_timeline_entries (
+        entry_id, child_id, record_id, source_version_id, event_at,
+        payload_json, revision, updated_at, deleted_at
+      ) values (?, ?, ?, ?, ?, ?, ?, ?, null)`,
+      input.mutationId,
+      input.childId,
+      input.recordId,
+      input.mutationId,
+      input.eventAt ?? input.now,
+      JSON.stringify({
+        category: input.category,
+        dateAuthority: input.eventAt ? "recordEventAt" : "confirmedAtFallback",
+        title: input.content.title,
+      } satisfies GeneratedRecordTimelineContent),
+      baseRevision ?? 1,
+      input.now,
+    );
+  });
+}
+
+export async function queueRecordDelete(
+  database: LocalSyncDatabase,
+  input: {
+    readonly idempotencyKey: string;
+    readonly mutationId: string;
+    readonly now: string;
+    readonly recordId: string;
+  },
+): Promise<void> {
+  await database.withTransactionAsync(async () => {
+    const current = await database.getFirstAsync<{ readonly revision: number }>(
+      "select revision from local_records where record_id = ? and deleted_at is null",
+      input.recordId,
+    );
+    if (!current) {
+      throw new Error("The record is unavailable in the local repository.");
+    }
+    await database.runAsync(
+      `insert into local_mutations (
+        mutation_id, entity_type, entity_id, operation, payload_json, status,
+        created_at, base_revision, idempotency_key, dependency_ids_json,
+        attempts, next_attempt_at, last_error_code, updated_at
+      ) values (?, 'record', ?, 'delete', null, 'pending', ?, ?, ?, '[]', 0, null, null, ?)`,
+      input.mutationId,
+      input.recordId,
+      input.now,
+      current.revision,
+      input.idempotencyKey,
+      input.now,
+    );
+    await database.runAsync(
+      "update local_records set sync_status = 'pending', deleted_at = ? where record_id = ?",
+      input.now,
+      input.recordId,
+    );
+    await database.runAsync(
+      "update local_timeline_entries set deleted_at = ? where record_id = ?",
+      input.now,
+      input.recordId,
+    );
+  });
 }
 
 export async function queueChildProfileUpdate(
@@ -395,8 +743,32 @@ export async function applyMutationResults(
 ): Promise<void> {
   await database.withTransactionAsync(async () => {
     for (const result of results) {
+      const mutation = await database.getFirstAsync<LocalMutationRow>(
+        `select
+          mutation_id as "mutationId", entity_id as "entityId",
+          entity_type as "entityType", operation,
+          payload_json as "payloadJson", status, base_revision as "baseRevision",
+          idempotency_key as "idempotencyKey",
+          dependency_ids_json as "dependencyIdsJson", attempts,
+          next_attempt_at as "nextAttemptAt"
+         from local_mutations where mutation_id = ?`,
+        result.mutationId,
+      );
       if ("entity" in result) {
-        if ("cardId" in result.entity) {
+        if ("recordId" in result.entity) {
+          if (mutation?.operation === "delete") {
+            await database.runAsync(
+              "delete from local_timeline_entries where record_id = ?",
+              result.entityId,
+            );
+            await database.runAsync(
+              "delete from local_records where record_id = ?",
+              result.entityId,
+            );
+          } else {
+            await upsertSyncedRecord(database, result.entity);
+          }
+        } else if ("cardId" in result.entity) {
           await upsertSyncedEmergencyCard(database, result.entity);
         } else {
           await upsertSyncedChild(database, result.entity);
@@ -411,17 +783,6 @@ export async function applyMutationResults(
         );
         continue;
       }
-      const mutation = await database.getFirstAsync<LocalMutationRow>(
-        `select
-          mutation_id as "mutationId", entity_id as "entityId",
-          entity_type as "entityType", operation,
-          payload_json as "payloadJson", status, base_revision as "baseRevision",
-          idempotency_key as "idempotencyKey",
-          dependency_ids_json as "dependencyIdsJson", attempts,
-          next_attempt_at as "nextAttemptAt"
-         from local_mutations where mutation_id = ?`,
-        result.mutationId,
-      );
       if (result.status === "conflict") {
         await database.runAsync(
           `update local_mutations set status = 'conflict', last_error_code = ?, updated_at = ?
@@ -430,23 +791,50 @@ export async function applyMutationResults(
           now,
           result.mutationId,
         );
-        const emergencyConflict = "cardId" in result.current;
-        const serverPayload = emergencyConflict
-          ? emergencyContentPayload(result.current.content)
-          : profilePayload(result.current);
-        await database.runAsync(
-          emergencyConflict
-            ? `update local_emergency_cards
-               set revision = ?, version = ?, server_payload_json = ?, sync_status = 'conflict'
-               where card_id = ?`
-            : `update local_children
-               set revision = ?, server_payload_json = ?, sync_status = 'conflict'
-               where child_id = ?`,
-          result.current.revision,
-          ...(emergencyConflict ? [result.current.version] : []),
-          serverPayload,
-          result.entityId,
-        );
+        let conflictType: "child" | "emergencyCard" | "record";
+        let serverPayload: string;
+        if ("recordId" in result.current) {
+          conflictType = "record";
+          serverPayload = recordContentPayload(result.current.content);
+        } else if ("cardId" in result.current) {
+          conflictType = "emergencyCard";
+          serverPayload = emergencyContentPayload(result.current.content);
+        } else {
+          conflictType = "child";
+          serverPayload = profilePayload(result.current);
+        }
+        if (conflictType === "record" && "recordId" in result.current) {
+          await database.runAsync(
+            `update local_records
+             set revision = ?, version = ?, version_id = ?,
+                 server_payload_json = ?, sync_status = 'conflict'
+             where record_id = ?`,
+            result.current.revision,
+            result.current.version,
+            result.current.versionId,
+            serverPayload,
+            result.entityId,
+          );
+        } else if (conflictType === "emergencyCard" && "cardId" in result.current) {
+          await database.runAsync(
+            `update local_emergency_cards
+             set revision = ?, version = ?, server_payload_json = ?, sync_status = 'conflict'
+             where card_id = ?`,
+            result.current.revision,
+            result.current.version,
+            serverPayload,
+            result.entityId,
+          );
+        } else {
+          await database.runAsync(
+            `update local_children
+             set revision = ?, server_payload_json = ?, sync_status = 'conflict'
+             where child_id = ?`,
+            result.current.revision,
+            serverPayload,
+            result.entityId,
+          );
+        }
         await database.runAsync(
           `insert or replace into local_conflicts (
             conflict_id, mutation_id, entity_type, entity_id,
@@ -454,7 +842,7 @@ export async function applyMutationResults(
           ) values (?, ?, ?, ?, ?, ?, ?, ?)`,
           result.mutationId,
           result.mutationId,
-          emergencyConflict ? "emergencyCard" : "child",
+          conflictType,
           result.entityId,
           mutation?.payloadJson ?? null,
           serverPayload,
@@ -471,9 +859,11 @@ export async function applyMutationResults(
         result.mutationId,
       );
       await database.runAsync(
-        mutation?.entityType === "emergencyCard"
-          ? "update local_emergency_cards set sync_status = 'rejected' where card_id = ?"
-          : "update local_children set sync_status = 'rejected' where child_id = ?",
+        mutation?.entityType === "record"
+          ? "update local_records set sync_status = 'rejected' where record_id = ?"
+          : mutation?.entityType === "emergencyCard"
+            ? "update local_emergency_cards set sync_status = 'rejected' where card_id = ?"
+            : "update local_children set sync_status = 'rejected' where child_id = ?",
         result.entityId,
       );
     }
@@ -494,7 +884,27 @@ export async function applyChangePage(
       const entityType = change.entityType ?? "child";
       const pending = await pendingMutationForEntity(database, entityType, change.entityId);
       if (change.operation === "upsert") {
-        if (entityType === "emergencyCard" && "cardId" in change.entity) {
+        if (entityType === "record" && "versionId" in change.entity) {
+          if (pending) {
+            await database.runAsync(
+              `update local_records
+               set revision = ?, version = ?, version_id = ?,
+                   server_payload_json = ?, deleted_at = null
+               where record_id = ?`,
+              change.entity.revision,
+              change.entity.version,
+              change.entity.versionId,
+              recordContentPayload(change.entity.content),
+              change.entityId,
+            );
+          } else {
+            await upsertSyncedRecord(database, change.entity);
+          }
+        } else if (entityType === "timelineEntry" && "entryId" in change.entity) {
+          if (!pending) {
+            await upsertSyncedTimeline(database, change.entity);
+          }
+        } else if (entityType === "emergencyCard" && "cardId" in change.entity) {
           if (pending) {
             await database.runAsync(
               `update local_emergency_cards
@@ -508,7 +918,12 @@ export async function applyChangePage(
           } else {
             await upsertSyncedEmergencyCard(database, change.entity);
           }
-        } else if (pending && !("cardId" in change.entity)) {
+        } else if (
+          pending &&
+          !("cardId" in change.entity) &&
+          !("recordId" in change.entity) &&
+          !("entryId" in change.entity)
+        ) {
           await database.runAsync(
             `update local_children
              set revision = ?, server_payload_json = ?, deleted_at = null
@@ -517,7 +932,11 @@ export async function applyChangePage(
             profilePayload(change.entity),
             change.entityId,
           );
-        } else if (!("cardId" in change.entity)) {
+        } else if (
+          !("cardId" in change.entity) &&
+          !("recordId" in change.entity) &&
+          !("entryId" in change.entity)
+        ) {
           await upsertSyncedChild(database, change.entity);
         }
         await database.runAsync(
@@ -534,13 +953,26 @@ export async function applyChangePage(
         change.entityId,
         change.changedAt,
       );
+      if (entityType === "timelineEntry" && pending) {
+        continue;
+      }
       if (!pending) {
-        await database.runAsync(
-          entityType === "emergencyCard"
-            ? "delete from local_emergency_cards where card_id = ?"
-            : "delete from local_children where child_id = ?",
-          change.entityId,
-        );
+        if (entityType === "record") {
+          await database.runAsync(
+            "delete from local_timeline_entries where record_id = ?",
+            change.entityId,
+          );
+          await database.runAsync("delete from local_records where record_id = ?", change.entityId);
+        } else {
+          await database.runAsync(
+            entityType === "timelineEntry"
+              ? "delete from local_timeline_entries where entry_id = ?"
+              : entityType === "emergencyCard"
+                ? "delete from local_emergency_cards where card_id = ?"
+                : "delete from local_children where child_id = ?",
+            change.entityId,
+          );
+        }
         continue;
       }
       await database.runAsync(
@@ -551,9 +983,11 @@ export async function applyChangePage(
         pending.mutationId,
       );
       await database.runAsync(
-        entityType === "emergencyCard"
-          ? `update local_emergency_cards set sync_status = 'conflict', deleted_at = ? where card_id = ?`
-          : `update local_children set sync_status = 'conflict', deleted_at = ? where child_id = ?`,
+        entityType === "record"
+          ? `update local_records set sync_status = 'conflict', deleted_at = ? where record_id = ?`
+          : entityType === "emergencyCard"
+            ? `update local_emergency_cards set sync_status = 'conflict', deleted_at = ? where card_id = ?`
+            : `update local_children set sync_status = 'conflict', deleted_at = ? where child_id = ?`,
         change.changedAt,
         change.entityId,
       );
@@ -582,6 +1016,8 @@ export async function beginSnapshot(
   await database.withTransactionAsync(async () => {
     await database.runAsync("delete from local_snapshot_children");
     await database.runAsync("delete from local_snapshot_emergency_cards");
+    await database.runAsync("delete from local_snapshot_records");
+    await database.runAsync("delete from local_snapshot_timeline_entries");
     await database.runAsync(
       `insert into local_sync_state (
         household_id, opaque_cursor, last_completed_at, reset_status, captured_cursor
@@ -596,10 +1032,28 @@ export async function beginSnapshot(
 
 export async function stageSnapshotPage(
   database: LocalSyncDatabase,
-  items: ReadonlyArray<ChildProfile | EmergencyCard>,
+  items: ReadonlyArray<ChildProfile | EmergencyCard | RecordProjection | TimelineProjection>,
 ): Promise<void> {
   await database.withTransactionAsync(async () => {
     for (const item of items) {
+      if ("recordId" in item && "entryId" in item) {
+        await database.runAsync(
+          `insert or replace into local_snapshot_timeline_entries (entry_id, payload_json)
+           values (?, ?)`,
+          item.entryId,
+          JSON.stringify(item),
+        );
+        continue;
+      }
+      if ("recordId" in item) {
+        await database.runAsync(
+          `insert or replace into local_snapshot_records (record_id, payload_json)
+           values (?, ?)`,
+          item.recordId,
+          JSON.stringify(item),
+        );
+        continue;
+      }
       if ("cardId" in item) {
         await database.runAsync(
           `insert or replace into local_snapshot_emergency_cards (
@@ -803,8 +1257,11 @@ export async function finalizeSnapshot(
         input.now,
       );
     }
+    await finalizeRecordSnapshot(database, input.now);
     await database.runAsync("delete from local_snapshot_children");
     await database.runAsync("delete from local_snapshot_emergency_cards");
+    await database.runAsync("delete from local_snapshot_records");
+    await database.runAsync("delete from local_snapshot_timeline_entries");
     await upsertSyncState(database, input.householdId, input.capturedCursor, input.now, "idle");
   });
 }
@@ -828,11 +1285,143 @@ export async function countRiskyMutations(database: LocalSyncDatabase): Promise<
   return row?.count ?? 0;
 }
 
+async function finalizeRecordSnapshot(database: LocalSyncDatabase, now: string): Promise<void> {
+  const stagedRows = await database.getAllAsync<{
+    readonly payloadJson: string;
+    readonly recordId: string;
+  }>(
+    `select record_id as "recordId", payload_json as "payloadJson"
+     from local_snapshot_records order by record_id`,
+  );
+  const staged = stagedRows.map((row) => parseRecordProjection(row.payloadJson));
+  const pending = await database.getAllAsync<{
+    readonly entityId: string;
+    readonly mutationId: string;
+    readonly payloadJson: string | null;
+  }>(
+    `select entity_id as "entityId", mutation_id as "mutationId",
+      payload_json as "payloadJson"
+     from local_mutations
+     where entity_type = 'record'
+       and status in ('pending', 'pushing', 'retrying', 'conflict', 'rejected')`,
+  );
+  const pendingByEntity = new Map(pending.map((row) => [row.entityId, row]));
+  const stagedIds = new Set(staged.map((record) => record.recordId));
+  const existing = await database.getAllAsync<{ readonly recordId: string }>(
+    `select record_id as "recordId" from local_records`,
+  );
+  for (const record of existing) {
+    if (!stagedIds.has(record.recordId) && !pendingByEntity.has(record.recordId)) {
+      await database.runAsync(
+        "delete from local_timeline_entries where record_id = ?",
+        record.recordId,
+      );
+      await database.runAsync("delete from local_records where record_id = ?", record.recordId);
+    }
+  }
+  for (const record of staged) {
+    const localPending = pendingByEntity.get(record.recordId);
+    if (localPending) {
+      await database.runAsync(
+        `update local_records
+         set revision = ?, version = ?, version_id = ?,
+             server_payload_json = ?
+         where record_id = ?`,
+        record.revision,
+        record.version,
+        record.versionId,
+        recordContentPayload(record.content),
+        record.recordId,
+      );
+    } else {
+      await upsertSyncedRecord(database, record);
+    }
+    await database.runAsync(
+      "delete from local_tombstones where entity_type = 'record' and entity_id = ?",
+      record.recordId,
+    );
+  }
+  for (const [recordId, localPending] of pendingByEntity) {
+    if (stagedIds.has(recordId)) {
+      continue;
+    }
+    await database.runAsync(
+      `update local_mutations
+       set status = 'conflict', last_error_code = 'snapshotMissing', updated_at = ?
+       where mutation_id = ?`,
+      now,
+      localPending.mutationId,
+    );
+    await database.runAsync(
+      "update local_records set sync_status = 'conflict' where record_id = ?",
+      recordId,
+    );
+    await database.runAsync(
+      `insert or replace into local_conflicts (
+        conflict_id, mutation_id, entity_type, entity_id,
+        local_payload_json, server_payload_json, reason, created_at
+      ) values (?, ?, 'record', ?, ?, null, 'snapshotMissing', ?)`,
+      localPending.mutationId,
+      localPending.mutationId,
+      recordId,
+      localPending.payloadJson,
+      now,
+    );
+  }
+
+  const stagedTimelineRows = await database.getAllAsync<{
+    readonly entryId: string;
+    readonly payloadJson: string;
+  }>(
+    `select entry_id as "entryId", payload_json as "payloadJson"
+     from local_snapshot_timeline_entries order by entry_id`,
+  );
+  const stagedTimeline = stagedTimelineRows.map((row) => parseTimelineProjection(row.payloadJson));
+  const stagedTimelineIds = new Set(stagedTimeline.map((entry) => entry.entryId));
+  const existingTimeline = await database.getAllAsync<{
+    readonly entryId: string;
+    readonly recordId: string;
+  }>(
+    `select entry_id as "entryId", record_id as "recordId"
+     from local_timeline_entries`,
+  );
+  for (const entry of existingTimeline) {
+    if (!stagedTimelineIds.has(entry.entryId) && !pendingByEntity.has(entry.recordId)) {
+      await database.runAsync(
+        "delete from local_timeline_entries where entry_id = ?",
+        entry.entryId,
+      );
+    }
+  }
+  for (const entry of stagedTimeline) {
+    if (!pendingByEntity.has(entry.recordId)) {
+      await upsertSyncedTimeline(database, entry);
+    }
+    await database.runAsync(
+      "delete from local_tombstones where entity_type = 'timelineEntry' and entity_id = ?",
+      entry.entryId,
+    );
+  }
+}
+
 async function pendingMutationForEntity(
   database: LocalSyncDatabase,
-  entityType: "child" | "emergencyCard",
+  entityType: "child" | "emergencyCard" | "record" | "timelineEntry",
   entityId: string,
-): Promise<{ readonly mutationId: string; readonly payloadJson: string } | null> {
+): Promise<{ readonly mutationId: string; readonly payloadJson: string | null } | null> {
+  if (entityType === "timelineEntry") {
+    return database.getFirstAsync(
+      `select mutation_id as "mutationId", payload_json as "payloadJson"
+       from local_mutations
+       where entity_type = 'record'
+         and entity_id = (
+           select record_id from local_timeline_entries where entry_id = ?
+         )
+         and status in ('pending', 'pushing', 'retrying', 'conflict', 'rejected')
+       order by created_at desc limit 1`,
+      entityId,
+    );
+  }
   return database.getFirstAsync(
     `select mutation_id as "mutationId", payload_json as "payloadJson"
      from local_mutations
@@ -898,6 +1487,93 @@ async function upsertSyncedEmergencyCard(
   );
 }
 
+async function upsertSyncedRecord(
+  database: LocalSyncDatabase,
+  record: RecordProjection,
+): Promise<void> {
+  const payload = recordContentPayload(record.content);
+  await database.runAsync(
+    `insert into local_records (
+      record_id, child_id, category, source_type, confirmation_state,
+      event_at, access_scope, revision, version, version_id,
+      payload_json, server_payload_json, updated_at, deleted_at, sync_status
+    ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, null, 'synced')
+    on conflict(record_id) do update set
+      child_id = excluded.child_id,
+      category = excluded.category,
+      source_type = excluded.source_type,
+      confirmation_state = excluded.confirmation_state,
+      event_at = excluded.event_at,
+      access_scope = excluded.access_scope,
+      revision = excluded.revision,
+      version = excluded.version,
+      version_id = excluded.version_id,
+      payload_json = excluded.payload_json,
+      server_payload_json = excluded.server_payload_json,
+      updated_at = excluded.updated_at,
+      deleted_at = null,
+      sync_status = 'synced'`,
+    record.recordId,
+    record.childId,
+    record.category,
+    record.provenance.sourceType,
+    record.confirmationState,
+    record.eventAt,
+    record.accessScope,
+    record.revision,
+    record.version,
+    record.versionId,
+    payload,
+    payload,
+    record.updatedAt,
+  );
+  await database.runAsync(
+    `insert or ignore into local_record_versions (
+      version_id, record_id, version, payload_json, provenance_json,
+      confirmed_at, created_at, supersedes_version_id
+    ) values (?, ?, ?, ?, ?, ?, ?, null)`,
+    record.versionId,
+    record.recordId,
+    record.version,
+    payload,
+    JSON.stringify({
+      confirmationState: record.confirmationState,
+      ...record.provenance,
+    }),
+    record.confirmationState === "confirmed" ? record.updatedAt : null,
+    record.updatedAt,
+  );
+}
+
+async function upsertSyncedTimeline(
+  database: LocalSyncDatabase,
+  entry: TimelineProjection,
+): Promise<void> {
+  await database.runAsync(
+    `insert into local_timeline_entries (
+      entry_id, child_id, record_id, source_version_id, event_at,
+      payload_json, revision, updated_at, deleted_at
+    ) values (?, ?, ?, ?, ?, ?, ?, ?, null)
+    on conflict(entry_id) do update set
+      child_id = excluded.child_id,
+      record_id = excluded.record_id,
+      source_version_id = excluded.source_version_id,
+      event_at = excluded.event_at,
+      payload_json = excluded.payload_json,
+      revision = excluded.revision,
+      updated_at = excluded.updated_at,
+      deleted_at = null`,
+    entry.entryId,
+    entry.childId,
+    entry.recordId,
+    entry.sourceVersionId,
+    entry.eventAt,
+    JSON.stringify(entry.content),
+    entry.revision,
+    entry.updatedAt,
+  );
+}
+
 async function upsertSyncState(
   database: LocalSyncDatabase,
   householdId: string,
@@ -956,6 +1632,45 @@ type LocalEmergencyCardRow = {
   readonly version: number;
 };
 
+type LocalRecordRow = {
+  readonly accessScope: RecordAccessScope;
+  readonly category: RecordCategory;
+  readonly childId: string;
+  readonly confirmationState: RecordProjection["confirmationState"];
+  readonly deletedAt: string | null;
+  readonly eventAt: string | null;
+  readonly payloadJson: string;
+  readonly recordId: string;
+  readonly revision: number;
+  readonly sourceType: RecordSourceType;
+  readonly syncStatus: LocalRecordProjection["syncStatus"];
+  readonly updatedAt: string;
+  readonly version: number;
+  readonly versionId: string;
+};
+
+type LocalTimelineRow = {
+  readonly childId: string;
+  readonly entryId: string;
+  readonly eventAt: string;
+  readonly payloadJson: string;
+  readonly recordId: string;
+  readonly revision: number;
+  readonly sourceVersionId: string;
+  readonly updatedAt: string;
+};
+
+type LocalRecordVersionRow = {
+  readonly confirmedAt: string | null;
+  readonly createdAt: string;
+  readonly payloadJson: string;
+  readonly provenanceJson: string;
+  readonly recordId: string;
+  readonly supersedesVersionId: string | null;
+  readonly version: number;
+  readonly versionId: string;
+};
+
 function localChild(row: LocalChildRow): LocalChildProfile {
   return {
     childId: row.childId,
@@ -981,8 +1696,66 @@ function localEmergencyCard(row: LocalEmergencyCardRow): LocalEmergencyCard {
   };
 }
 
+function localRecord(row: LocalRecordRow): LocalRecordProjection {
+  return {
+    accessScope: row.accessScope,
+    category: row.category,
+    childId: row.childId,
+    confirmationState: row.confirmationState,
+    content: parseRecordContent(row.payloadJson),
+    deletedAt: row.deletedAt,
+    eventAt: row.eventAt,
+    provenance: {
+      sourceType: row.sourceType,
+      trustedIssuer:
+        row.sourceType === "provider_issued" || row.sourceType === "government_imported",
+    },
+    recordId: row.recordId,
+    revision: row.revision,
+    syncStatus: row.syncStatus,
+    updatedAt: row.updatedAt,
+    version: row.version,
+    versionId: row.versionId,
+  };
+}
+
+function localTimeline(row: LocalTimelineRow): TimelineProjection {
+  return {
+    childId: row.childId,
+    content: JSON.parse(row.payloadJson) as GeneratedRecordTimelineContent,
+    entryId: row.entryId,
+    eventAt: row.eventAt,
+    recordId: row.recordId,
+    revision: row.revision,
+    sourceVersionId: row.sourceVersionId,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function localRecordVersion(row: LocalRecordVersionRow): RecordVersionProjection {
+  const provenance = JSON.parse(row.provenanceJson) as {
+    readonly confirmationState?: RecordProjection["confirmationState"];
+    readonly sourceType: RecordSourceType;
+    readonly trustedIssuer: boolean;
+  };
+  return {
+    confirmedAt: row.confirmedAt,
+    confirmationState: provenance.confirmationState ?? "confirmed",
+    content: parseRecordContent(row.payloadJson),
+    createdAt: row.createdAt,
+    provenance: {
+      sourceType: provenance.sourceType,
+      trustedIssuer: provenance.trustedIssuer,
+    },
+    recordId: row.recordId,
+    supersedesVersionId: row.supersedesVersionId,
+    version: row.version,
+    versionId: row.versionId,
+  };
+}
+
 function queuedMutation(row: LocalMutationRow): QueuedMutation {
-  if (!row.idempotencyKey || !row.payloadJson) {
+  if (!row.idempotencyKey) {
     throw new Error("The local mutation is missing OFF-04 dispatch fields.");
   }
   const common = {
@@ -996,6 +1769,9 @@ function queuedMutation(row: LocalMutationRow): QueuedMutation {
     status: parseMutationStatus(row.status),
   };
   if (row.entityType === "emergencyCard") {
+    if (!row.payloadJson) {
+      throw new Error("The local emergency-card mutation payload is missing.");
+    }
     if (row.operation !== "create" && row.operation !== "update") {
       throw new Error("The local emergency-card mutation operation is invalid.");
     }
@@ -1006,6 +1782,44 @@ function queuedMutation(row: LocalMutationRow): QueuedMutation {
       operation: row.operation,
       payload,
     };
+  }
+  if (row.entityType === "record") {
+    if (row.operation === "create") {
+      if (row.baseRevision !== null || !row.payloadJson) {
+        throw new Error("The local record create mutation is invalid.");
+      }
+      return {
+        ...common,
+        baseRevision: null,
+        entityType: "record",
+        operation: "create",
+        payload: JSON.parse(row.payloadJson) as NonNullable<QueuedRecordMutation["payload"]>,
+      };
+    }
+    if (row.operation === "update") {
+      if (row.baseRevision === null || !row.payloadJson) {
+        throw new Error("The local record update mutation is invalid.");
+      }
+      return {
+        ...common,
+        baseRevision: row.baseRevision,
+        entityType: "record",
+        operation: "update",
+        payload: JSON.parse(row.payloadJson) as NonNullable<QueuedRecordMutation["payload"]>,
+      };
+    }
+    if (row.operation === "delete" && row.baseRevision !== null && row.payloadJson === null) {
+      return {
+        ...common,
+        baseRevision: row.baseRevision,
+        entityType: "record",
+        operation: "delete",
+      };
+    }
+    throw new Error("The local record mutation is invalid.");
+  }
+  if (!row.payloadJson) {
+    throw new Error("The local child mutation payload is missing.");
   }
   if (
     (row.entityType ?? "child") !== "child" ||
@@ -1037,6 +1851,10 @@ function emergencyContentPayload(content: EmergencyCardContent): string {
   return JSON.stringify(content);
 }
 
+function recordContentPayload(content: RecordVersionContentV1): string {
+  return JSON.stringify(content);
+}
+
 function parseProfilePayload(value: string): {
   readonly dateOfBirth: string;
   readonly preferredName: string;
@@ -1057,6 +1875,18 @@ function parseProfilePayload(value: string): {
 
 function parseEmergencyContent(value: string): EmergencyCardContent {
   return JSON.parse(value) as EmergencyCardContent;
+}
+
+function parseRecordContent(value: string): RecordVersionContentV1 {
+  return JSON.parse(value) as RecordVersionContentV1;
+}
+
+function parseRecordProjection(value: string): RecordProjection {
+  return JSON.parse(value) as RecordProjection;
+}
+
+function parseTimelineProjection(value: string): TimelineProjection {
+  return JSON.parse(value) as TimelineProjection;
 }
 
 function parseStringArray(value: string): ReadonlyArray<string> {

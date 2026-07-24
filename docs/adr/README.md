@@ -1,7 +1,7 @@
 # Architecture Decision Records
 
 > **Status:** Active index
-> **Last updated:** 2026-07-22
+> **Last updated:** 2026-07-24
 > **Owner:** Engineering
 
 Use ADRs for important decisions that affect system structure, quality
@@ -34,6 +34,7 @@ decision with a new ADR and link both records through `Supersedes` and
 | [ADR-0011](./0011-local-key-custody-app-lock-and-device-enrollment.md) | Accepted | Device-bound local keys, app lock, invalidation recovery, wipe, and authority-neutral enrollment | 2026-07-22 | 2026-10-22 |
 | [ADR-0012](./0012-server-authoritative-synchronization-and-conflict-boundary.md) | Accepted | Signed cursors, reset staging, durable mutations, and explicit critical conflicts | 2026-07-22 | 2026-10-22 |
 | [ADR-0013](./0013-emergency-card-aggregate-and-standard-access-boundary.md) | Accepted | Dedicated immutable emergency-card versions with standard post-unlock access | 2026-07-22 | 2026-10-22 |
+| [ADR-0014](./0014-record-aggregate-provenance-and-generated-timeline-boundary.md) | Accepted | Generic immutable records with trusted provenance and source-linked Timeline projections | 2026-07-24 | 2026-10-24 |
 
 Architecture candidates not represented here have not yet been implemented.
 Create their ADRs with the owning work package rather than treating the core

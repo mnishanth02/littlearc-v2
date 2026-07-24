@@ -1,5 +1,5 @@
 import type { ConsentPurpose, ConsentState } from "@littlearc/domain";
-import { foreignKey, index, text } from "drizzle-orm/pg-core";
+import { foreignKey, index, text, unique } from "drizzle-orm/pg-core";
 import { createdAtColumn, jsonObjectColumn, uuidV7Column } from "./_columns.js";
 import { children } from "./children.js";
 import { householdMemberships } from "./household-memberships.js";
@@ -25,6 +25,7 @@ export const consentEvents = littlearcSchema.table(
   (table) => [
     index("consent_events_household_time_idx").on(table.householdId, table.occurredAt),
     index("consent_events_actor_idx").on(table.actorMembershipId),
+    unique("consent_events_household_id_id_unique").on(table.householdId, table.id),
     foreignKey({
       columns: [table.householdId, table.actorMembershipId],
       foreignColumns: [householdMemberships.householdId, householdMemberships.id],

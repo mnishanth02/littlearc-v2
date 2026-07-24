@@ -15,6 +15,17 @@ import {
 } from "@littlearc/domain";
 import { sql } from "drizzle-orm";
 import type { DatabaseClient } from "./client.js";
+import {
+  createRecordPersistence,
+  type GeneratedTimelineProjection,
+  projectRecordForSync,
+  projectTimelineForSync,
+  type RecordProjection,
+  type RecordSyncMutation,
+  type RecordVersionProjection,
+  readRecordsForSync,
+  readTimelineForSync,
+} from "./record-persistence.js";
 
 export type ChildProfileProjection = {
   readonly childId: UuidV7;
@@ -34,7 +45,11 @@ export type EmergencyCardProjection = {
   readonly version: number;
 };
 
-export type SyncProjection = ChildProfileProjection | EmergencyCardProjection;
+export type SyncProjection =
+  | ChildProfileProjection
+  | EmergencyCardProjection
+  | RecordProjection
+  | GeneratedTimelineProjection;
 
 export type SyncPersistenceChange =
   | {
@@ -67,6 +82,40 @@ export type SyncPersistenceChange =
       readonly changedAt: string;
       readonly entityId: UuidV7;
       readonly entityType: "emergencyCard";
+      readonly operation: "delete";
+      readonly revision: number;
+      readonly sequence: number;
+    }
+  | {
+      readonly changedAt: string;
+      readonly entity: RecordProjection;
+      readonly entityId: UuidV7;
+      readonly entityType: "record";
+      readonly operation: "upsert";
+      readonly revision: number;
+      readonly sequence: number;
+    }
+  | {
+      readonly changedAt: string;
+      readonly entityId: UuidV7;
+      readonly entityType: "record";
+      readonly operation: "delete";
+      readonly revision: number;
+      readonly sequence: number;
+    }
+  | {
+      readonly changedAt: string;
+      readonly entity: GeneratedTimelineProjection;
+      readonly entityId: UuidV7;
+      readonly entityType: "timelineEntry";
+      readonly operation: "upsert";
+      readonly revision: number;
+      readonly sequence: number;
+    }
+  | {
+      readonly changedAt: string;
+      readonly entityId: UuidV7;
+      readonly entityType: "timelineEntry";
       readonly operation: "delete";
       readonly revision: number;
       readonly sequence: number;
@@ -128,7 +177,10 @@ export type EmergencyCardSyncMutation = {
   };
 };
 
-export type SyncPersistenceMutation = ChildProfileSyncMutation | EmergencyCardSyncMutation;
+export type SyncPersistenceMutation =
+  | ChildProfileSyncMutation
+  | EmergencyCardSyncMutation
+  | RecordSyncMutation;
 
 export class SyncPersistenceError extends Error {
   readonly code: "authorization_denied" | "cursor_ahead" | "membership_required";
@@ -145,6 +197,16 @@ export type SyncPersistence = {
     readonly cardId: UuidV7;
     readonly identityUserId: string;
   }) => Promise<EmergencyCardProjection | null>;
+  readonly readRecord: (input: {
+    readonly identityUserId: string;
+    readonly recordId: UuidV7;
+  }) => Promise<RecordProjection | null>;
+  readonly readRecordVersions: (input: {
+    readonly beforeVersion?: number;
+    readonly identityUserId: string;
+    readonly limit: number;
+    readonly recordId: UuidV7;
+  }) => Promise<ReadonlyArray<RecordVersionProjection>>;
   readonly pull: (input: {
     readonly afterSequence: number;
     readonly identityUserId: string;
@@ -161,7 +223,7 @@ export type SyncPersistence = {
     readonly mutations: ReadonlyArray<SyncPersistenceMutation>;
   }) => Promise<ReadonlyArray<SyncMutationOutcome>>;
   readonly snapshot: (input: {
-    readonly afterEntityType: "child" | "emergencyCard" | null;
+    readonly afterEntityType: "child" | "emergencyCard" | "record" | "timelineEntry" | null;
     readonly afterId: UuidV7 | null;
     readonly capturedSequence: number | null;
     readonly identityUserId: string;
@@ -170,7 +232,7 @@ export type SyncPersistence = {
     readonly capturedSequence: number;
     readonly hasMore: boolean;
     readonly items: ReadonlyArray<SyncProjection>;
-    readonly nextAfterEntityType: "child" | "emergencyCard" | null;
+    readonly nextAfterEntityType: "child" | "emergencyCard" | "record" | "timelineEntry" | null;
     readonly nextAfterId: UuidV7 | null;
   }>;
 };
@@ -179,6 +241,7 @@ export function createSyncPersistence(options: {
   readonly crypto: StructuredPayloadCrypto;
   readonly database: DatabaseClient;
 }): SyncPersistence {
+  const recordPersistence = createRecordPersistence(options);
   return {
     async readEmergencyCard(input) {
       return options.database.transaction(async (transaction) => {
@@ -201,6 +264,14 @@ export function createSyncPersistence(options: {
           plaintextKey.fill(0);
         }
       });
+    },
+
+    async readRecord(input) {
+      return recordPersistence.readRecord(input);
+    },
+
+    async readRecordVersions(input) {
+      return recordPersistence.readVersions(input);
     },
 
     async pull(input) {
@@ -249,12 +320,94 @@ export function createSyncPersistence(options: {
             event.entityType === "emergencyCard",
         );
         const cardIds = [...new Set(emergencyEvents.map((event) => event.entityId))];
+        const recordIds = [
+          ...new Set(
+            scanned.filter((event) => event.entityType === "record").map((event) => event.entityId),
+          ),
+        ];
+        const timelineIds = [
+          ...new Set(
+            scanned
+              .filter((event) => event.entityType === "timelineEntry")
+              .map((event) => event.entityId),
+          ),
+        ];
         const childRows = await readChildren(transaction, context, childIds);
         const cardRows = await readEmergencyCards(transaction, context, cardIds);
+        const recordRows = await readRecordsForSync(transaction, context, recordIds);
+        const timelineRows = await readTimelineForSync(transaction, context, timelineIds);
         const householdKey = await readHouseholdKey(transaction, context.householdId);
         const plaintextKey = options.crypto.unwrapHouseholdKey(householdKey);
         try {
           const changes = scanned.flatMap((event): ReadonlyArray<SyncPersistenceChange> => {
+            if (event.entityType === "record") {
+              const record = recordRows.get(event.entityId);
+              if (!record) {
+                return [];
+              }
+              if (event.operation === "delete" || record.deletedAt) {
+                return [
+                  {
+                    changedAt: normalizeTimestamp(event.changedAt),
+                    entityId: event.entityId,
+                    entityType: "record",
+                    operation: "delete",
+                    revision: event.revision,
+                    sequence: event.sequence,
+                  },
+                ];
+              }
+              return [
+                {
+                  changedAt: normalizeTimestamp(event.changedAt),
+                  entity: projectRecordForSync(
+                    options.crypto,
+                    context.householdId,
+                    record,
+                    plaintextKey,
+                  ),
+                  entityId: event.entityId,
+                  entityType: "record",
+                  operation: "upsert",
+                  revision: record.revision,
+                  sequence: event.sequence,
+                },
+              ];
+            }
+            if (event.entityType === "timelineEntry") {
+              const timeline = timelineRows.get(event.entityId);
+              if (!timeline) {
+                return [];
+              }
+              if (event.operation === "delete" || timeline.deletedAt) {
+                return [
+                  {
+                    changedAt: normalizeTimestamp(event.changedAt),
+                    entityId: event.entityId,
+                    entityType: "timelineEntry",
+                    operation: "delete",
+                    revision: event.revision,
+                    sequence: event.sequence,
+                  },
+                ];
+              }
+              return [
+                {
+                  changedAt: normalizeTimestamp(event.changedAt),
+                  entity: projectTimelineForSync(
+                    options.crypto,
+                    context.householdId,
+                    timeline,
+                    plaintextKey,
+                  ),
+                  entityId: event.entityId,
+                  entityType: "timelineEntry",
+                  operation: "upsert",
+                  revision: timeline.revision,
+                  sequence: event.sequence,
+                },
+              ];
+            }
             if (event.entityType === "emergencyCard") {
               if (!canReadEmergencyCard(context)) {
                 return [];
@@ -364,6 +517,17 @@ export function createSyncPersistence(options: {
             where household_id = ${context.householdId}
               and deleted_at is null
               and ${canReadEmergencyCard(context)}
+            union all
+            select 'record'::text entity_type, id
+            from littlearc.records
+            where household_id = ${context.householdId}
+              and deleted_at is null
+            union all
+            select 'timelineEntry'::text entity_type, id
+            from littlearc.timeline_entries
+            where household_id = ${context.householdId}
+              and projection_state = 'active'
+              and deleted_at is null
           ) snapshot_entities
           where ${input.afterEntityType}::text is null
             or entity_type > ${input.afterEntityType}
@@ -382,6 +546,16 @@ export function createSyncPersistence(options: {
           context,
           page.filter((item) => item.entityType === "emergencyCard").map((item) => item.id),
         );
+        const recordRows = await readRecordsForSync(
+          transaction,
+          context,
+          page.filter((item) => item.entityType === "record").map((item) => item.id),
+        );
+        const timelineRows = await readTimelineForSync(
+          transaction,
+          context,
+          page.filter((item) => item.entityType === "timelineEntry").map((item) => item.id),
+        );
         const householdKey = await readHouseholdKey(transaction, context.householdId);
         const plaintextKey = options.crypto.unwrapHouseholdKey(householdKey);
         try {
@@ -393,6 +567,32 @@ export function createSyncPersistence(options: {
                 const child = childRows.get(item.id);
                 return child
                   ? [projectChild(options.crypto, context.householdId, child, plaintextKey)]
+                  : [];
+              }
+              if (item.entityType === "record") {
+                const record = recordRows.get(item.id);
+                return record
+                  ? [
+                      projectRecordForSync(
+                        options.crypto,
+                        context.householdId,
+                        record,
+                        plaintextKey,
+                      ),
+                    ]
+                  : [];
+              }
+              if (item.entityType === "timelineEntry") {
+                const timeline = timelineRows.get(item.id);
+                return timeline
+                  ? [
+                      projectTimelineForSync(
+                        options.crypto,
+                        context.householdId,
+                        timeline,
+                        plaintextKey,
+                      ),
+                    ]
                   : [];
               }
               const card = cardRows.get(item.id);
@@ -415,17 +615,23 @@ export function createSyncPersistence(options: {
       const batchStatuses = new Map<UuidV7, SyncMutationOutcome["status"]>();
       for (const mutation of input.mutations) {
         const result =
-          mutation.entityType === "emergencyCard"
-            ? await persistEmergencyCardMutation(options, {
+          mutation.entityType === "record"
+            ? await recordPersistence.mutate({
                 identityUserId: input.identityUserId,
                 mutation,
                 batchStatuses,
               })
-            : await persistMutation(options, {
-                identityUserId: input.identityUserId,
-                mutation,
-                batchStatuses,
-              });
+            : mutation.entityType === "emergencyCard"
+              ? await persistEmergencyCardMutation(options, {
+                  identityUserId: input.identityUserId,
+                  mutation,
+                  batchStatuses,
+                })
+              : await persistMutation(options, {
+                  identityUserId: input.identityUserId,
+                  mutation,
+                  batchStatuses,
+                });
         results.push(result);
         batchStatuses.set(mutation.mutationId, result.status);
       }
@@ -472,7 +678,7 @@ type ChangeEventRecord = {
 };
 
 type SnapshotEntityRecord = {
-  readonly entityType: "child" | "emergencyCard";
+  readonly entityType: "child" | "emergencyCard" | "record" | "timelineEntry";
   readonly id: UuidV7;
 };
 
@@ -1305,7 +1511,7 @@ function fingerprint(mutation: SyncPersistenceMutation): string {
         localDependencyIds: mutation.localDependencyIds,
         mutationId: mutation.mutationId,
         operation: mutation.operation ?? "update",
-        payload: mutation.payload,
+        payload: "payload" in mutation ? mutation.payload : null,
       }),
     )
     .digest("hex")}`;

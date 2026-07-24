@@ -23,6 +23,14 @@ if (!emergencyCard) {
   throw new Error("Expected the OFF-05 emergency-card migration to be registered.");
 }
 const generatedEmergencyCardSql = readFileSync(join("migrations", emergencyCard.filename), "utf8");
+const recordFoundation = databaseMigrations()[4];
+if (!recordFoundation) {
+  throw new Error("Expected the VLT-01 record-foundation migration to be registered.");
+}
+const generatedRecordFoundationSql = readFileSync(
+  join("migrations", recordFoundation.filename),
+  "utf8",
+);
 
 describe("database migration foundation", () => {
   it("keeps the generated migration artifact in sync with the reviewed source", () => {
@@ -162,5 +170,29 @@ describe("OFF-05 emergency-card migration", () => {
       "revoke update, delete on littlearc.emergency_card_versions",
     );
     expect(emergencyCard.sql).toContain("revoke all on littlearc.emergency_card_versions");
+  });
+});
+
+describe("VLT-01 record-foundation migration", () => {
+  it("keeps the reviewed source and generated artifact synchronized", () => {
+    expect(generatedRecordFoundationSql).toBe(`${recordFoundation.sql}\n`);
+  });
+
+  it("enforces encrypted immutable versions, separate suggestions, and Timeline RLS", () => {
+    for (const table of ["records", "record_versions", "record_suggestions", "timeline_entries"]) {
+      expect(recordFoundation.sql).toContain(`create table littlearc.${table}`);
+      expect(recordFoundation.sql).toContain(
+        `alter table littlearc.${table} force row level security`,
+      );
+      expect(recordFoundation.sql).toContain(`create policy ${table}_tenant_isolation`);
+    }
+    expect(recordFoundation.sql).toContain("records_current_version_fk");
+    expect(recordFoundation.sql).toContain("record_versions_immutable");
+    expect(recordFoundation.sql).toContain("record_versions_envelope_check");
+    expect(recordFoundation.sql).toContain("record_suggestions_suggestion_envelope_check");
+    expect(recordFoundation.sql).toContain("timeline_entries_one_active_record_idx");
+    expect(recordFoundation.sql).toContain(
+      "revoke all on littlearc.records, littlearc.record_versions",
+    );
   });
 });

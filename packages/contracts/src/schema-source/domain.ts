@@ -4,6 +4,7 @@ import {
   consentPurposes,
   consentStates,
   emergencyCardAccessModes,
+  recordAccessScopes,
   recordCategories,
   recordSourceTypes,
 } from "@littlearc/domain";
@@ -88,7 +89,7 @@ export const deviceEnrollmentRequestSchema = z.object({
     .trim()
     .regex(/^[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$/),
   deviceId: uuidV7Schema,
-  localSchemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  localSchemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   platform: z.enum(["android", "ios"]),
 });
 
@@ -96,7 +97,7 @@ export const deviceEnrollmentResponseSchema = z.object({
   deviceId: uuidV7Schema,
   enrollmentStatus: z.literal("active"),
   householdId: uuidV7Schema,
-  localSchemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  localSchemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   replayed: z.boolean(),
 });
 
@@ -137,18 +138,44 @@ export const auditEventSchema = z.object({
 export const recordCategorySchema = z.enum(recordCategories);
 export const recordSourceTypeSchema = z.enum(recordSourceTypes);
 export const confirmationStateSchema = z.enum(confirmationStates);
+export const recordAccessScopeSchema = z.enum(recordAccessScopes);
+
+export const optionalConfirmedTextSchema = (maximum: number) =>
+  z.discriminatedUnion("state", [
+    z.object({ state: z.literal("notProvided") }),
+    z.object({
+      state: z.literal("confirmed"),
+      value: z.string().trim().min(1).max(maximum),
+    }),
+  ]);
+
+export const recordVersionContentV1Schema = z.object({
+  details: z.object({
+    documentKind: optionalConfirmedTextSchema(120),
+    schema: z.literal("document.v1"),
+  }),
+  notes: optionalConfirmedTextSchema(2_000),
+  providerFacility: optionalConfirmedTextSchema(160),
+  schemaVersion: z.literal(1),
+  title: z.string().trim().min(1).max(160),
+});
+
+export const recordProvenanceSchema = z.object({
+  sourceType: recordSourceTypeSchema,
+  trustedIssuer: z.boolean(),
+});
 
 export const recordDescriptorSchema = mutableResourceSchema.extend({
   childId: uuidV7Schema,
   category: recordCategorySchema,
   sourceType: recordSourceTypeSchema,
   confirmationState: confirmationStateSchema,
-  accessPolicy: accessPolicySchema,
+  accessScope: recordAccessScopeSchema,
 });
 
 export const syncMutationSchema = z.object({
   mutationId: uuidV7Schema,
-  entityType: z.enum(["child", "consent", "record", "emergencyCard"]),
+  entityType: z.enum(["child", "consent", "record", "emergencyCard", "timelineEntry"]),
   entityId: uuidV7Schema,
   operation: z.enum(["create", "update", "delete"]),
   baseRevision: revisionSchema.nullable(),
@@ -212,6 +239,50 @@ export const emergencyCardProjectionSchema = z.object({
   version: revisionSchema,
 });
 
+export const recordProjectionSchema = z.object({
+  accessScope: recordAccessScopeSchema,
+  category: recordCategorySchema,
+  childId: uuidV7Schema,
+  confirmationState: z.enum(["draft", "suggested", "confirmed", "archived"]),
+  content: recordVersionContentV1Schema,
+  eventAt: utcTimestampSchema.nullable(),
+  provenance: recordProvenanceSchema,
+  recordId: uuidV7Schema,
+  revision: revisionSchema,
+  updatedAt: utcTimestampSchema,
+  version: revisionSchema,
+  versionId: uuidV7Schema,
+});
+
+export const recordVersionProjectionSchema = z.object({
+  confirmedAt: utcTimestampSchema.nullable(),
+  confirmationState: confirmationStateSchema,
+  content: recordVersionContentV1Schema,
+  createdAt: utcTimestampSchema,
+  provenance: recordProvenanceSchema,
+  recordId: uuidV7Schema,
+  supersedesVersionId: uuidV7Schema.nullable(),
+  version: revisionSchema,
+  versionId: uuidV7Schema,
+});
+
+export const generatedTimelineContentSchema = z.object({
+  category: recordCategorySchema,
+  dateAuthority: z.enum(["recordEventAt", "confirmedAtFallback"]),
+  title: z.string().trim().min(1).max(160),
+});
+
+export const generatedTimelineProjectionSchema = z.object({
+  childId: uuidV7Schema,
+  content: generatedTimelineContentSchema,
+  entryId: uuidV7Schema,
+  eventAt: utcTimestampSchema,
+  recordId: uuidV7Schema,
+  revision: revisionSchema,
+  sourceVersionId: uuidV7Schema,
+  updatedAt: utcTimestampSchema,
+});
+
 export const syncChangeSchema = z.union([
   z.object({
     changedAt: utcTimestampSchema,
@@ -247,6 +318,40 @@ export const syncChangeSchema = z.union([
     revision: revisionSchema,
     sequence: z.number().int().positive(),
   }),
+  z.object({
+    changedAt: utcTimestampSchema,
+    entity: recordProjectionSchema,
+    entityId: uuidV7Schema,
+    entityType: z.literal("record"),
+    operation: z.literal("upsert"),
+    revision: revisionSchema,
+    sequence: z.number().int().positive(),
+  }),
+  z.object({
+    changedAt: utcTimestampSchema,
+    entityId: uuidV7Schema,
+    entityType: z.literal("record"),
+    operation: z.literal("delete"),
+    revision: revisionSchema,
+    sequence: z.number().int().positive(),
+  }),
+  z.object({
+    changedAt: utcTimestampSchema,
+    entity: generatedTimelineProjectionSchema,
+    entityId: uuidV7Schema,
+    entityType: z.literal("timelineEntry"),
+    operation: z.literal("upsert"),
+    revision: revisionSchema,
+    sequence: z.number().int().positive(),
+  }),
+  z.object({
+    changedAt: utcTimestampSchema,
+    entityId: uuidV7Schema,
+    entityType: z.literal("timelineEntry"),
+    operation: z.literal("delete"),
+    revision: revisionSchema,
+    sequence: z.number().int().positive(),
+  }),
 ]);
 
 export const syncChangesPageSchema = z.object({
@@ -271,7 +376,14 @@ export const syncPullResponseSchema = z.discriminatedUnion("kind", [
 export const syncSnapshotPageSchema = z.object({
   capturedCursor: cursorSchema,
   hasMore: z.boolean(),
-  items: z.array(z.union([childProfileProjectionSchema, emergencyCardProjectionSchema])),
+  items: z.array(
+    z.union([
+      childProfileProjectionSchema,
+      emergencyCardProjectionSchema,
+      recordProjectionSchema,
+      generatedTimelineProjectionSchema,
+    ]),
+  ),
   nextSnapshotCursor: cursorSchema.nullable(),
   serverTime: utcTimestampSchema,
 });
@@ -305,12 +417,55 @@ export const emergencyCardSyncMutationSchema = z.object({
   }),
 });
 
+const recordMutationContentSchema = z.object({
+  category: recordCategorySchema,
+  childId: uuidV7Schema,
+  content: recordVersionContentV1Schema,
+  eventAt: utcTimestampSchema.nullable(),
+  sourceType: recordSourceTypeSchema,
+});
+
+export const recordCreateSyncMutationSchema = z.object({
+  baseRevision: z.null(),
+  entityId: uuidV7Schema,
+  entityType: z.literal("record"),
+  idempotencyKey: uuidV7Schema,
+  localDependencyIds: z.array(uuidV7Schema).max(50),
+  mutationId: uuidV7Schema,
+  operation: z.literal("create"),
+  payload: recordMutationContentSchema,
+});
+
+export const recordCorrectSyncMutationSchema = z.object({
+  baseRevision: revisionSchema,
+  entityId: uuidV7Schema,
+  entityType: z.literal("record"),
+  idempotencyKey: uuidV7Schema,
+  localDependencyIds: z.array(uuidV7Schema).max(50),
+  mutationId: uuidV7Schema,
+  operation: z.literal("update"),
+  payload: recordMutationContentSchema,
+});
+
+export const recordDeleteSyncMutationSchema = z.object({
+  baseRevision: revisionSchema,
+  entityId: uuidV7Schema,
+  entityType: z.literal("record"),
+  idempotencyKey: uuidV7Schema,
+  localDependencyIds: z.array(uuidV7Schema).max(50),
+  mutationId: uuidV7Schema,
+  operation: z.literal("delete"),
+});
+
 export const syncMutationPushRequestSchema = z.object({
   mutations: z
     .array(
-      z.discriminatedUnion("entityType", [
+      z.union([
         childProfileSyncMutationSchema,
         emergencyCardSyncMutationSchema,
+        recordCreateSyncMutationSchema,
+        recordCorrectSyncMutationSchema,
+        recordDeleteSyncMutationSchema,
       ]),
     )
     .min(1)
@@ -324,11 +479,19 @@ const syncMutationResultBaseSchema = z.object({
 
 export const syncMutationResultSchema = z.discriminatedUnion("status", [
   syncMutationResultBaseSchema.extend({
-    entity: z.union([childProfileProjectionSchema, emergencyCardProjectionSchema]),
+    entity: z.union([
+      childProfileProjectionSchema,
+      emergencyCardProjectionSchema,
+      recordProjectionSchema,
+    ]),
     status: z.enum(["applied", "duplicate"]),
   }),
   syncMutationResultBaseSchema.extend({
-    current: z.union([childProfileProjectionSchema, emergencyCardProjectionSchema]),
+    current: z.union([
+      childProfileProjectionSchema,
+      emergencyCardProjectionSchema,
+      recordProjectionSchema,
+    ]),
     reason: z.literal("staleCriticalRevision"),
     status: z.literal("conflict"),
   }),
@@ -356,4 +519,9 @@ export const emergencyCardPutRequestSchema = z.object({
   childId: uuidV7Schema,
   content: emergencyCardContentSchema,
   mutationId: uuidV7Schema,
+});
+
+export const recordVersionPageSchema = z.object({
+  items: z.array(recordVersionProjectionSchema),
+  nextCursor: cursorSchema.nullable(),
 });
