@@ -145,9 +145,9 @@ M3 preview as a real record or as seven-day activation.
 | --- | --- | --- |
 | Plan and boundary review | Completed | Source traceability, scope, privacy, composition, synthetic-data, analytics, documentation, source-coverage, and diff reviews passed on 23 July 2026. |
 | Workflow and analytics | Completed | Typed ordered workflow, completion rules, strict coarse milestone allowlist, and rejection/canary tests passed. |
-| Mobile activation shell | Completed | Shared seven-step shell, synthetic summaries, preview, completion, progress semantics, and safe retry states passed. |
+| Mobile activation shell | Completed | Shared seven-step shell, synthetic summaries, preview, completion, progress semantics, safe retry states, and development-versus-release route containment passed. |
 | Composed API/native harness | Completed | Disposable Aiven mode composed atomic owner create, protected enrollment, SQLCipher repository, and shared authoritative synchronization. |
-| Automated and device validation | Completed | Focused, database, repository, build/export, root, clean-checkout, Pixel 8, iOS Simulator, accessibility, failure/retry, restart/offline, and leakage checks passed within the recorded boundary. |
+| Automated and device validation | Completed | Focused, database, repository, build/export, release-bundle canary, root, clean-checkout, Pixel 8, iOS Simulator, accessibility, failure/retry, restart/offline, and leakage checks passed within the recorded boundary. |
 | Documentation and evidence | Completed | Evidence dossier and the plan, M2 index, context map, dashboard, roadmap, and repository index are aligned. |
 
 ## Implementation Plan

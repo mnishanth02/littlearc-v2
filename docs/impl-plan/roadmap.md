@@ -669,6 +669,13 @@ through the production-shaped architecture.
 > its other unproven named criteria. Physical-iOS pre-pilot evidence remains
 > unchanged; simulated Face ID is not physical Secure Enclave evidence.
 <!-- Follow-up evidence is a separate status callout. -->
+> **Release-bundle containment follow-up (24 July 2026): COMPLETE.** Metro
+> retains the synthetic OFF-06 evidence route in development bundles and
+> substitutes a redirect-only implementation for release exports. The current
+> 179-test suite, Android/iOS Hermes canary scans, root validation, and
+> clean-checkout proof pass. This changes no Gate 2 criterion or evidence
+> boundary.
+<!-- Follow-up evidence is a separate status callout. -->
 > **Cross-milestone validation follow-up (23 July 2026): COMPLETE.** A current
 > iPhone 17 Pro Simulator pass classified every implemented `RDY`, `FND`,
 > Gate 1, and `OFF-01` through `OFF-06` row and exercised every applicable

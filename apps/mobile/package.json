@@ -7,8 +7,8 @@
   "scripts": {
     "android": "EXPO_ROUTER_APP_ROOT=app expo run:android",
     "build": "pnpm run build:android && pnpm run build:ios",
-    "build:android": "EXPO_ROUTER_APP_ROOT=app expo export --platform android --output-dir dist/android",
-    "build:ios": "EXPO_ROUTER_APP_ROOT=app expo export --platform ios --output-dir dist/ios",
+    "build:android": "EXPO_ROUTER_APP_ROOT=app expo export --platform android --output-dir dist/android && node ../../tooling/mobile-release/check-validation-bundle.mjs dist/android",
+    "build:ios": "EXPO_ROUTER_APP_ROOT=app expo export --platform ios --output-dir dist/ios && node ../../tooling/mobile-release/check-validation-bundle.mjs dist/ios",
     "clean": "rm -rf dist .expo android ios",
     "dev:android:usb": "EXPO_UNSTABLE_MCP_SERVER=1 EXPO_ROUTER_APP_ROOT=app expo start --dev-client --localhost",
     "dev": "EXPO_ROUTER_APP_ROOT=app expo start --dev-client",

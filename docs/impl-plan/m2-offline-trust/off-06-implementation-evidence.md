@@ -249,3 +249,34 @@ emergency card, and one immutable version. The earlier same-source failure/
 retry, simulated Face ID, accessibility, restart, and API-offline SQLCipher
 checks remain the owning detailed evidence above. See the
 [cross-milestone parity dossier](../ios-simulator-parity-validation-evidence.md).
+
+## Release-Bundle Containment Follow-Up — 24 July 2026
+
+The development-only OFF-06 route remains available for the unresolved Gate 2
+device matrix, but it no longer contributes its synthetic adapter or evidence
+content to release exports. Metro now resolves the route to:
+
+- the retained OFF-06 validation shell for development bundles; and
+- a redirect-only implementation for non-development bundles.
+
+Every Android and iOS export now runs a fail-closed binary scan for named
+validation headers, synthetic sessions, validation endpoints, fixed approval
+assertions, emergency-card fixture content, and device-evidence labels. The
+policy has positive, negative, missing-bundle, and empty-bundle tests.
+
+The first Android export intentionally demonstrated the prior gap: the new
+scanner rejected the bundle because it still contained the OFF-06 synthetic
+session, validation endpoint, approval assertion, and evidence label. After
+introducing the build-time route boundary:
+
+- the Android Hermes export passed after scanning 29 files;
+- the iOS Hermes export passed after scanning 25 files; and
+- a separate Android development export retained the OFF-06 session, endpoint,
+  and completion label, proving the evidence route was contained rather than
+  deleted.
+
+The current root suite passed with 179 tests. `pnpm validate`,
+`git diff --check`, and the source-only clean-checkout validation also passed.
+
+This cleanup changes no OFF-01 through OFF-06 domain, API, persistence,
+encryption, synchronization, accessibility, or Gate 2 acceptance boundary.

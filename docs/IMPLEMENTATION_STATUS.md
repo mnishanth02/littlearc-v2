@@ -2,7 +2,7 @@
 
 > **Status:** Active delivery dashboard
 > **Version:** 1.0
-> **Last updated:** 23 July 2026
+> **Last updated:** 24 July 2026
 > **Execution plan:** [Implementation Plan and Roadmap](./impl-plan/roadmap.md)
 > **Core documents:** [Product plan](./core/littlearc-complete-product-plan.md),
 > [architecture](./core/littlearc-architecture-and-tech-stack.md),
@@ -75,7 +75,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | `OFF-03` Local security and enrollment | `COMPLETE` | Engineering | Authority-neutral enrollment, device-bound key custody, SQLCipher and authenticated files, invalidation recovery, verified wipe, 138 tests, Aiven PostgreSQL, and bounded Pixel 8 native lifecycle accepted; see [evidence](./impl-plan/m2-offline-trust/off-03-implementation-evidence.md) |
 | `OFF-04` Repository and synchronization engine | `COMPLETE` | Engineering | Signed cursors, reset-safe SQLCipher repositories, ordered mutations, critical conflicts, 151 tests, Aiven PostgreSQL, repository gates, and the bounded Pixel 8 lifecycle passed; see [evidence](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) |
 | `OFF-05` Emergency-card vertical slice | `COMPLETE` | Engineering | Dedicated encrypted aggregate, immutable versions, shared sync, SQLCipher V3, accessible standard-access UI, 164 tests, Aiven PostgreSQL, repository gates, and the bounded Pixel 8 lifecycle passed; see [evidence](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) |
-| `OFF-06` Onboarding activation shell | `COMPLETE` | Engineering | Ordered accessible shell, atomic owner/child creation, protected enrollment, shared emergency sync, strict analytics, 176 tests, Aiven gates, Android/iOS exports, bounded Pixel 8 lifecycle, and iOS Simulator activation/Face ID/failure/accessibility/restart/offline evidence passed; see [evidence](./impl-plan/m2-offline-trust/off-06-implementation-evidence.md) |
+| `OFF-06` Onboarding activation shell | `COMPLETE` | Engineering | Ordered accessible shell, atomic owner/child creation, protected enrollment, shared emergency sync, strict analytics, 179 tests, Aiven gates, Android/iOS exports with validation-bundle containment, bounded Pixel 8 lifecycle, and iOS Simulator activation/Face ID/failure/accessibility/restart/offline evidence passed; see [evidence](./impl-plan/m2-offline-trust/off-06-implementation-evidence.md) |
 | M3 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
@@ -105,6 +105,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 22 Jul 2026 | [`OFF-05` emergency-card vertical slice](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) | `COMPLETE` | Dedicated encrypted aggregate, immutable versions, explicit clinical states, shared synchronization, SQLCipher schema V3, standard post-unlock UI, 164 tests, Aiven integration, Android/iOS exports, accessibility, and the bounded Pixel 8 offline/dialer/conflict/wipe lifecycle passed |
 | 23 Jul 2026 | [`OFF-06` onboarding activation shell](./impl-plan/m2-offline-trust/off-06-implementation-evidence.md) | `COMPLETE` | Seven-step accessible orchestration, atomic owner/child creation, protected SQLCipher enrollment, shared authoritative emergency sync, synthetic first-record preview, bounded analytics, 176 tests, Aiven integration, Android/iOS exports, the bounded Pixel 8 lifecycle, and iOS Simulator activation/Face ID/failure/accessibility/restart/offline follow-up passed |
 | 23 Jul 2026 | [iOS Simulator cross-milestone parity validation](./impl-plan/ios-simulator-parity-validation-evidence.md) | `COMPLETE` | All implemented M0/M1/Gate 1/M2 rows through `OFF-06` were classified and validated on the iPhone 17 Pro Simulator or by their owning checks; retained-harness probes, production OFF-01 through OFF-06 flows, API-offline restart, design/accessibility states, Aiven gates, and repository validation passed within explicit physical-iOS limits |
+| 24 Jul 2026 | OFF-06 validation-bundle containment | `COMPLETE` | Metro selects the retained synthetic OFF-06 route only for development bundles and a redirect-only implementation for release exports; 179 tests, Android/iOS Hermes scans, root validation, and clean-checkout proof passed |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
