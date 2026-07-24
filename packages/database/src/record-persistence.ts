@@ -5,7 +5,9 @@ import type {
   WrappedHouseholdKey,
 } from "@littlearc/crypto";
 import {
+  assertRecordContentForCategory,
   assertRecordVersionContent,
+  assertVaccinationDateMeaning,
   canArchiveOrDeleteRecord,
   canCorrectRecord,
   canCreateRecord,
@@ -410,7 +412,13 @@ async function persistRecordMutation(
     let requestFingerprint: string;
     try {
       if (mutation.operation !== "delete") {
-        assertRecordVersionContent(mutation.payload.content);
+        assertRecordContentForCategory(mutation.payload.category, mutation.payload.content);
+        if (mutation.payload.content.details.schema === "vaccination.v1") {
+          assertVaccinationDateMeaning({
+            details: mutation.payload.content.details,
+            eventAt: mutation.payload.eventAt,
+          });
+        }
         if (mutation.payload.sourceType !== "manual") {
           throw new Error("VLT-01 accepts manual synthetic records only.");
         }

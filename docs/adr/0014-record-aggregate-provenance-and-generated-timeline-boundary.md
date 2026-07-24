@@ -3,10 +3,11 @@
 > **Status:** Accepted
 > **Date:** 2026-07-24
 > **Owner:** Engineering
+> **Last reviewed:** 2026-07-24 for VLT-02 category payloads
 > **Review date:** 2026-10-24
 > **Supersedes:** None
 > **Superseded by:** None
-> **Related documents:** [VLT-01 plan](../impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md), [architecture](../core/littlearc-architecture-and-tech-stack.md), [backend data model](../core/backend-data-model-and-database-schema.md), and [ADR-0012](./0012-server-authoritative-synchronization-and-conflict-boundary.md)
+> **Related documents:** [VLT-01 plan](../impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md), [VLT-02 plan](../impl-plan/m3-vault-wedge/vlt-02-manual-record-creation-plan.md), [VLT-02 evidence](../impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md), [architecture](../core/littlearc-architecture-and-tech-stack.md), [backend data model](../core/backend-data-model-and-database-schema.md), and [ADR-0012](./0012-server-authoritative-synchronization-and-conflict-boundary.md)
 
 ---
 
@@ -106,6 +107,24 @@ SQLCipher tests cover V4 migration, optimistic changes, reset, conflict,
 tombstone, history cache, and wipe. The development-only native flow exercises
 the fixed synthetic lifecycle on physical Android and iOS Simulator within the
 VLT-01 evidence boundary.
+
+## VLT-02 Triggered Review
+
+VLT-02 exercised the early review trigger by adding document, vaccination,
+doctor-visit, and prescription discriminated payloads. The review retained
+this decision unchanged:
+
+- every payload remains inside the generic record aggregate and versioned
+  content union;
+- manual confirmation is the only authority added by VLT-02;
+- drafts remain separate local form artifacts without provenance, versions, or
+  Timeline authority;
+- corrections append immutable versions and replace the active generated
+  Timeline projection; and
+- synchronization, access scope, conflict, tombstone, and purge-request
+  behavior continue through ADR-0012 and VLT-01.
+
+The next scheduled review date remains 2026-10-24.
 
 ## Review Triggers
 

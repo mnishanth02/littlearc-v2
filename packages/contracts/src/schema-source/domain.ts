@@ -89,7 +89,13 @@ export const deviceEnrollmentRequestSchema = z.object({
     .trim()
     .regex(/^[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$/),
   deviceId: uuidV7Schema,
-  localSchemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+  localSchemaVersion: z.union([
+    z.literal(1),
+    z.literal(2),
+    z.literal(3),
+    z.literal(4),
+    z.literal(5),
+  ]),
   platform: z.enum(["android", "ios"]),
 });
 
@@ -97,7 +103,13 @@ export const deviceEnrollmentResponseSchema = z.object({
   deviceId: uuidV7Schema,
   enrollmentStatus: z.literal("active"),
   householdId: uuidV7Schema,
-  localSchemaVersion: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+  localSchemaVersion: z.union([
+    z.literal(1),
+    z.literal(2),
+    z.literal(3),
+    z.literal(4),
+    z.literal(5),
+  ]),
   replayed: z.boolean(),
 });
 
@@ -149,11 +161,46 @@ export const optionalConfirmedTextSchema = (maximum: number) =>
     }),
   ]);
 
-export const recordVersionContentV1Schema = z.object({
-  details: z.object({
-    documentKind: optionalConfirmedTextSchema(120),
-    schema: z.literal("document.v1"),
+export const optionalConfirmedDateSchema = z.discriminatedUnion("state", [
+  z.object({ state: z.literal("notProvided") }),
+  z.object({
+    state: z.literal("confirmed"),
+    value: z.string().date(),
   }),
+]);
+
+export const recordVersionContentV1Schema = z.object({
+  details: z.discriminatedUnion("schema", [
+    z.object({
+      documentKind: optionalConfirmedTextSchema(120),
+      schema: z.literal("document.v1"),
+    }),
+    z.object({
+      batchLot: optionalConfirmedTextSchema(120),
+      dateMeaning: z.discriminatedUnion("state", [
+        z.object({ state: z.literal("notProvided") }),
+        z.object({
+          state: z.literal("confirmed"),
+          value: z.enum(["due", "given"]),
+        }),
+      ]),
+      schema: z.literal("vaccination.v1"),
+      vaccineName: z.string().trim().min(1).max(160),
+    }),
+    z.object({
+      followUpDate: optionalConfirmedDateSchema,
+      reasonForVisit: z.string().trim().min(1).max(500),
+      schema: z.literal("doctor_visit.v1"),
+      tags: optionalConfirmedTextSchema(240),
+    }),
+    z.object({
+      duration: optionalConfirmedTextSchema(160),
+      endDate: optionalConfirmedDateSchema,
+      medicines: z.string().trim().min(1).max(1_000),
+      schema: z.literal("prescription.v1"),
+      writtenSchedule: optionalConfirmedTextSchema(1_000),
+    }),
+  ]),
   notes: optionalConfirmedTextSchema(2_000),
   providerFacility: optionalConfirmedTextSchema(160),
   schemaVersion: z.literal(1),

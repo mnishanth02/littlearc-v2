@@ -76,8 +76,9 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | `OFF-04` Repository and synchronization engine | `COMPLETE` | Engineering | Signed cursors, reset-safe SQLCipher repositories, ordered mutations, critical conflicts, 151 tests, Aiven PostgreSQL, repository gates, and the bounded Pixel 8 lifecycle passed; see [evidence](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) |
 | `OFF-05` Emergency-card vertical slice | `COMPLETE` | Engineering | Dedicated encrypted aggregate, immutable versions, shared sync, SQLCipher V3, accessible standard-access UI, 164 tests, Aiven PostgreSQL, repository gates, and the bounded Pixel 8 lifecycle passed; see [evidence](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) |
 | `OFF-06` Onboarding activation shell | `COMPLETE` | Engineering | Ordered accessible shell, atomic owner/child creation, protected enrollment, shared emergency sync, strict analytics, 179 tests, Aiven gates, Android/iOS exports with validation-bundle containment, bounded Pixel 8 lifecycle, and iOS Simulator activation/Face ID/failure/accessibility/restart/offline evidence passed; see [evidence](./impl-plan/m2-offline-trust/off-06-implementation-evidence.md) |
-| M3. Vault wedge | `IN PROGRESS` | Engineering | Bounded `VLT-01` implementation, automated/Aiven validation, release exports, iOS Simulator lifecycle, and physical Pixel 8 lifecycle/accessibility checks passed; Gate 2 remains open and `VLT-02+` stay blocked |
+| M3. Vault wedge | `IN PROGRESS` | Engineering | Bounded `VLT-01` and separately authorized `VLT-02` are complete; Gate 2 remains open and `VLT-03+` stay blocked |
 | `VLT-01` Record model, versions, provenance, and timeline projection | `COMPLETE` | Engineering | Implementation, 193 root tests, disposable Aiven checks, Android/iOS release containment, iOS Simulator lifecycle, and bounded Pixel 8 lifecycle/accessibility checks passed; see [plan](./impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md) and [evidence](./impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md) |
+| `VLT-02` Manual record creation | `COMPLETE` | Engineering | Four manual category payloads, SQLCipher V5 drafts, production create/view/correct/history/delete routes, 206 tests, disposable Aiven checks, release containment, and full Pixel 8 plus iOS-Simulator functional lifecycles passed; see [plan](./impl-plan/m3-vault-wedge/vlt-02-manual-record-creation-plan.md) and [evidence](./impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md) |
 | M4 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
@@ -109,6 +110,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 23 Jul 2026 | [iOS Simulator cross-milestone parity validation](./impl-plan/ios-simulator-parity-validation-evidence.md) | `COMPLETE` | All implemented M0/M1/Gate 1/M2 rows through `OFF-06` were classified and validated on the iPhone 17 Pro Simulator or by their owning checks; retained-harness probes, production OFF-01 through OFF-06 flows, API-offline restart, design/accessibility states, Aiven gates, and repository validation passed within explicit physical-iOS limits |
 | 24 Jul 2026 | OFF-06 validation-bundle containment | `COMPLETE` | Metro selects the retained synthetic OFF-06 route only for development bundles and a redirect-only implementation for release exports; 179 tests, Android/iOS Hermes scans, root validation, and clean-checkout proof passed |
 | 24 Jul 2026 | [`VLT-01` record model, versions, provenance, and Timeline projection](./impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md) | `COMPLETE` | Encrypted immutable records/versions, separated suggestions, generated Timeline projections, shared synchronization, SQLCipher V4, 193 tests, disposable Aiven validation, release containment, iOS Simulator lifecycle, and bounded physical Pixel 8 lifecycle/accessibility evidence passed |
+| 24 Jul 2026 | [`VLT-02` manual record creation](./impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md) | `COMPLETE` | Four manual category schemas and production routes, encrypted SQLCipher V5 drafts, atomic confirm/sync, immutable correction/history, tombstone delete, 206 tests, disposable Aiven validation, Android/iOS release containment, and complete functional restart lifecycles on physical Pixel 8 and iPhone 17 Pro Simulator passed |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -123,13 +125,13 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 ## 6. In-Progress Register
 
 M2 remains open at the milestone level because Gate 2 is not closed. `VLT-01`
-is complete under a founder-directed, package-specific exception. The
-exception does not authorize later M3 work.
+and `VLT-02` are complete under separate founder-directed, package-specific
+exceptions. These exceptions do not authorize `VLT-03+`.
 
 ## 7. Ready Queue
 
-No M3 package is currently ready. `VLT-02` and later M3 packages remain gated
-by Gate 2.
+No M3 package is ready automatically. `VLT-03` and later packages remain gated
+by Gate 2 or separate founder direction.
 
 The complete dependency order remains in Section 25 of the implementation
 roadmap. This section should show only the next few actionable packages.
@@ -180,6 +182,8 @@ roadmap. This section should show only the next few actionable packages.
 | [`OFF-04` Repository and synchronization engine](./impl-plan/m2-offline-trust/off-04-repository-and-synchronization-engine-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) |
 | [`OFF-05` Emergency-card vertical slice](./impl-plan/m2-offline-trust/off-05-emergency-card-vertical-slice-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) |
 | [`OFF-06` Onboarding activation shell](./impl-plan/m2-offline-trust/off-06-onboarding-activation-shell-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-06-implementation-evidence.md) |
+| [`VLT-01` Record model, versions, provenance, and timeline projection](./impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md) |
+| [`VLT-02` Manual record creation](./impl-plan/m3-vault-wedge/vlt-02-manual-record-creation-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md) |
 
 ## 11. Agent Workflow
 

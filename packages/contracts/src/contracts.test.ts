@@ -21,6 +21,7 @@ import {
 } from "./index.js";
 
 const validUuidV7 = "019f742b-de82-7292-86cd-5475a1388313";
+const validTimestamp = "2026-07-24T08:00:00.000Z";
 
 describe("LittleArc API contract", () => {
   it("keeps all product contract paths under /v1", () => {
@@ -279,5 +280,65 @@ describe("LittleArc API contract", () => {
         ],
       }),
     ).toThrow();
+  });
+
+  it("accepts the four bounded VLT-02 manual category payloads", () => {
+    const common = {
+      notes: { state: "notProvided" as const },
+      providerFacility: { state: "notProvided" as const },
+      schemaVersion: 1 as const,
+      title: "Synthetic manual record",
+    };
+    const details = [
+      {
+        documentKind: { state: "confirmed", value: "Synthetic summary" },
+        schema: "document.v1",
+      },
+      {
+        batchLot: { state: "notProvided" },
+        dateMeaning: { state: "confirmed", value: "given" },
+        schema: "vaccination.v1",
+        vaccineName: "Synthetic vaccine",
+      },
+      {
+        followUpDate: { state: "confirmed", value: "2026-08-01" },
+        reasonForVisit: "Synthetic visit",
+        schema: "doctor_visit.v1",
+        tags: { state: "confirmed", value: "routine" },
+      },
+      {
+        duration: { state: "notProvided" },
+        endDate: { state: "confirmed", value: "2026-08-02" },
+        medicines: "Synthetic medicine",
+        schema: "prescription.v1",
+        writtenSchedule: { state: "confirmed", value: "Literal written schedule" },
+      },
+    ] as const;
+
+    for (const categoryDetails of details) {
+      expect(() =>
+        recordProjectionSchema.parse({
+          accessScope: "selectedHealthRecords",
+          category:
+            categoryDetails.schema === "document.v1"
+              ? "document"
+              : categoryDetails.schema === "vaccination.v1"
+                ? "vaccination"
+                : categoryDetails.schema === "doctor_visit.v1"
+                  ? "doctor_visit"
+                  : "prescription",
+          childId: validUuidV7,
+          confirmationState: "confirmed",
+          content: { ...common, details: categoryDetails },
+          eventAt: null,
+          provenance: { sourceType: "manual", trustedIssuer: false },
+          recordId: validUuidV7,
+          revision: 1,
+          updatedAt: validTimestamp,
+          version: 1,
+          versionId: validUuidV7,
+        }),
+      ).not.toThrow();
+    }
   });
 });

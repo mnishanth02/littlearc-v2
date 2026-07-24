@@ -12,7 +12,12 @@ import {
   createSyncCursorCodec,
   createSyncPersistence,
 } from "@littlearc/database";
-import type { EmergencyCardContent, RecordVersionContentV1, UuidV7 } from "@littlearc/domain";
+import type {
+  EmergencyCardContent,
+  RecordCategory,
+  RecordVersionContentV1,
+  UuidV7,
+} from "@littlearc/domain";
 import { Client } from "pg";
 import { loadApiConfig } from "../src/config.js";
 import { createDeviceEnrollmentCommand } from "../src/device-enrollment.js";
@@ -40,6 +45,7 @@ const off04DeviceMode = process.argv.includes("--device-off04");
 const off05DeviceMode = process.argv.includes("--device-off05");
 const off06DeviceMode = process.argv.includes("--device-off06");
 const vlt01DeviceMode = process.argv.includes("--device-vlt01");
+const deviceApiPort = Number(process.env.LITTLEARC_DEVICE_API_PORT ?? "3000");
 const syntheticRequest: OwnerOnboardingRequest = {
   adultVerificationAssertion: "synthetic-approved-off-02",
   child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
@@ -408,6 +414,73 @@ const syntheticRecordContent: RecordVersionContentV1 = {
   title: "VLT01_CANARY_SYNTHETIC_RECORD",
 };
 
+const syntheticManualCategoryRecords: ReadonlyArray<{
+  readonly category: Extract<
+    RecordCategory,
+    "document" | "vaccination" | "doctor_visit" | "prescription"
+  >;
+  readonly content: RecordVersionContentV1;
+  readonly eventAt: string | null;
+}> = [
+  {
+    category: "document",
+    content: syntheticRecordContent,
+    eventAt: null,
+  },
+  {
+    category: "vaccination",
+    content: {
+      details: {
+        batchLot: { state: "confirmed", value: "VLT02_CANARY_SYNTHETIC_LOT" },
+        dateMeaning: { state: "confirmed", value: "given" },
+        schema: "vaccination.v1",
+        vaccineName: "VLT02_CANARY_SYNTHETIC_VACCINE",
+      },
+      notes: { state: "notProvided" },
+      providerFacility: { state: "confirmed", value: "VLT02_CANARY_SYNTHETIC_CLINIC" },
+      schemaVersion: 1,
+      title: "VLT02_CANARY_SYNTHETIC_VACCINATION",
+    },
+    eventAt: "2026-07-20T00:00:00.000Z",
+  },
+  {
+    category: "doctor_visit",
+    content: {
+      details: {
+        followUpDate: { state: "confirmed", value: "2026-08-01" },
+        reasonForVisit: "VLT02_CANARY_SYNTHETIC_VISIT_REASON",
+        schema: "doctor_visit.v1",
+        tags: { state: "confirmed", value: "VLT02_CANARY_SYNTHETIC_TAG" },
+      },
+      notes: { state: "confirmed", value: "VLT02_CANARY_SYNTHETIC_VISIT_NOTE" },
+      providerFacility: { state: "confirmed", value: "VLT02_CANARY_SYNTHETIC_CLINIC" },
+      schemaVersion: 1,
+      title: "VLT02_CANARY_SYNTHETIC_VISIT",
+    },
+    eventAt: "2026-07-21T00:00:00.000Z",
+  },
+  {
+    category: "prescription",
+    content: {
+      details: {
+        duration: { state: "confirmed", value: "VLT02_CANARY_SYNTHETIC_DURATION" },
+        endDate: { state: "confirmed", value: "2026-08-02" },
+        medicines: "VLT02_CANARY_SYNTHETIC_MEDICINE",
+        schema: "prescription.v1",
+        writtenSchedule: {
+          state: "confirmed",
+          value: "VLT02_CANARY_SYNTHETIC_WRITTEN_SCHEDULE",
+        },
+      },
+      notes: { state: "notProvided" },
+      providerFacility: { state: "confirmed", value: "VLT02_CANARY_SYNTHETIC_CLINIC" },
+      schemaVersion: 1,
+      title: "VLT02_CANARY_SYNTHETIC_PRESCRIPTION",
+    },
+    eventAt: "2026-07-22T00:00:00.000Z",
+  },
+];
+
 async function runRecordAutomated(
   syncService: SyncService,
   client: Client,
@@ -527,6 +600,96 @@ async function runRecordAutomated(
     recordId,
   });
   assert(crossHousehold === null, "Cross-household VLT-01 record was visible.");
+
+  const manualRecordIds: UuidV7[] = [];
+  for (const [index, manual] of syntheticManualCategoryRecords.entries()) {
+    const manualRecordId = nextId();
+    manualRecordIds.push(manualRecordId);
+    const manualCreate = {
+      baseRevision: null,
+      entityId: manualRecordId,
+      entityType: "record" as const,
+      idempotencyKey: nextId(),
+      localDependencyIds: [],
+      mutationId: nextId(),
+      operation: "create" as const,
+      payload: {
+        category: manual.category,
+        childId: input.firstChildId,
+        content: manual.content,
+        eventAt: manual.eventAt,
+        sourceType: "manual" as const,
+      },
+    };
+    const manualCreated = await syncService.push({
+      identityUserId: input.firstUser,
+      mutations: [manualCreate],
+    });
+    assert(
+      manualCreated.results[0]?.status === "applied",
+      `VLT-02 ${manual.category} create did not apply.`,
+    );
+    const manualCorrected = await syncService.push({
+      identityUserId: input.firstUser,
+      mutations: [
+        {
+          ...manualCreate,
+          baseRevision: 1,
+          idempotencyKey: nextId(),
+          mutationId: nextId(),
+          operation: "update" as const,
+          payload: {
+            ...manualCreate.payload,
+            content: {
+              ...manual.content,
+              title: `${manual.content.title} CORRECTED`,
+            },
+          },
+        },
+      ],
+    });
+    assert(
+      manualCorrected.results[0]?.status === "applied",
+      `VLT-02 ${manual.category} correction did not apply.`,
+    );
+    const [manualCurrent, manualHistory] = await Promise.all([
+      syncService.readRecord({
+        identityUserId: input.firstUser,
+        recordId: manualRecordId,
+      }),
+      syncService.readRecordVersions({
+        identityUserId: input.firstUser,
+        limit: 20,
+        recordId: manualRecordId,
+      }),
+    ]);
+    assert(
+      manualCurrent?.category === manual.category &&
+        manualCurrent.provenance.sourceType === "manual" &&
+        manualCurrent.provenance.trustedIssuer === false &&
+        manualCurrent.revision === 2 &&
+        manualCurrent.version === 2 &&
+        manualHistory.length === 2,
+      `VLT-02 ${manual.category} version/provenance evidence is invalid.`,
+    );
+    if (index === 0) {
+      const manualDeleted = await syncService.push({
+        identityUserId: input.firstUser,
+        mutations: [
+          {
+            baseRevision: 2,
+            entityId: manualRecordId,
+            entityType: "record",
+            idempotencyKey: nextId(),
+            localDependencyIds: [],
+            mutationId: nextId(),
+            operation: "delete",
+          },
+        ],
+      });
+      assert(manualDeleted.results[0]?.status === "applied", "VLT-02 manual delete did not apply.");
+    }
+  }
 
   const wrapped = await client.query<WrappedHouseholdKey>(
     `select
@@ -801,6 +964,42 @@ async function runRecordAutomated(
   ]) {
     assert(!plaintext.includes(canary), `VLT-01 plaintext canary leaked: ${canary}`);
   }
+  const vlt02Plaintext = JSON.stringify(
+    (
+      await client.query(
+        `select payload from (
+           select encrypted_payload::text payload
+             from littlearc.record_versions where record_id = any($1::uuid[])
+           union all
+           select encrypted_payload::text
+             from littlearc.timeline_entries where source_record_id = any($1::uuid[])
+           union all
+           select metadata::text
+             from littlearc.audit_events where target_id = any($1::uuid[])
+           union all
+           select payload::text
+             from littlearc.change_events where entity_id = any($1::uuid[])
+           union all
+           select payload::text
+             from littlearc.outbox_events where aggregate_id = any($1::uuid[])
+         ) evidence`,
+        [manualRecordIds],
+      )
+    ).rows,
+  );
+  for (const canary of [
+    "VLT02_CANARY_SYNTHETIC_LOT",
+    "VLT02_CANARY_SYNTHETIC_VACCINE",
+    "VLT02_CANARY_SYNTHETIC_CLINIC",
+    "VLT02_CANARY_SYNTHETIC_VISIT_REASON",
+    "VLT02_CANARY_SYNTHETIC_TAG",
+    "VLT02_CANARY_SYNTHETIC_VISIT_NOTE",
+    "VLT02_CANARY_SYNTHETIC_DURATION",
+    "VLT02_CANARY_SYNTHETIC_MEDICINE",
+    "VLT02_CANARY_SYNTHETIC_WRITTEN_SCHEDULE",
+  ]) {
+    assert(!vlt02Plaintext.includes(canary), `VLT-02 plaintext canary leaked: ${canary}`);
+  }
 
   const indexes = await client.query<{ readonly indexname: string }>(
     `select indexname from pg_indexes
@@ -819,6 +1018,9 @@ async function runRecordAutomated(
   console.log("- Suggestions remained separate from confirmed and Timeline authority.");
   console.log("- RLS/BOLA, immutable versions, rollback, tombstone, and one purge request passed.");
   console.log("- Record, suggestion, source-span, and Timeline plaintext canaries were absent.");
+  console.log("VLT-02 PostgreSQL manual-record validation passed.");
+  console.log("- Document, vaccination, doctor-visit, and prescription create/correct passed.");
+  console.log("- Manual provenance, immutable history, delete, and plaintext canaries passed.");
 }
 
 async function runEmergencyCardAutomated(
@@ -1603,7 +1805,7 @@ async function serveVlt01Device(
   const getSessionIdentity = async (headers: Headers) =>
     headers.get("x-littlearc-synthetic-session") === "vlt01-device-validation" ? { userId } : null;
   const server = await createApiServer(
-    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: String(deviceApiPort) }),
     undefined,
     undefined,
     undefined,
@@ -1663,7 +1865,7 @@ async function serveVlt01Device(
           mutationId: nextId(),
           operation: "update",
           payload: {
-            category: "doctor_visit",
+            category: "document",
             childId: onboarding.childId,
             content: {
               details: {
@@ -1728,8 +1930,8 @@ async function serveVlt01Device(
     return result.rows[0];
   });
 
-  await server.listen({ host: "127.0.0.1", port: 3000 });
-  console.log("VLT-01 synthetic device API listening on 127.0.0.1:3000.");
+  await server.listen({ host: "127.0.0.1", port: deviceApiPort });
+  console.log(`VLT-01 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
   return async () => server.close();
 }
 

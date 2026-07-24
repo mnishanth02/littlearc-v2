@@ -2,11 +2,15 @@ import { describe, expect, it, vi } from "vitest";
 import {
   applyChangePage,
   applyMutationResults,
+  deleteLocalRecordDraft,
   type LocalSyncDatabase,
+  listLocalRecordDrafts,
   listReadyMutations,
   queueChildProfileUpdate,
   queueEmergencyCardUpdate,
   queueRecordUpsert,
+  readLocalRecordDraft,
+  saveLocalRecordDraft,
 } from "./repository";
 
 const childId = "019f742b-de82-7292-86cd-5475a1388313";
@@ -304,7 +308,7 @@ describe("VLT-01 local record repository", () => {
     const scripted = scriptedDatabase({ first: [null] });
 
     await queueRecordUpsert(scripted.database, {
-      category: "doctor_visit",
+      category: "document",
       childId,
       content: recordContent,
       eventAt: "2026-07-20T09:00:00.000Z",
@@ -327,7 +331,7 @@ describe("VLT-01 local record repository", () => {
 
   it("keeps the local correction and stores the authoritative record on conflict", async () => {
     const localPayload = JSON.stringify({
-      category: "doctor_visit",
+      category: "document",
       childId,
       content: { ...recordContent, title: "Synthetic local correction" },
       eventAt: "2026-07-20T09:00:00.000Z",
@@ -357,7 +361,7 @@ describe("VLT-01 local record repository", () => {
         {
           current: {
             accessScope: "selectedHealthRecords",
-            category: "doctor_visit",
+            category: "document",
             childId,
             confirmationState: "confirmed",
             content: { ...recordContent, title: "Synthetic remote correction" },
@@ -392,7 +396,7 @@ describe("VLT-01 local record repository", () => {
           entity: {
             childId,
             content: {
-              category: "doctor_visit",
+              category: "document",
               dateAuthority: "recordEventAt",
               title: "Synthetic visit record",
             },
@@ -419,5 +423,55 @@ describe("VLT-01 local record repository", () => {
         String(call[0]).includes("insert into local_timeline_entries"),
       ),
     ).toBe(true);
+  });
+});
+
+describe("VLT-02 local manual drafts", () => {
+  it("stores, resumes, lists, and explicitly discards an encrypted form draft", async () => {
+    const draft = {
+      category: "prescription" as const,
+      childId,
+      draftId: recordId,
+      formJson: JSON.stringify({ title: "Synthetic unfinished prescription" }),
+      targetRecordId: null,
+      updatedAt: "2026-07-24T12:00:00.000Z",
+    };
+    const scripted = scriptedDatabase({ all: [[draft]], first: [draft] });
+
+    await saveLocalRecordDraft(scripted.database, draft);
+    await expect(readLocalRecordDraft(scripted.database, recordId)).resolves.toEqual(draft);
+    await expect(listLocalRecordDrafts(scripted.database, childId)).resolves.toEqual([draft]);
+    await deleteLocalRecordDraft(scripted.database, recordId);
+
+    expect(String(scripted.runAsync.mock.calls[0]?.[0])).toContain("local_record_drafts");
+    expect(scripted.runAsync.mock.calls[0]).toEqual(
+      expect.arrayContaining([recordId, childId, "prescription", draft.formJson]),
+    );
+    expect(String(scripted.runAsync.mock.calls[1]?.[0])).toContain(
+      "delete from local_record_drafts",
+    );
+  });
+
+  it("removes the source draft in the same transaction as confirmation", async () => {
+    const scripted = scriptedDatabase({ first: [null] });
+    await queueRecordUpsert(scripted.database, {
+      category: "document",
+      childId,
+      content: recordContent,
+      draftId: recordId,
+      eventAt: null,
+      idempotencyKey,
+      localDependencyIds: [],
+      mutationId,
+      now: "2026-07-24T12:00:00.000Z",
+      recordId,
+      sourceType: "manual",
+    });
+
+    expect(scripted.runAsync).toHaveBeenCalledTimes(5);
+    expect(String(scripted.runAsync.mock.calls[4]?.[0])).toContain(
+      "delete from local_record_drafts",
+    );
+    expect(scripted.runAsync.mock.calls[4]).toEqual(expect.arrayContaining([recordId]));
   });
 });

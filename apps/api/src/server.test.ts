@@ -553,7 +553,7 @@ describe("API skeleton", () => {
     };
     const projection = {
       accessScope: "selectedHealthRecords" as const,
-      category: "doctor_visit" as const,
+      category: "document" as const,
       childId,
       confirmationState: "confirmed" as const,
       content,

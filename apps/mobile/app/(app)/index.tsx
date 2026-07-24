@@ -66,6 +66,11 @@ export default function LandingScreen() {
             onPress={() => router.push("/emergency")}
             testID="open-emergency-card"
           />
+          <Button
+            label="Open manual records"
+            onPress={() => router.push("/records")}
+            testID="open-manual-records"
+          />
           <Button label="Open runtime status" onPress={() => router.push("/status")} />
           {__DEV__ ? (
             <>
@@ -109,6 +114,12 @@ export default function LandingScreen() {
                 label="Open VLT-01 record validation"
                 onPress={() => router.push("/vlt-01-validation")}
                 testID="open-vlt01-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open VLT-02 manual-record validation"
+                onPress={() => router.push("/vlt-02-validation")}
+                testID="open-vlt02-validation"
                 variant="secondary"
               />
               <Button

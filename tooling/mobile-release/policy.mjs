@@ -10,6 +10,8 @@ export const validationBundleCanaries = [
   "off05-device-validation",
   "off06-device-validation",
   "vlt01-device-validation",
+  "vlt02-summary",
+  "Synthetic manual prescription",
   "synthetic-approved-off-02",
   "/v1/validation/",
   "OFF-01 device validation",
@@ -19,6 +21,7 @@ export const validationBundleCanaries = [
   "OFF-05 device validation",
   "OFF-06 synthetic activation validation passed",
   "VLT-01 device validation passed",
+  "VLT-02 device validation passed",
   "Synthetic critical note",
 ];
 

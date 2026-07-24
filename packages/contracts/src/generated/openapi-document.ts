@@ -4,7 +4,7 @@ export const openApiDocument = {
   "info": {
     "title": "LittleArc API",
     "version": "0.1.0",
-    "description": "Versioned LittleArc API contract through the OFF-05 emergency-card slice."
+    "description": "Versioned LittleArc API contract through the VLT-02 manual-record slice."
   },
   "servers": [
     {
@@ -1109,56 +1109,393 @@ export const openApiDocument = {
                         "type": "object",
                         "properties": {
                           "details": {
-                            "type": "object",
-                            "properties": {
-                              "documentKind": {
-                                "oneOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "state": {
-                                        "type": "string",
-                                        "enum": [
-                                          "notProvided"
-                                        ]
-                                      }
-                                    },
-                                    "required": [
-                                      "state"
-                                    ]
-                                  },
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "state": {
-                                        "type": "string",
-                                        "enum": [
-                                          "confirmed"
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "documentKind": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
                                         ]
                                       },
-                                      "value": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "maxLength": 120
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
                                       }
-                                    },
-                                    "required": [
-                                      "state",
-                                      "value"
+                                    ]
+                                  },
+                                  "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                      "document.v1"
                                     ]
                                   }
+                                },
+                                "required": [
+                                  "documentKind",
+                                  "schema"
                                 ]
                               },
-                              "schema": {
-                                "type": "string",
-                                "enum": [
-                                  "document.v1"
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "batchLot": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "dateMeaning": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "enum": [
+                                              "due",
+                                              "given"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                      "vaccination.v1"
+                                    ]
+                                  },
+                                  "vaccineName": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  }
+                                },
+                                "required": [
+                                  "batchLot",
+                                  "dateMeaning",
+                                  "schema",
+                                  "vaccineName"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "followUpDate": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "format": "date"
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "reasonForVisit": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                      "doctor_visit.v1"
+                                    ]
+                                  },
+                                  "tags": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 240
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "followUpDate",
+                                  "reasonForVisit",
+                                  "schema",
+                                  "tags"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "duration": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "endDate": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "format": "date"
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "medicines": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 1000
+                                  },
+                                  "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                      "prescription.v1"
+                                    ]
+                                  },
+                                  "writtenSchedule": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 1000
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "duration",
+                                  "endDate",
+                                  "medicines",
+                                  "schema",
+                                  "writtenSchedule"
                                 ]
                               }
-                            },
-                            "required": [
-                              "documentKind",
-                              "schema"
                             ]
                           },
                           "notes": {
@@ -1787,56 +2124,393 @@ export const openApiDocument = {
                         "type": "object",
                         "properties": {
                           "details": {
-                            "type": "object",
-                            "properties": {
-                              "documentKind": {
-                                "oneOf": [
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "state": {
-                                        "type": "string",
-                                        "enum": [
-                                          "notProvided"
-                                        ]
-                                      }
-                                    },
-                                    "required": [
-                                      "state"
-                                    ]
-                                  },
-                                  {
-                                    "type": "object",
-                                    "properties": {
-                                      "state": {
-                                        "type": "string",
-                                        "enum": [
-                                          "confirmed"
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "documentKind": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
                                         ]
                                       },
-                                      "value": {
-                                        "type": "string",
-                                        "minLength": 1,
-                                        "maxLength": 120
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
                                       }
-                                    },
-                                    "required": [
-                                      "state",
-                                      "value"
+                                    ]
+                                  },
+                                  "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                      "document.v1"
                                     ]
                                   }
+                                },
+                                "required": [
+                                  "documentKind",
+                                  "schema"
                                 ]
                               },
-                              "schema": {
-                                "type": "string",
-                                "enum": [
-                                  "document.v1"
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "batchLot": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 120
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "dateMeaning": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "enum": [
+                                              "due",
+                                              "given"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                      "vaccination.v1"
+                                    ]
+                                  },
+                                  "vaccineName": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 160
+                                  }
+                                },
+                                "required": [
+                                  "batchLot",
+                                  "dateMeaning",
+                                  "schema",
+                                  "vaccineName"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "followUpDate": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "format": "date"
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "reasonForVisit": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 500
+                                  },
+                                  "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                      "doctor_visit.v1"
+                                    ]
+                                  },
+                                  "tags": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 240
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "followUpDate",
+                                  "reasonForVisit",
+                                  "schema",
+                                  "tags"
+                                ]
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "duration": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "endDate": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "format": "date"
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  "medicines": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 1000
+                                  },
+                                  "schema": {
+                                    "type": "string",
+                                    "enum": [
+                                      "prescription.v1"
+                                    ]
+                                  },
+                                  "writtenSchedule": {
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "notProvided"
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "state"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "state": {
+                                            "type": "string",
+                                            "enum": [
+                                              "confirmed"
+                                            ]
+                                          },
+                                          "value": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 1000
+                                          }
+                                        },
+                                        "required": [
+                                          "state",
+                                          "value"
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "duration",
+                                  "endDate",
+                                  "medicines",
+                                  "schema",
+                                  "writtenSchedule"
                                 ]
                               }
-                            },
-                            "required": [
-                              "documentKind",
-                              "schema"
                             ]
                           },
                           "notes": {
@@ -2692,56 +3366,393 @@ export const openApiDocument = {
                               "type": "object",
                               "properties": {
                                 "details": {
-                                  "type": "object",
-                                  "properties": {
-                                    "documentKind": {
-                                      "oneOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "state": {
-                                              "type": "string",
-                                              "enum": [
-                                                "notProvided"
-                                              ]
-                                            }
-                                          },
-                                          "required": [
-                                            "state"
-                                          ]
-                                        },
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "state": {
-                                              "type": "string",
-                                              "enum": [
-                                                "confirmed"
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "documentKind": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
                                               ]
                                             },
-                                            "value": {
-                                              "type": "string",
-                                              "minLength": 1,
-                                              "maxLength": 120
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
                                             }
-                                          },
-                                          "required": [
-                                            "state",
-                                            "value"
+                                          ]
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "document.v1"
                                           ]
                                         }
+                                      },
+                                      "required": [
+                                        "documentKind",
+                                        "schema"
                                       ]
                                     },
-                                    "schema": {
-                                      "type": "string",
-                                      "enum": [
-                                        "document.v1"
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "batchLot": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "dateMeaning": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "due",
+                                                    "given"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "vaccination.v1"
+                                          ]
+                                        },
+                                        "vaccineName": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 160
+                                        }
+                                      },
+                                      "required": [
+                                        "batchLot",
+                                        "dateMeaning",
+                                        "schema",
+                                        "vaccineName"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "followUpDate": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "format": "date"
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "reasonForVisit": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 500
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "doctor_visit.v1"
+                                          ]
+                                        },
+                                        "tags": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 240
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "followUpDate",
+                                        "reasonForVisit",
+                                        "schema",
+                                        "tags"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "duration": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 160
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "endDate": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "format": "date"
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "medicines": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 1000
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "prescription.v1"
+                                          ]
+                                        },
+                                        "writtenSchedule": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 1000
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "duration",
+                                        "endDate",
+                                        "medicines",
+                                        "schema",
+                                        "writtenSchedule"
                                       ]
                                     }
-                                  },
-                                  "required": [
-                                    "documentKind",
-                                    "schema"
                                   ]
                                 },
                                 "notes": {
@@ -3668,56 +4679,393 @@ export const openApiDocument = {
                       "type": "object",
                       "properties": {
                         "details": {
-                          "type": "object",
-                          "properties": {
-                            "documentKind": {
-                              "oneOf": [
-                                {
-                                  "type": "object",
-                                  "properties": {
-                                    "state": {
-                                      "type": "string",
-                                      "enum": [
-                                        "notProvided"
-                                      ]
-                                    }
-                                  },
-                                  "required": [
-                                    "state"
-                                  ]
-                                },
-                                {
-                                  "type": "object",
-                                  "properties": {
-                                    "state": {
-                                      "type": "string",
-                                      "enum": [
-                                        "confirmed"
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "documentKind": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
                                       ]
                                     },
-                                    "value": {
-                                      "type": "string",
-                                      "minLength": 1,
-                                      "maxLength": 120
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 120
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
                                     }
-                                  },
-                                  "required": [
-                                    "state",
-                                    "value"
+                                  ]
+                                },
+                                "schema": {
+                                  "type": "string",
+                                  "enum": [
+                                    "document.v1"
                                   ]
                                 }
+                              },
+                              "required": [
+                                "documentKind",
+                                "schema"
                               ]
                             },
-                            "schema": {
-                              "type": "string",
-                              "enum": [
-                                "document.v1"
+                            {
+                              "type": "object",
+                              "properties": {
+                                "batchLot": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 120
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "dateMeaning": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "enum": [
+                                            "due",
+                                            "given"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "schema": {
+                                  "type": "string",
+                                  "enum": [
+                                    "vaccination.v1"
+                                  ]
+                                },
+                                "vaccineName": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 160
+                                }
+                              },
+                              "required": [
+                                "batchLot",
+                                "dateMeaning",
+                                "schema",
+                                "vaccineName"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "followUpDate": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "format": "date"
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "reasonForVisit": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 500
+                                },
+                                "schema": {
+                                  "type": "string",
+                                  "enum": [
+                                    "doctor_visit.v1"
+                                  ]
+                                },
+                                "tags": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 240
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "followUpDate",
+                                "reasonForVisit",
+                                "schema",
+                                "tags"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "duration": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 160
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "endDate": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "format": "date"
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "medicines": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 1000
+                                },
+                                "schema": {
+                                  "type": "string",
+                                  "enum": [
+                                    "prescription.v1"
+                                  ]
+                                },
+                                "writtenSchedule": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 1000
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "duration",
+                                "endDate",
+                                "medicines",
+                                "schema",
+                                "writtenSchedule"
                               ]
                             }
-                          },
-                          "required": [
-                            "documentKind",
-                            "schema"
                           ]
                         },
                         "notes": {
@@ -4530,56 +5878,393 @@ export const openApiDocument = {
                           "type": "object",
                           "properties": {
                             "details": {
-                              "type": "object",
-                              "properties": {
-                                "documentKind": {
-                                  "oneOf": [
-                                    {
-                                      "type": "object",
-                                      "properties": {
-                                        "state": {
-                                          "type": "string",
-                                          "enum": [
-                                            "notProvided"
-                                          ]
-                                        }
-                                      },
-                                      "required": [
-                                        "state"
-                                      ]
-                                    },
-                                    {
-                                      "type": "object",
-                                      "properties": {
-                                        "state": {
-                                          "type": "string",
-                                          "enum": [
-                                            "confirmed"
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "documentKind": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
                                           ]
                                         },
-                                        "value": {
-                                          "type": "string",
-                                          "minLength": 1,
-                                          "maxLength": 120
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 120
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
                                         }
-                                      },
-                                      "required": [
-                                        "state",
-                                        "value"
+                                      ]
+                                    },
+                                    "schema": {
+                                      "type": "string",
+                                      "enum": [
+                                        "document.v1"
                                       ]
                                     }
+                                  },
+                                  "required": [
+                                    "documentKind",
+                                    "schema"
                                   ]
                                 },
-                                "schema": {
-                                  "type": "string",
-                                  "enum": [
-                                    "document.v1"
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "batchLot": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 120
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "dateMeaning": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "enum": [
+                                                "due",
+                                                "given"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "schema": {
+                                      "type": "string",
+                                      "enum": [
+                                        "vaccination.v1"
+                                      ]
+                                    },
+                                    "vaccineName": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    }
+                                  },
+                                  "required": [
+                                    "batchLot",
+                                    "dateMeaning",
+                                    "schema",
+                                    "vaccineName"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "followUpDate": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "format": "date"
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "reasonForVisit": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 500
+                                    },
+                                    "schema": {
+                                      "type": "string",
+                                      "enum": [
+                                        "doctor_visit.v1"
+                                      ]
+                                    },
+                                    "tags": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 240
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "followUpDate",
+                                    "reasonForVisit",
+                                    "schema",
+                                    "tags"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "duration": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 160
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "endDate": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "format": "date"
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "medicines": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 1000
+                                    },
+                                    "schema": {
+                                      "type": "string",
+                                      "enum": [
+                                        "prescription.v1"
+                                      ]
+                                    },
+                                    "writtenSchedule": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 1000
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "duration",
+                                    "endDate",
+                                    "medicines",
+                                    "schema",
+                                    "writtenSchedule"
                                   ]
                                 }
-                              },
-                              "required": [
-                                "documentKind",
-                                "schema"
                               ]
                             },
                             "notes": {
@@ -4786,56 +6471,393 @@ export const openApiDocument = {
                           "type": "object",
                           "properties": {
                             "details": {
-                              "type": "object",
-                              "properties": {
-                                "documentKind": {
-                                  "oneOf": [
-                                    {
-                                      "type": "object",
-                                      "properties": {
-                                        "state": {
-                                          "type": "string",
-                                          "enum": [
-                                            "notProvided"
-                                          ]
-                                        }
-                                      },
-                                      "required": [
-                                        "state"
-                                      ]
-                                    },
-                                    {
-                                      "type": "object",
-                                      "properties": {
-                                        "state": {
-                                          "type": "string",
-                                          "enum": [
-                                            "confirmed"
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "documentKind": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
                                           ]
                                         },
-                                        "value": {
-                                          "type": "string",
-                                          "minLength": 1,
-                                          "maxLength": 120
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 120
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
                                         }
-                                      },
-                                      "required": [
-                                        "state",
-                                        "value"
+                                      ]
+                                    },
+                                    "schema": {
+                                      "type": "string",
+                                      "enum": [
+                                        "document.v1"
                                       ]
                                     }
+                                  },
+                                  "required": [
+                                    "documentKind",
+                                    "schema"
                                   ]
                                 },
-                                "schema": {
-                                  "type": "string",
-                                  "enum": [
-                                    "document.v1"
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "batchLot": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 120
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "dateMeaning": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "enum": [
+                                                "due",
+                                                "given"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "schema": {
+                                      "type": "string",
+                                      "enum": [
+                                        "vaccination.v1"
+                                      ]
+                                    },
+                                    "vaccineName": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    }
+                                  },
+                                  "required": [
+                                    "batchLot",
+                                    "dateMeaning",
+                                    "schema",
+                                    "vaccineName"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "followUpDate": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "format": "date"
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "reasonForVisit": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 500
+                                    },
+                                    "schema": {
+                                      "type": "string",
+                                      "enum": [
+                                        "doctor_visit.v1"
+                                      ]
+                                    },
+                                    "tags": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 240
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "followUpDate",
+                                    "reasonForVisit",
+                                    "schema",
+                                    "tags"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "duration": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 160
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "endDate": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "format": "date"
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "medicines": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 1000
+                                    },
+                                    "schema": {
+                                      "type": "string",
+                                      "enum": [
+                                        "prescription.v1"
+                                      ]
+                                    },
+                                    "writtenSchedule": {
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "notProvided"
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "state"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "state": {
+                                              "type": "string",
+                                              "enum": [
+                                                "confirmed"
+                                              ]
+                                            },
+                                            "value": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 1000
+                                            }
+                                          },
+                                          "required": [
+                                            "state",
+                                            "value"
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "duration",
+                                    "endDate",
+                                    "medicines",
+                                    "schema",
+                                    "writtenSchedule"
                                   ]
                                 }
-                              },
-                              "required": [
-                                "documentKind",
-                                "schema"
                               ]
                             },
                             "notes": {
@@ -5487,56 +7509,393 @@ export const openApiDocument = {
                               "type": "object",
                               "properties": {
                                 "details": {
-                                  "type": "object",
-                                  "properties": {
-                                    "documentKind": {
-                                      "oneOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "state": {
-                                              "type": "string",
-                                              "enum": [
-                                                "notProvided"
-                                              ]
-                                            }
-                                          },
-                                          "required": [
-                                            "state"
-                                          ]
-                                        },
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "state": {
-                                              "type": "string",
-                                              "enum": [
-                                                "confirmed"
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "documentKind": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
                                               ]
                                             },
-                                            "value": {
-                                              "type": "string",
-                                              "minLength": 1,
-                                              "maxLength": 120
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
                                             }
-                                          },
-                                          "required": [
-                                            "state",
-                                            "value"
+                                          ]
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "document.v1"
                                           ]
                                         }
+                                      },
+                                      "required": [
+                                        "documentKind",
+                                        "schema"
                                       ]
                                     },
-                                    "schema": {
-                                      "type": "string",
-                                      "enum": [
-                                        "document.v1"
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "batchLot": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "dateMeaning": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "due",
+                                                    "given"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "vaccination.v1"
+                                          ]
+                                        },
+                                        "vaccineName": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 160
+                                        }
+                                      },
+                                      "required": [
+                                        "batchLot",
+                                        "dateMeaning",
+                                        "schema",
+                                        "vaccineName"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "followUpDate": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "format": "date"
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "reasonForVisit": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 500
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "doctor_visit.v1"
+                                          ]
+                                        },
+                                        "tags": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 240
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "followUpDate",
+                                        "reasonForVisit",
+                                        "schema",
+                                        "tags"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "duration": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 160
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "endDate": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "format": "date"
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "medicines": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 1000
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "prescription.v1"
+                                          ]
+                                        },
+                                        "writtenSchedule": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 1000
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "duration",
+                                        "endDate",
+                                        "medicines",
+                                        "schema",
+                                        "writtenSchedule"
                                       ]
                                     }
-                                  },
-                                  "required": [
-                                    "documentKind",
-                                    "schema"
                                   ]
                                 },
                                 "notes": {
@@ -6165,56 +8524,393 @@ export const openApiDocument = {
                               "type": "object",
                               "properties": {
                                 "details": {
-                                  "type": "object",
-                                  "properties": {
-                                    "documentKind": {
-                                      "oneOf": [
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "state": {
-                                              "type": "string",
-                                              "enum": [
-                                                "notProvided"
-                                              ]
-                                            }
-                                          },
-                                          "required": [
-                                            "state"
-                                          ]
-                                        },
-                                        {
-                                          "type": "object",
-                                          "properties": {
-                                            "state": {
-                                              "type": "string",
-                                              "enum": [
-                                                "confirmed"
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "documentKind": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
                                               ]
                                             },
-                                            "value": {
-                                              "type": "string",
-                                              "minLength": 1,
-                                              "maxLength": 120
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
                                             }
-                                          },
-                                          "required": [
-                                            "state",
-                                            "value"
+                                          ]
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "document.v1"
                                           ]
                                         }
+                                      },
+                                      "required": [
+                                        "documentKind",
+                                        "schema"
                                       ]
                                     },
-                                    "schema": {
-                                      "type": "string",
-                                      "enum": [
-                                        "document.v1"
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "batchLot": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 120
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "dateMeaning": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "due",
+                                                    "given"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "vaccination.v1"
+                                          ]
+                                        },
+                                        "vaccineName": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 160
+                                        }
+                                      },
+                                      "required": [
+                                        "batchLot",
+                                        "dateMeaning",
+                                        "schema",
+                                        "vaccineName"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "followUpDate": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "format": "date"
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "reasonForVisit": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 500
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "doctor_visit.v1"
+                                          ]
+                                        },
+                                        "tags": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 240
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "followUpDate",
+                                        "reasonForVisit",
+                                        "schema",
+                                        "tags"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "duration": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 160
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "endDate": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "format": "date"
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "medicines": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 1000
+                                        },
+                                        "schema": {
+                                          "type": "string",
+                                          "enum": [
+                                            "prescription.v1"
+                                          ]
+                                        },
+                                        "writtenSchedule": {
+                                          "oneOf": [
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "notProvided"
+                                                  ]
+                                                }
+                                              },
+                                              "required": [
+                                                "state"
+                                              ]
+                                            },
+                                            {
+                                              "type": "object",
+                                              "properties": {
+                                                "state": {
+                                                  "type": "string",
+                                                  "enum": [
+                                                    "confirmed"
+                                                  ]
+                                                },
+                                                "value": {
+                                                  "type": "string",
+                                                  "minLength": 1,
+                                                  "maxLength": 1000
+                                                }
+                                              },
+                                              "required": [
+                                                "state",
+                                                "value"
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "duration",
+                                        "endDate",
+                                        "medicines",
+                                        "schema",
+                                        "writtenSchedule"
                                       ]
                                     }
-                                  },
-                                  "required": [
-                                    "documentKind",
-                                    "schema"
                                   ]
                                 },
                                 "notes": {
@@ -6622,6 +9318,12 @@ export const openApiDocument = {
                 "enum": [
                   4
                 ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  5
+                ]
               }
             ]
           },
@@ -6683,6 +9385,12 @@ export const openApiDocument = {
                 "type": "number",
                 "enum": [
                   4
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  5
                 ]
               }
             ]
@@ -7423,56 +10131,393 @@ export const openApiDocument = {
             "type": "object",
             "properties": {
               "details": {
-                "type": "object",
-                "properties": {
-                  "documentKind": {
-                    "oneOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "state": {
-                            "type": "string",
-                            "enum": [
-                              "notProvided"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "state"
-                        ]
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "state": {
-                            "type": "string",
-                            "enum": [
-                              "confirmed"
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "documentKind": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
                             ]
                           },
-                          "value": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 120
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
                           }
-                        },
-                        "required": [
-                          "state",
-                          "value"
+                        ]
+                      },
+                      "schema": {
+                        "type": "string",
+                        "enum": [
+                          "document.v1"
                         ]
                       }
+                    },
+                    "required": [
+                      "documentKind",
+                      "schema"
                     ]
                   },
-                  "schema": {
-                    "type": "string",
-                    "enum": [
-                      "document.v1"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "batchLot": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "dateMeaning": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "enum": [
+                                  "due",
+                                  "given"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "schema": {
+                        "type": "string",
+                        "enum": [
+                          "vaccination.v1"
+                        ]
+                      },
+                      "vaccineName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      }
+                    },
+                    "required": [
+                      "batchLot",
+                      "dateMeaning",
+                      "schema",
+                      "vaccineName"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "followUpDate": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "reasonForVisit": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                      },
+                      "schema": {
+                        "type": "string",
+                        "enum": [
+                          "doctor_visit.v1"
+                        ]
+                      },
+                      "tags": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 240
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "followUpDate",
+                      "reasonForVisit",
+                      "schema",
+                      "tags"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "duration": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 160
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "endDate": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "medicines": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      },
+                      "schema": {
+                        "type": "string",
+                        "enum": [
+                          "prescription.v1"
+                        ]
+                      },
+                      "writtenSchedule": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 1000
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "duration",
+                      "endDate",
+                      "medicines",
+                      "schema",
+                      "writtenSchedule"
                     ]
                   }
-                },
-                "required": [
-                  "documentKind",
-                  "schema"
                 ]
               },
               "notes": {
@@ -7667,56 +10712,393 @@ export const openApiDocument = {
             "type": "object",
             "properties": {
               "details": {
-                "type": "object",
-                "properties": {
-                  "documentKind": {
-                    "oneOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "state": {
-                            "type": "string",
-                            "enum": [
-                              "notProvided"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "state"
-                        ]
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "state": {
-                            "type": "string",
-                            "enum": [
-                              "confirmed"
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "documentKind": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
                             ]
                           },
-                          "value": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 120
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
                           }
-                        },
-                        "required": [
-                          "state",
-                          "value"
+                        ]
+                      },
+                      "schema": {
+                        "type": "string",
+                        "enum": [
+                          "document.v1"
                         ]
                       }
+                    },
+                    "required": [
+                      "documentKind",
+                      "schema"
                     ]
                   },
-                  "schema": {
-                    "type": "string",
-                    "enum": [
-                      "document.v1"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "batchLot": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 120
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "dateMeaning": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "enum": [
+                                  "due",
+                                  "given"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "schema": {
+                        "type": "string",
+                        "enum": [
+                          "vaccination.v1"
+                        ]
+                      },
+                      "vaccineName": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 160
+                      }
+                    },
+                    "required": [
+                      "batchLot",
+                      "dateMeaning",
+                      "schema",
+                      "vaccineName"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "followUpDate": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "reasonForVisit": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                      },
+                      "schema": {
+                        "type": "string",
+                        "enum": [
+                          "doctor_visit.v1"
+                        ]
+                      },
+                      "tags": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 240
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "followUpDate",
+                      "reasonForVisit",
+                      "schema",
+                      "tags"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "duration": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 160
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "endDate": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      },
+                      "medicines": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000
+                      },
+                      "schema": {
+                        "type": "string",
+                        "enum": [
+                          "prescription.v1"
+                        ]
+                      },
+                      "writtenSchedule": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "notProvided"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "state"
+                            ]
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "confirmed"
+                                ]
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 1000
+                              }
+                            },
+                            "required": [
+                              "state",
+                              "value"
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "duration",
+                      "endDate",
+                      "medicines",
+                      "schema",
+                      "writtenSchedule"
                     ]
                   }
-                },
-                "required": [
-                  "documentKind",
-                  "schema"
                 ]
               },
               "notes": {
@@ -7908,56 +11290,393 @@ export const openApiDocument = {
                   "type": "object",
                   "properties": {
                     "details": {
-                      "type": "object",
-                      "properties": {
-                        "documentKind": {
-                          "oneOf": [
-                            {
-                              "type": "object",
-                              "properties": {
-                                "state": {
-                                  "type": "string",
-                                  "enum": [
-                                    "notProvided"
-                                  ]
-                                }
-                              },
-                              "required": [
-                                "state"
-                              ]
-                            },
-                            {
-                              "type": "object",
-                              "properties": {
-                                "state": {
-                                  "type": "string",
-                                  "enum": [
-                                    "confirmed"
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "documentKind": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
                                   ]
                                 },
-                                "value": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "maxLength": 120
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 120
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
                                 }
-                              },
-                              "required": [
-                                "state",
-                                "value"
+                              ]
+                            },
+                            "schema": {
+                              "type": "string",
+                              "enum": [
+                                "document.v1"
                               ]
                             }
+                          },
+                          "required": [
+                            "documentKind",
+                            "schema"
                           ]
                         },
-                        "schema": {
-                          "type": "string",
-                          "enum": [
-                            "document.v1"
+                        {
+                          "type": "object",
+                          "properties": {
+                            "batchLot": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 120
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
+                                }
+                              ]
+                            },
+                            "dateMeaning": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "enum": [
+                                        "due",
+                                        "given"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
+                                }
+                              ]
+                            },
+                            "schema": {
+                              "type": "string",
+                              "enum": [
+                                "vaccination.v1"
+                              ]
+                            },
+                            "vaccineName": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 160
+                            }
+                          },
+                          "required": [
+                            "batchLot",
+                            "dateMeaning",
+                            "schema",
+                            "vaccineName"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "followUpDate": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "format": "date"
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
+                                }
+                              ]
+                            },
+                            "reasonForVisit": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            },
+                            "schema": {
+                              "type": "string",
+                              "enum": [
+                                "doctor_visit.v1"
+                              ]
+                            },
+                            "tags": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 240
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "followUpDate",
+                            "reasonForVisit",
+                            "schema",
+                            "tags"
+                          ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "duration": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 160
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
+                                }
+                              ]
+                            },
+                            "endDate": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "format": "date"
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
+                                }
+                              ]
+                            },
+                            "medicines": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 1000
+                            },
+                            "schema": {
+                              "type": "string",
+                              "enum": [
+                                "prescription.v1"
+                              ]
+                            },
+                            "writtenSchedule": {
+                              "oneOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "notProvided"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "state"
+                                  ]
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "state": {
+                                      "type": "string",
+                                      "enum": [
+                                        "confirmed"
+                                      ]
+                                    },
+                                    "value": {
+                                      "type": "string",
+                                      "minLength": 1,
+                                      "maxLength": 1000
+                                    }
+                                  },
+                                  "required": [
+                                    "state",
+                                    "value"
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "duration",
+                            "endDate",
+                            "medicines",
+                            "schema",
+                            "writtenSchedule"
                           ]
                         }
-                      },
-                      "required": [
-                        "documentKind",
-                        "schema"
                       ]
                     },
                     "notes": {
@@ -8208,56 +11927,393 @@ export const openApiDocument = {
                       "type": "object",
                       "properties": {
                         "details": {
-                          "type": "object",
-                          "properties": {
-                            "documentKind": {
-                              "oneOf": [
-                                {
-                                  "type": "object",
-                                  "properties": {
-                                    "state": {
-                                      "type": "string",
-                                      "enum": [
-                                        "notProvided"
-                                      ]
-                                    }
-                                  },
-                                  "required": [
-                                    "state"
-                                  ]
-                                },
-                                {
-                                  "type": "object",
-                                  "properties": {
-                                    "state": {
-                                      "type": "string",
-                                      "enum": [
-                                        "confirmed"
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "documentKind": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
                                       ]
                                     },
-                                    "value": {
-                                      "type": "string",
-                                      "minLength": 1,
-                                      "maxLength": 120
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 120
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
                                     }
-                                  },
-                                  "required": [
-                                    "state",
-                                    "value"
+                                  ]
+                                },
+                                "schema": {
+                                  "type": "string",
+                                  "enum": [
+                                    "document.v1"
                                   ]
                                 }
+                              },
+                              "required": [
+                                "documentKind",
+                                "schema"
                               ]
                             },
-                            "schema": {
-                              "type": "string",
-                              "enum": [
-                                "document.v1"
+                            {
+                              "type": "object",
+                              "properties": {
+                                "batchLot": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 120
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "dateMeaning": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "enum": [
+                                            "due",
+                                            "given"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "schema": {
+                                  "type": "string",
+                                  "enum": [
+                                    "vaccination.v1"
+                                  ]
+                                },
+                                "vaccineName": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 160
+                                }
+                              },
+                              "required": [
+                                "batchLot",
+                                "dateMeaning",
+                                "schema",
+                                "vaccineName"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "followUpDate": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "format": "date"
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "reasonForVisit": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 500
+                                },
+                                "schema": {
+                                  "type": "string",
+                                  "enum": [
+                                    "doctor_visit.v1"
+                                  ]
+                                },
+                                "tags": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 240
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "followUpDate",
+                                "reasonForVisit",
+                                "schema",
+                                "tags"
+                              ]
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "duration": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 160
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "endDate": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "format": "date"
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "medicines": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 1000
+                                },
+                                "schema": {
+                                  "type": "string",
+                                  "enum": [
+                                    "prescription.v1"
+                                  ]
+                                },
+                                "writtenSchedule": {
+                                  "oneOf": [
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "notProvided"
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "state"
+                                      ]
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "state": {
+                                          "type": "string",
+                                          "enum": [
+                                            "confirmed"
+                                          ]
+                                        },
+                                        "value": {
+                                          "type": "string",
+                                          "minLength": 1,
+                                          "maxLength": 1000
+                                        }
+                                      },
+                                      "required": [
+                                        "state",
+                                        "value"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "duration",
+                                "endDate",
+                                "medicines",
+                                "schema",
+                                "writtenSchedule"
                               ]
                             }
-                          },
-                          "required": [
-                            "documentKind",
-                            "schema"
                           ]
                         },
                         "notes": {
@@ -8799,56 +12855,393 @@ export const openApiDocument = {
                             "type": "object",
                             "properties": {
                               "details": {
-                                "type": "object",
-                                "properties": {
-                                  "documentKind": {
-                                    "oneOf": [
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "state": {
-                                            "type": "string",
-                                            "enum": [
-                                              "notProvided"
-                                            ]
-                                          }
-                                        },
-                                        "required": [
-                                          "state"
-                                        ]
-                                      },
-                                      {
-                                        "type": "object",
-                                        "properties": {
-                                          "state": {
-                                            "type": "string",
-                                            "enum": [
-                                              "confirmed"
+                                "oneOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "documentKind": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "notProvided"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state"
                                             ]
                                           },
-                                          "value": {
-                                            "type": "string",
-                                            "minLength": 1,
-                                            "maxLength": 120
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "confirmed"
+                                                ]
+                                              },
+                                              "value": {
+                                                "type": "string",
+                                                "minLength": 1,
+                                                "maxLength": 120
+                                              }
+                                            },
+                                            "required": [
+                                              "state",
+                                              "value"
+                                            ]
                                           }
-                                        },
-                                        "required": [
-                                          "state",
-                                          "value"
+                                        ]
+                                      },
+                                      "schema": {
+                                        "type": "string",
+                                        "enum": [
+                                          "document.v1"
                                         ]
                                       }
+                                    },
+                                    "required": [
+                                      "documentKind",
+                                      "schema"
                                     ]
                                   },
-                                  "schema": {
-                                    "type": "string",
-                                    "enum": [
-                                      "document.v1"
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "batchLot": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "notProvided"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "confirmed"
+                                                ]
+                                              },
+                                              "value": {
+                                                "type": "string",
+                                                "minLength": 1,
+                                                "maxLength": 120
+                                              }
+                                            },
+                                            "required": [
+                                              "state",
+                                              "value"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "dateMeaning": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "notProvided"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "confirmed"
+                                                ]
+                                              },
+                                              "value": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "due",
+                                                  "given"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state",
+                                              "value"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "schema": {
+                                        "type": "string",
+                                        "enum": [
+                                          "vaccination.v1"
+                                        ]
+                                      },
+                                      "vaccineName": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 160
+                                      }
+                                    },
+                                    "required": [
+                                      "batchLot",
+                                      "dateMeaning",
+                                      "schema",
+                                      "vaccineName"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "followUpDate": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "notProvided"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "confirmed"
+                                                ]
+                                              },
+                                              "value": {
+                                                "type": "string",
+                                                "format": "date"
+                                              }
+                                            },
+                                            "required": [
+                                              "state",
+                                              "value"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "reasonForVisit": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 500
+                                      },
+                                      "schema": {
+                                        "type": "string",
+                                        "enum": [
+                                          "doctor_visit.v1"
+                                        ]
+                                      },
+                                      "tags": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "notProvided"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "confirmed"
+                                                ]
+                                              },
+                                              "value": {
+                                                "type": "string",
+                                                "minLength": 1,
+                                                "maxLength": 240
+                                              }
+                                            },
+                                            "required": [
+                                              "state",
+                                              "value"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "followUpDate",
+                                      "reasonForVisit",
+                                      "schema",
+                                      "tags"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "duration": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "notProvided"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "confirmed"
+                                                ]
+                                              },
+                                              "value": {
+                                                "type": "string",
+                                                "minLength": 1,
+                                                "maxLength": 160
+                                              }
+                                            },
+                                            "required": [
+                                              "state",
+                                              "value"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "endDate": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "notProvided"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "confirmed"
+                                                ]
+                                              },
+                                              "value": {
+                                                "type": "string",
+                                                "format": "date"
+                                              }
+                                            },
+                                            "required": [
+                                              "state",
+                                              "value"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "medicines": {
+                                        "type": "string",
+                                        "minLength": 1,
+                                        "maxLength": 1000
+                                      },
+                                      "schema": {
+                                        "type": "string",
+                                        "enum": [
+                                          "prescription.v1"
+                                        ]
+                                      },
+                                      "writtenSchedule": {
+                                        "oneOf": [
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "notProvided"
+                                                ]
+                                              }
+                                            },
+                                            "required": [
+                                              "state"
+                                            ]
+                                          },
+                                          {
+                                            "type": "object",
+                                            "properties": {
+                                              "state": {
+                                                "type": "string",
+                                                "enum": [
+                                                  "confirmed"
+                                                ]
+                                              },
+                                              "value": {
+                                                "type": "string",
+                                                "minLength": 1,
+                                                "maxLength": 1000
+                                              }
+                                            },
+                                            "required": [
+                                              "state",
+                                              "value"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "duration",
+                                      "endDate",
+                                      "medicines",
+                                      "schema",
+                                      "writtenSchedule"
                                     ]
                                   }
-                                },
-                                "required": [
-                                  "documentKind",
-                                  "schema"
                                 ]
                               },
                               "notes": {
@@ -12126,56 +16519,393 @@ export const openApiDocument = {
                                         "type": "object",
                                         "properties": {
                                           "details": {
-                                            "type": "object",
-                                            "properties": {
-                                              "documentKind": {
-                                                "oneOf": [
-                                                  {
-                                                    "type": "object",
-                                                    "properties": {
-                                                      "state": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                          "notProvided"
-                                                        ]
-                                                      }
-                                                    },
-                                                    "required": [
-                                                      "state"
-                                                    ]
-                                                  },
-                                                  {
-                                                    "type": "object",
-                                                    "properties": {
-                                                      "state": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                          "confirmed"
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "documentKind": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
                                                         ]
                                                       },
-                                                      "value": {
-                                                        "type": "string",
-                                                        "minLength": 1,
-                                                        "maxLength": 120
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 120
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
                                                       }
-                                                    },
-                                                    "required": [
-                                                      "state",
-                                                      "value"
+                                                    ]
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "document.v1"
                                                     ]
                                                   }
+                                                },
+                                                "required": [
+                                                  "documentKind",
+                                                  "schema"
                                                 ]
                                               },
-                                              "schema": {
-                                                "type": "string",
-                                                "enum": [
-                                                  "document.v1"
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "batchLot": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 120
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "dateMeaning": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "due",
+                                                              "given"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "vaccination.v1"
+                                                    ]
+                                                  },
+                                                  "vaccineName": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 160
+                                                  }
+                                                },
+                                                "required": [
+                                                  "batchLot",
+                                                  "dateMeaning",
+                                                  "schema",
+                                                  "vaccineName"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "followUpDate": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "format": "date"
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "reasonForVisit": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 500
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "doctor_visit.v1"
+                                                    ]
+                                                  },
+                                                  "tags": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 240
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "followUpDate",
+                                                  "reasonForVisit",
+                                                  "schema",
+                                                  "tags"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "duration": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 160
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "endDate": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "format": "date"
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "medicines": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 1000
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "prescription.v1"
+                                                    ]
+                                                  },
+                                                  "writtenSchedule": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 1000
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "duration",
+                                                  "endDate",
+                                                  "medicines",
+                                                  "schema",
+                                                  "writtenSchedule"
                                                 ]
                                               }
-                                            },
-                                            "required": [
-                                              "documentKind",
-                                              "schema"
                                             ]
                                           },
                                           "notes": {
@@ -13433,56 +18163,393 @@ export const openApiDocument = {
                                 "type": "object",
                                 "properties": {
                                   "details": {
-                                    "type": "object",
-                                    "properties": {
-                                      "documentKind": {
-                                        "oneOf": [
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "state": {
-                                                "type": "string",
-                                                "enum": [
-                                                  "notProvided"
-                                                ]
-                                              }
-                                            },
-                                            "required": [
-                                              "state"
-                                            ]
-                                          },
-                                          {
-                                            "type": "object",
-                                            "properties": {
-                                              "state": {
-                                                "type": "string",
-                                                "enum": [
-                                                  "confirmed"
+                                    "oneOf": [
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "documentKind": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
                                                 ]
                                               },
-                                              "value": {
-                                                "type": "string",
-                                                "minLength": 1,
-                                                "maxLength": 120
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 120
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
                                               }
-                                            },
-                                            "required": [
-                                              "state",
-                                              "value"
+                                            ]
+                                          },
+                                          "schema": {
+                                            "type": "string",
+                                            "enum": [
+                                              "document.v1"
                                             ]
                                           }
+                                        },
+                                        "required": [
+                                          "documentKind",
+                                          "schema"
                                         ]
                                       },
-                                      "schema": {
-                                        "type": "string",
-                                        "enum": [
-                                          "document.v1"
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "batchLot": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 120
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "dateMeaning": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "due",
+                                                      "given"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "schema": {
+                                            "type": "string",
+                                            "enum": [
+                                              "vaccination.v1"
+                                            ]
+                                          },
+                                          "vaccineName": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 160
+                                          }
+                                        },
+                                        "required": [
+                                          "batchLot",
+                                          "dateMeaning",
+                                          "schema",
+                                          "vaccineName"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "followUpDate": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "format": "date"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "reasonForVisit": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 500
+                                          },
+                                          "schema": {
+                                            "type": "string",
+                                            "enum": [
+                                              "doctor_visit.v1"
+                                            ]
+                                          },
+                                          "tags": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 240
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "followUpDate",
+                                          "reasonForVisit",
+                                          "schema",
+                                          "tags"
+                                        ]
+                                      },
+                                      {
+                                        "type": "object",
+                                        "properties": {
+                                          "duration": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 160
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "endDate": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "format": "date"
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "medicines": {
+                                            "type": "string",
+                                            "minLength": 1,
+                                            "maxLength": 1000
+                                          },
+                                          "schema": {
+                                            "type": "string",
+                                            "enum": [
+                                              "prescription.v1"
+                                            ]
+                                          },
+                                          "writtenSchedule": {
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "notProvided"
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "state": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "confirmed"
+                                                    ]
+                                                  },
+                                                  "value": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 1000
+                                                  }
+                                                },
+                                                "required": [
+                                                  "state",
+                                                  "value"
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        },
+                                        "required": [
+                                          "duration",
+                                          "endDate",
+                                          "medicines",
+                                          "schema",
+                                          "writtenSchedule"
                                         ]
                                       }
-                                    },
-                                    "required": [
-                                      "documentKind",
-                                      "schema"
                                     ]
                                   },
                                   "notes": {
@@ -14507,56 +19574,393 @@ export const openApiDocument = {
                                   "type": "object",
                                   "properties": {
                                     "details": {
-                                      "type": "object",
-                                      "properties": {
-                                        "documentKind": {
-                                          "oneOf": [
-                                            {
-                                              "type": "object",
-                                              "properties": {
-                                                "state": {
-                                                  "type": "string",
-                                                  "enum": [
-                                                    "notProvided"
-                                                  ]
-                                                }
-                                              },
-                                              "required": [
-                                                "state"
-                                              ]
-                                            },
-                                            {
-                                              "type": "object",
-                                              "properties": {
-                                                "state": {
-                                                  "type": "string",
-                                                  "enum": [
-                                                    "confirmed"
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "documentKind": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
                                                   ]
                                                 },
-                                                "value": {
-                                                  "type": "string",
-                                                  "minLength": 1,
-                                                  "maxLength": 120
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 120
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
                                                 }
-                                              },
-                                              "required": [
-                                                "state",
-                                                "value"
+                                              ]
+                                            },
+                                            "schema": {
+                                              "type": "string",
+                                              "enum": [
+                                                "document.v1"
                                               ]
                                             }
+                                          },
+                                          "required": [
+                                            "documentKind",
+                                            "schema"
                                           ]
                                         },
-                                        "schema": {
-                                          "type": "string",
-                                          "enum": [
-                                            "document.v1"
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "batchLot": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 120
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "dateMeaning": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "due",
+                                                        "given"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "schema": {
+                                              "type": "string",
+                                              "enum": [
+                                                "vaccination.v1"
+                                              ]
+                                            },
+                                            "vaccineName": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 160
+                                            }
+                                          },
+                                          "required": [
+                                            "batchLot",
+                                            "dateMeaning",
+                                            "schema",
+                                            "vaccineName"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "followUpDate": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "format": "date"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "reasonForVisit": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 500
+                                            },
+                                            "schema": {
+                                              "type": "string",
+                                              "enum": [
+                                                "doctor_visit.v1"
+                                              ]
+                                            },
+                                            "tags": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 240
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "followUpDate",
+                                            "reasonForVisit",
+                                            "schema",
+                                            "tags"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "duration": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 160
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "endDate": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "format": "date"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "medicines": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 1000
+                                            },
+                                            "schema": {
+                                              "type": "string",
+                                              "enum": [
+                                                "prescription.v1"
+                                              ]
+                                            },
+                                            "writtenSchedule": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 1000
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "duration",
+                                            "endDate",
+                                            "medicines",
+                                            "schema",
+                                            "writtenSchedule"
                                           ]
                                         }
-                                      },
-                                      "required": [
-                                        "documentKind",
-                                        "schema"
                                       ]
                                     },
                                     "notes": {
@@ -14763,56 +20167,393 @@ export const openApiDocument = {
                                   "type": "object",
                                   "properties": {
                                     "details": {
-                                      "type": "object",
-                                      "properties": {
-                                        "documentKind": {
-                                          "oneOf": [
-                                            {
-                                              "type": "object",
-                                              "properties": {
-                                                "state": {
-                                                  "type": "string",
-                                                  "enum": [
-                                                    "notProvided"
-                                                  ]
-                                                }
-                                              },
-                                              "required": [
-                                                "state"
-                                              ]
-                                            },
-                                            {
-                                              "type": "object",
-                                              "properties": {
-                                                "state": {
-                                                  "type": "string",
-                                                  "enum": [
-                                                    "confirmed"
+                                      "oneOf": [
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "documentKind": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
                                                   ]
                                                 },
-                                                "value": {
-                                                  "type": "string",
-                                                  "minLength": 1,
-                                                  "maxLength": 120
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 120
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
                                                 }
-                                              },
-                                              "required": [
-                                                "state",
-                                                "value"
+                                              ]
+                                            },
+                                            "schema": {
+                                              "type": "string",
+                                              "enum": [
+                                                "document.v1"
                                               ]
                                             }
+                                          },
+                                          "required": [
+                                            "documentKind",
+                                            "schema"
                                           ]
                                         },
-                                        "schema": {
-                                          "type": "string",
-                                          "enum": [
-                                            "document.v1"
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "batchLot": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 120
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "dateMeaning": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "due",
+                                                        "given"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "schema": {
+                                              "type": "string",
+                                              "enum": [
+                                                "vaccination.v1"
+                                              ]
+                                            },
+                                            "vaccineName": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 160
+                                            }
+                                          },
+                                          "required": [
+                                            "batchLot",
+                                            "dateMeaning",
+                                            "schema",
+                                            "vaccineName"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "followUpDate": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "format": "date"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "reasonForVisit": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 500
+                                            },
+                                            "schema": {
+                                              "type": "string",
+                                              "enum": [
+                                                "doctor_visit.v1"
+                                              ]
+                                            },
+                                            "tags": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 240
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "followUpDate",
+                                            "reasonForVisit",
+                                            "schema",
+                                            "tags"
+                                          ]
+                                        },
+                                        {
+                                          "type": "object",
+                                          "properties": {
+                                            "duration": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 160
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "endDate": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "format": "date"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "medicines": {
+                                              "type": "string",
+                                              "minLength": 1,
+                                              "maxLength": 1000
+                                            },
+                                            "schema": {
+                                              "type": "string",
+                                              "enum": [
+                                                "prescription.v1"
+                                              ]
+                                            },
+                                            "writtenSchedule": {
+                                              "oneOf": [
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "notProvided"
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state"
+                                                  ]
+                                                },
+                                                {
+                                                  "type": "object",
+                                                  "properties": {
+                                                    "state": {
+                                                      "type": "string",
+                                                      "enum": [
+                                                        "confirmed"
+                                                      ]
+                                                    },
+                                                    "value": {
+                                                      "type": "string",
+                                                      "minLength": 1,
+                                                      "maxLength": 1000
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "state",
+                                                    "value"
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "duration",
+                                            "endDate",
+                                            "medicines",
+                                            "schema",
+                                            "writtenSchedule"
                                           ]
                                         }
-                                      },
-                                      "required": [
-                                        "documentKind",
-                                        "schema"
                                       ]
                                     },
                                     "notes": {
@@ -15472,56 +21213,393 @@ export const openApiDocument = {
                                         "type": "object",
                                         "properties": {
                                           "details": {
-                                            "type": "object",
-                                            "properties": {
-                                              "documentKind": {
-                                                "oneOf": [
-                                                  {
-                                                    "type": "object",
-                                                    "properties": {
-                                                      "state": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                          "notProvided"
-                                                        ]
-                                                      }
-                                                    },
-                                                    "required": [
-                                                      "state"
-                                                    ]
-                                                  },
-                                                  {
-                                                    "type": "object",
-                                                    "properties": {
-                                                      "state": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                          "confirmed"
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "documentKind": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
                                                         ]
                                                       },
-                                                      "value": {
-                                                        "type": "string",
-                                                        "minLength": 1,
-                                                        "maxLength": 120
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 120
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
                                                       }
-                                                    },
-                                                    "required": [
-                                                      "state",
-                                                      "value"
+                                                    ]
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "document.v1"
                                                     ]
                                                   }
+                                                },
+                                                "required": [
+                                                  "documentKind",
+                                                  "schema"
                                                 ]
                                               },
-                                              "schema": {
-                                                "type": "string",
-                                                "enum": [
-                                                  "document.v1"
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "batchLot": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 120
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "dateMeaning": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "due",
+                                                              "given"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "vaccination.v1"
+                                                    ]
+                                                  },
+                                                  "vaccineName": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 160
+                                                  }
+                                                },
+                                                "required": [
+                                                  "batchLot",
+                                                  "dateMeaning",
+                                                  "schema",
+                                                  "vaccineName"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "followUpDate": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "format": "date"
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "reasonForVisit": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 500
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "doctor_visit.v1"
+                                                    ]
+                                                  },
+                                                  "tags": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 240
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "followUpDate",
+                                                  "reasonForVisit",
+                                                  "schema",
+                                                  "tags"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "duration": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 160
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "endDate": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "format": "date"
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "medicines": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 1000
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "prescription.v1"
+                                                    ]
+                                                  },
+                                                  "writtenSchedule": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 1000
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "duration",
+                                                  "endDate",
+                                                  "medicines",
+                                                  "schema",
+                                                  "writtenSchedule"
                                                 ]
                                               }
-                                            },
-                                            "required": [
-                                              "documentKind",
-                                              "schema"
                                             ]
                                           },
                                           "notes": {
@@ -16150,56 +22228,393 @@ export const openApiDocument = {
                                         "type": "object",
                                         "properties": {
                                           "details": {
-                                            "type": "object",
-                                            "properties": {
-                                              "documentKind": {
-                                                "oneOf": [
-                                                  {
-                                                    "type": "object",
-                                                    "properties": {
-                                                      "state": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                          "notProvided"
-                                                        ]
-                                                      }
-                                                    },
-                                                    "required": [
-                                                      "state"
-                                                    ]
-                                                  },
-                                                  {
-                                                    "type": "object",
-                                                    "properties": {
-                                                      "state": {
-                                                        "type": "string",
-                                                        "enum": [
-                                                          "confirmed"
+                                            "oneOf": [
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "documentKind": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
                                                         ]
                                                       },
-                                                      "value": {
-                                                        "type": "string",
-                                                        "minLength": 1,
-                                                        "maxLength": 120
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 120
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
                                                       }
-                                                    },
-                                                    "required": [
-                                                      "state",
-                                                      "value"
+                                                    ]
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "document.v1"
                                                     ]
                                                   }
+                                                },
+                                                "required": [
+                                                  "documentKind",
+                                                  "schema"
                                                 ]
                                               },
-                                              "schema": {
-                                                "type": "string",
-                                                "enum": [
-                                                  "document.v1"
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "batchLot": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 120
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "dateMeaning": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "due",
+                                                              "given"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "vaccination.v1"
+                                                    ]
+                                                  },
+                                                  "vaccineName": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 160
+                                                  }
+                                                },
+                                                "required": [
+                                                  "batchLot",
+                                                  "dateMeaning",
+                                                  "schema",
+                                                  "vaccineName"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "followUpDate": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "format": "date"
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "reasonForVisit": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 500
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "doctor_visit.v1"
+                                                    ]
+                                                  },
+                                                  "tags": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 240
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "followUpDate",
+                                                  "reasonForVisit",
+                                                  "schema",
+                                                  "tags"
+                                                ]
+                                              },
+                                              {
+                                                "type": "object",
+                                                "properties": {
+                                                  "duration": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 160
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "endDate": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "format": "date"
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  "medicines": {
+                                                    "type": "string",
+                                                    "minLength": 1,
+                                                    "maxLength": 1000
+                                                  },
+                                                  "schema": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                      "prescription.v1"
+                                                    ]
+                                                  },
+                                                  "writtenSchedule": {
+                                                    "oneOf": [
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "notProvided"
+                                                            ]
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state"
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "object",
+                                                        "properties": {
+                                                          "state": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                              "confirmed"
+                                                            ]
+                                                          },
+                                                          "value": {
+                                                            "type": "string",
+                                                            "minLength": 1,
+                                                            "maxLength": 1000
+                                                          }
+                                                        },
+                                                        "required": [
+                                                          "state",
+                                                          "value"
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "required": [
+                                                  "duration",
+                                                  "endDate",
+                                                  "medicines",
+                                                  "schema",
+                                                  "writtenSchedule"
                                                 ]
                                               }
-                                            },
-                                            "required": [
-                                              "documentKind",
-                                              "schema"
                                             ]
                                           },
                                           "notes": {
@@ -16695,6 +23110,12 @@ export const openApiDocument = {
                         "enum": [
                           4
                         ]
+                      },
+                      {
+                        "type": "number",
+                        "enum": [
+                          5
+                        ]
                       }
                     ]
                   },
@@ -16765,6 +23186,12 @@ export const openApiDocument = {
                           "enum": [
                             4
                           ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            5
+                          ]
                         }
                       ]
                     },
@@ -16830,6 +23257,12 @@ export const openApiDocument = {
                           "type": "number",
                           "enum": [
                             4
+                          ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            5
                           ]
                         }
                       ]

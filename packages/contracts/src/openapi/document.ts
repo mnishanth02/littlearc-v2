@@ -453,7 +453,7 @@ export function createOpenApiDocument(): GeneratedOpenApiDocument {
     info: {
       title: "LittleArc API",
       version: "0.1.0",
-      description: "Versioned LittleArc API contract through the OFF-05 emergency-card slice.",
+      description: "Versioned LittleArc API contract through the VLT-02 manual-record slice.",
     },
     servers: [
       {

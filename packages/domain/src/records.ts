@@ -17,17 +17,53 @@ export type OptionalConfirmedText =
   | { readonly state: "notProvided" }
   | { readonly state: "confirmed"; readonly value: string };
 
+export type OptionalConfirmedDate =
+  | { readonly state: "notProvided" }
+  | { readonly state: "confirmed"; readonly value: string };
+
+export type VaccinationDateMeaning =
+  | { readonly state: "notProvided" }
+  | { readonly state: "confirmed"; readonly value: "due" | "given" };
+
 export type DocumentRecordDetailsV1 = {
   readonly schema: "document.v1";
   readonly documentKind: OptionalConfirmedText;
 };
+
+export type VaccinationRecordDetailsV1 = {
+  readonly schema: "vaccination.v1";
+  readonly vaccineName: string;
+  readonly dateMeaning: VaccinationDateMeaning;
+  readonly batchLot: OptionalConfirmedText;
+};
+
+export type DoctorVisitRecordDetailsV1 = {
+  readonly schema: "doctor_visit.v1";
+  readonly reasonForVisit: string;
+  readonly followUpDate: OptionalConfirmedDate;
+  readonly tags: OptionalConfirmedText;
+};
+
+export type PrescriptionRecordDetailsV1 = {
+  readonly schema: "prescription.v1";
+  readonly medicines: string;
+  readonly writtenSchedule: OptionalConfirmedText;
+  readonly duration: OptionalConfirmedText;
+  readonly endDate: OptionalConfirmedDate;
+};
+
+export type RecordDetailsV1 =
+  | DocumentRecordDetailsV1
+  | VaccinationRecordDetailsV1
+  | DoctorVisitRecordDetailsV1
+  | PrescriptionRecordDetailsV1;
 
 export type RecordVersionContentV1 = {
   readonly schemaVersion: 1;
   readonly title: string;
   readonly providerFacility: OptionalConfirmedText;
   readonly notes: OptionalConfirmedText;
-  readonly details: DocumentRecordDetailsV1;
+  readonly details: RecordDetailsV1;
 };
 
 export type RecordTimelineDateAuthority = "recordEventAt" | "confirmedAtFallback";
@@ -104,17 +140,71 @@ export function assertConsumerRecordSource(
 }
 
 export function assertRecordVersionContent(content: RecordVersionContentV1): void {
-  if (content.schemaVersion !== 1 || content.details.schema !== "document.v1") {
+  if (content.schemaVersion !== 1) {
     invalid("The record payload schema is not supported.");
   }
   assertText(content.title, "title", 160);
   assertOptionalText(content.providerFacility, "provider or facility", 160);
   assertOptionalText(content.notes, "notes", 2_000);
-  assertOptionalText(content.details.documentKind, "document kind", 120);
+
+  switch (content.details.schema) {
+    case "document.v1":
+      assertOptionalText(content.details.documentKind, "document kind", 120);
+      break;
+    case "vaccination.v1":
+      assertText(content.details.vaccineName, "vaccine name", 160);
+      assertOptionalText(content.details.batchLot, "batch or lot", 120);
+      break;
+    case "doctor_visit.v1":
+      assertText(content.details.reasonForVisit, "reason for visit", 500);
+      assertOptionalDate(content.details.followUpDate, "follow-up date");
+      assertOptionalText(content.details.tags, "tags", 240);
+      break;
+    case "prescription.v1":
+      assertText(content.details.medicines, "medicines", 1_000);
+      assertOptionalText(content.details.writtenSchedule, "written schedule", 1_000);
+      assertOptionalText(content.details.duration, "duration", 160);
+      assertOptionalDate(content.details.endDate, "end date");
+      break;
+    default:
+      invalid("The record detail schema is not supported.");
+  }
 
   const encodedLength = new TextEncoder().encode(JSON.stringify(content)).byteLength;
   if (encodedLength > 16_384) {
-    invalid("The record payload exceeds the 16 KiB VLT-01 limit.");
+    invalid("The record payload exceeds the 16 KiB record limit.");
+  }
+}
+
+export function assertRecordContentForCategory(
+  category: RecordCategory,
+  content: RecordVersionContentV1,
+): void {
+  assertRecordVersionContent(content);
+  const expectedSchema =
+    category === "document"
+      ? "document.v1"
+      : category === "vaccination"
+        ? "vaccination.v1"
+        : category === "doctor_visit"
+          ? "doctor_visit.v1"
+          : category === "prescription"
+            ? "prescription.v1"
+            : null;
+  if (!expectedSchema || content.details.schema !== expectedSchema) {
+    invalid(`The ${category} category does not match ${content.details.schema}.`);
+  }
+}
+
+export function assertVaccinationDateMeaning(input: {
+  readonly details: VaccinationRecordDetailsV1;
+  readonly eventAt: string | null;
+}): void {
+  if (input.eventAt !== null && input.details.dateMeaning.state !== "confirmed") {
+    invalid("Choose whether the vaccination date is due or given.");
+  }
+  if (input.eventAt === null && input.details.dateMeaning.state === "confirmed") {
+    invalid("Enter a vaccination date before confirming what it means.");
   }
 }
 
@@ -172,6 +262,23 @@ export function timelineEventForConfirmedRecord(input: {
 function assertOptionalText(value: OptionalConfirmedText, label: string, maximum: number): void {
   if (value.state === "confirmed") {
     assertText(value.value, label, maximum);
+  }
+}
+
+function assertOptionalDate(value: OptionalConfirmedDate, label: string): void {
+  if (value.state === "confirmed") {
+    assertDate(value.value, label);
+  }
+}
+
+function assertDate(value: string, label: string): void {
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
+    Number.isNaN(parsed.getTime()) ||
+    parsed.toISOString().slice(0, 10) !== value
+  ) {
+    invalid(`${label} must be a valid calendar date.`);
   }
 }
 

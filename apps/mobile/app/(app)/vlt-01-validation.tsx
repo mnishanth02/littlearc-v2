@@ -131,14 +131,14 @@ export default function Vlt01ValidationScreen() {
           VLT-01 record foundation
         </Typography>
         <Banner
-          message="This development-only proof uses one bounded synthetic document payload, SQLCipher schema V4, manual provenance, and a generated Timeline projection. It is not VLT-02 product UI, real-provider evidence, physical-iOS evidence, a two-device claim, or Gate 2 closure."
+          message="This development-only proof uses one bounded synthetic document payload, the current SQLCipher schema, manual provenance, and a generated Timeline projection. It is not VLT-02 product UI, real-provider evidence, physical-iOS evidence, a two-device claim, or Gate 2 closure."
           title="Synthetic evidence boundary"
           variant="warning"
         />
 
         {step === "setup" ? (
           <View style={styles.panel}>
-            <Typography textRole="sectionTitle">1. Enroll SQLCipher schema V4</Typography>
+            <Typography textRole="sectionTitle">1. Enroll current SQLCipher schema</Typography>
             <Button
               label="Start clean VLT-01 proof"
               onPress={() =>
@@ -155,7 +155,7 @@ export default function Vlt01ValidationScreen() {
                     body: JSON.stringify({
                       appVersion: Constants.expoConfig?.version ?? "0.0.1",
                       deviceId,
-                      localSchemaVersion: 4,
+                      localSchemaVersion: 5,
                       platform: process.env.EXPO_OS === "ios" ? "ios" : "android",
                     }),
                     method: "POST",
@@ -166,12 +166,12 @@ export default function Vlt01ValidationScreen() {
                   }
                   await enrollLocalSecurity({ deviceId, householdId: bootstrap.householdId });
                   const security = await validateUnlockedLocalSecurity();
-                  if (security.migrationVersion !== 4 || !security.reopenPassed) {
-                    throw new Error("SQLCipher schema V4 did not survive a keyed reopen.");
+                  if (security.migrationVersion !== 5 || !security.reopenPassed) {
+                    throw new Error("SQLCipher schema V5 did not survive a keyed reopen.");
                   }
                   await sync(bootstrap.householdId);
                   setIdentifiers(bootstrap);
-                  setSummary(`SQLCipher ${security.cipherVersion} · schema V4 · child ready`);
+                  setSummary(`SQLCipher ${security.cipherVersion} · schema V5 · child ready`);
                   setStep("create");
                 })
               }
@@ -235,7 +235,7 @@ export default function Vlt01ValidationScreen() {
               void run(async () => {
                 await withUnlockedLocalDatabase((database) =>
                   queueRecordUpsert(database, {
-                    category: "doctor_visit",
+                    category: "document",
                     childId: identifiers.childId,
                     content: originalContent,
                     eventAt: "2026-07-20T09:00:00.000Z",
@@ -324,7 +324,7 @@ export default function Vlt01ValidationScreen() {
                 await setApiAvailability(true);
                 await withUnlockedLocalDatabase((database) =>
                   queueRecordUpsert(database, {
-                    category: "doctor_visit",
+                    category: "document",
                     childId: identifiers.childId,
                     content: correctedContent,
                     eventAt: "2026-07-20T09:00:00.000Z",
@@ -377,7 +377,7 @@ export default function Vlt01ValidationScreen() {
                 await request("/v1/validation/vlt01/remote-edit", { method: "POST" });
                 await withUnlockedLocalDatabase((database) =>
                   queueRecordUpsert(database, {
-                    category: "doctor_visit",
+                    category: "document",
                     childId: identifiers.childId,
                     content: {
                       ...correctedContent,

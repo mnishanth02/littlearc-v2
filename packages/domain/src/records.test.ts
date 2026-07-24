@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   assertConsumerRecordSource,
+  assertRecordContentForCategory,
   assertRecordTransition,
   assertRecordVersionContent,
+  assertVaccinationDateMeaning,
   canArchiveOrDeleteRecord,
   canCorrectRecord,
   canCreateRecord,
@@ -38,6 +40,78 @@ describe("VLT-01 record policy", () => {
         notes: { state: "confirmed", value: "x".repeat(2_001) },
       }),
     ).toThrow("notes");
+  });
+
+  it("validates all VLT-02 category payloads and category agreement", () => {
+    const vaccination: RecordVersionContentV1 = {
+      ...content,
+      details: {
+        batchLot: { state: "confirmed", value: "SYNTHETIC-LOT" },
+        dateMeaning: { state: "confirmed", value: "given" },
+        schema: "vaccination.v1",
+        vaccineName: "Synthetic vaccine",
+      },
+    };
+    const visit: RecordVersionContentV1 = {
+      ...content,
+      details: {
+        followUpDate: { state: "confirmed", value: "2026-08-01" },
+        reasonForVisit: "Synthetic follow-up",
+        schema: "doctor_visit.v1",
+        tags: { state: "confirmed", value: "routine" },
+      },
+    };
+    const prescription: RecordVersionContentV1 = {
+      ...content,
+      details: {
+        duration: { state: "confirmed", value: "Synthetic duration" },
+        endDate: { state: "confirmed", value: "2026-08-02" },
+        medicines: "Synthetic medicine",
+        schema: "prescription.v1",
+        writtenSchedule: { state: "confirmed", value: "Literal source text only" },
+      },
+    };
+
+    expect(() => assertRecordContentForCategory("document", content)).not.toThrow();
+    expect(() => assertRecordContentForCategory("vaccination", vaccination)).not.toThrow();
+    expect(() => assertRecordContentForCategory("doctor_visit", visit)).not.toThrow();
+    expect(() => assertRecordContentForCategory("prescription", prescription)).not.toThrow();
+    expect(() => assertRecordContentForCategory("document", vaccination)).toThrow(
+      "category does not match",
+    );
+    expect(() =>
+      assertRecordVersionContent({
+        ...visit,
+        details: {
+          followUpDate: { state: "confirmed", value: "2026-02-30" },
+          reasonForVisit: "Synthetic follow-up",
+          schema: "doctor_visit.v1",
+          tags: { state: "confirmed", value: "routine" },
+        },
+      }),
+    ).toThrow("valid calendar date");
+  });
+
+  it("requires explicit meaning for a vaccination date", () => {
+    const details = {
+      batchLot: { state: "notProvided" },
+      dateMeaning: { state: "notProvided" },
+      schema: "vaccination.v1",
+      vaccineName: "Synthetic vaccine",
+    } as const;
+    expect(() => assertVaccinationDateMeaning({ details, eventAt: null })).not.toThrow();
+    expect(() =>
+      assertVaccinationDateMeaning({
+        details,
+        eventAt: "2026-07-24T00:00:00.000Z",
+      }),
+    ).toThrow("due or given");
+    expect(() =>
+      assertVaccinationDateMeaning({
+        details: { ...details, dateMeaning: { state: "confirmed", value: "due" } },
+        eventAt: null,
+      }),
+    ).toThrow("Enter a vaccination date");
   });
 
   it("derives access scope without accepting a client ACL", () => {

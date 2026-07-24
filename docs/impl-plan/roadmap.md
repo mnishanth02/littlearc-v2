@@ -712,12 +712,15 @@ M3 feature breadth is authorized when:
 **Goal:** Let a parent reliably capture, store, confirm, search, retrieve, and
 correct the MVP's core child records.
 
-> **Delivery note — 24 July 2026:** Founder direction authorizes only the
-> bounded `VLT-01` record-foundation package to proceed before Gate 2 closes.
-> This exception retires record/version/projection architecture risk but does
-> not close Gate 2, authorize `VLT-02` or later M3 feature breadth, or broaden
-> real-data, provider, physical-iOS, low-end-Android, two-device, or pilot
-> claims. See the [reviewed VLT-01 plan](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md).
+> **Delivery note — 24 July 2026:** Founder direction separately authorized the
+> bounded `VLT-01` record-foundation and `VLT-02` manual-record packages.
+> Both are complete within their linked synthetic and device evidence
+> boundaries. These package-specific exceptions do not close Gate 2, authorize
+> `VLT-03` or later M3 breadth, or broaden real-data, provider, physical-iOS,
+> low-end-Android, two-device, or pilot claims. See the
+> [reviewed VLT-01 plan](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md)
+> the [VLT-02 plan](./m3-vault-wedge/vlt-02-manual-record-creation-plan.md),
+> and its [implementation evidence](./m3-vault-wedge/vlt-02-implementation-evidence.md).
 
 ### 12.1 Ordered work packages
 
@@ -727,7 +730,7 @@ correct the MVP's core child records.
 > disposable Aiven validation, Android/iOS release containment, and the bounded
 > iOS Simulator plus physical Pixel 8 lifecycle/accessibility checks passed.
 > Package acceptance is `COMPLETE` within the recorded synthetic and device
-> boundaries. Gate 2 remains open and `VLT-02+` remain blocked. See the
+> boundaries. Gate 2 remains open. See the
 > [implementation evidence](./m3-vault-wedge/vlt-01-implementation-evidence.md).
 
 - Implement common record metadata and encrypted versioned payloads.
@@ -738,7 +741,17 @@ correct the MVP's core child records.
   queued purge.
 - Create a minimal linked timeline projection for all confirmed records.
 
-#### `VLT-02` Manual record creation
+#### [`VLT-02` Manual record creation](./m3-vault-wedge/vlt-02-manual-record-creation-plan.md)
+
+> **Delivery status — 24 July 2026:** `COMPLETE` under the bounded
+> package-specific authorization above. Four manual categories, SQLCipher V5
+> drafts, production create/view/correct/history/delete routes, 206 automated
+> tests, disposable Aiven validation, Android/iOS release containment, and the
+> complete functional lifecycle on physical Pixel 8 plus iPhone 17 Pro
+> Simulator passed. Gate 2, physical iOS, two-device, low-end Android,
+> complete assistive-technology, real-data, provider, and `VLT-03+` claims
+> remain open. See the
+> [implementation evidence](./m3-vault-wedge/vlt-02-implementation-evidence.md).
 
 - Start with document, vaccination, doctor visit, and prescription forms.
 - Provide manual completion for every field that later extraction may suggest.

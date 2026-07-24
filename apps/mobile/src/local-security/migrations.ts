@@ -198,6 +198,22 @@ export const localMigrations: ReadonlyArray<LocalMigration> = [
         ON local_timeline_entries(child_id, event_at DESC, entry_id DESC);
     `,
   },
+  {
+    version: 5,
+    sql: `
+      CREATE TABLE local_record_drafts (
+        draft_id TEXT PRIMARY KEY NOT NULL,
+        target_record_id TEXT,
+        child_id TEXT NOT NULL,
+        category TEXT NOT NULL,
+        form_json TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (child_id) REFERENCES local_children(child_id) ON DELETE CASCADE
+      );
+      CREATE INDEX local_record_drafts_child_updated_idx
+        ON local_record_drafts(child_id, updated_at DESC, draft_id DESC);
+    `,
+  },
 ] as const;
 
 export async function applyLocalMigrations(database: LocalMigrationDatabase): Promise<number> {

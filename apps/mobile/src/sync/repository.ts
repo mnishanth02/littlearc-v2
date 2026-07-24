@@ -1,5 +1,7 @@
 import {
   assertConsumerRecordSource,
+  assertRecordContentForCategory,
+  assertVaccinationDateMeaning,
   dependencyReadiness,
   type EmergencyCardContent,
   type GeneratedRecordTimelineContent,
@@ -73,6 +75,18 @@ export type RecordProjection = {
 export type LocalRecordProjection = RecordProjection & {
   readonly deletedAt: string | null;
   readonly syncStatus: "conflict" | "pending" | "rejected" | "synced";
+};
+
+export type LocalRecordDraft = {
+  readonly category: Extract<
+    RecordCategory,
+    "document" | "vaccination" | "doctor_visit" | "prescription"
+  >;
+  readonly childId: string;
+  readonly draftId: string;
+  readonly formJson: string;
+  readonly targetRecordId: string | null;
+  readonly updatedAt: string;
 };
 
 export type RecordVersionProjection = {
@@ -309,6 +323,103 @@ export async function readLocalRecord(
   return row ? localRecord(row) : null;
 }
 
+export async function listLocalManualRecords(
+  database: LocalSyncDatabase,
+  childId: string,
+): Promise<ReadonlyArray<LocalRecordProjection>> {
+  const rows = await database.getAllAsync<LocalRecordRow>(
+    `select
+      record_id as "recordId",
+      child_id as "childId",
+      category,
+      source_type as "sourceType",
+      confirmation_state as "confirmationState",
+      event_at as "eventAt",
+      access_scope as "accessScope",
+      revision,
+      version,
+      version_id as "versionId",
+      payload_json as "payloadJson",
+      updated_at as "updatedAt",
+      deleted_at as "deletedAt",
+      sync_status as "syncStatus"
+    from local_records
+    where child_id = ?
+      and category in ('document', 'vaccination', 'doctor_visit', 'prescription')
+      and deleted_at is null
+    order by coalesce(event_at, updated_at) desc, record_id desc`,
+    childId,
+  );
+  return rows.map(localRecord);
+}
+
+export async function readLocalRecordDraft(
+  database: LocalSyncDatabase,
+  draftId: string,
+): Promise<LocalRecordDraft | null> {
+  return database.getFirstAsync<LocalRecordDraft>(
+    `select
+      draft_id as "draftId",
+      target_record_id as "targetRecordId",
+      child_id as "childId",
+      category,
+      form_json as "formJson",
+      updated_at as "updatedAt"
+    from local_record_drafts
+    where draft_id = ?`,
+    draftId,
+  );
+}
+
+export async function listLocalRecordDrafts(
+  database: LocalSyncDatabase,
+  childId: string,
+): Promise<ReadonlyArray<LocalRecordDraft>> {
+  return database.getAllAsync<LocalRecordDraft>(
+    `select
+      draft_id as "draftId",
+      target_record_id as "targetRecordId",
+      child_id as "childId",
+      category,
+      form_json as "formJson",
+      updated_at as "updatedAt"
+    from local_record_drafts
+    where child_id = ?
+    order by updated_at desc, draft_id desc`,
+    childId,
+  );
+}
+
+export async function saveLocalRecordDraft(
+  database: LocalSyncDatabase,
+  input: LocalRecordDraft,
+): Promise<void> {
+  await database.runAsync(
+    `insert into local_record_drafts (
+      draft_id, target_record_id, child_id, category, form_json, updated_at
+    ) values (?, ?, ?, ?, ?, ?)
+    on conflict(draft_id) do update set
+      target_record_id = excluded.target_record_id,
+      child_id = excluded.child_id,
+      category = excluded.category,
+      form_json = excluded.form_json,
+      updated_at = excluded.updated_at`,
+    input.draftId,
+    input.targetRecordId,
+    input.childId,
+    input.category,
+    input.formJson,
+    input.updatedAt,
+  );
+}
+
+export async function deleteLocalRecordDraft(
+  database: LocalSyncDatabase,
+  draftId: string,
+): Promise<void> {
+  await database.runAsync("delete from local_record_drafts where draft_id = ?", draftId);
+}
+
 export async function readLocalTimeline(
   database: LocalSyncDatabase,
   childId: string,
@@ -386,6 +497,7 @@ export async function queueRecordUpsert(
     readonly category: RecordCategory;
     readonly childId: string;
     readonly content: RecordVersionContentV1;
+    readonly draftId?: string;
     readonly eventAt: string | null;
     readonly idempotencyKey: string;
     readonly localDependencyIds: ReadonlyArray<string>;
@@ -396,6 +508,10 @@ export async function queueRecordUpsert(
   },
 ): Promise<void> {
   assertConsumerRecordSource(input.sourceType);
+  assertRecordContentForCategory(input.category, input.content);
+  if (input.content.details.schema === "vaccination.v1") {
+    assertVaccinationDateMeaning({ details: input.content.details, eventAt: input.eventAt });
+  }
   await database.withTransactionAsync(async () => {
     const current = await database.getFirstAsync<{ readonly revision: number }>(
       "select revision from local_records where record_id = ? and deleted_at is null",
@@ -479,6 +595,9 @@ export async function queueRecordUpsert(
       baseRevision ?? 1,
       input.now,
     );
+    if (input.draftId) {
+      await database.runAsync("delete from local_record_drafts where draft_id = ?", input.draftId);
+    }
   });
 }
 

@@ -51,6 +51,77 @@ export interface paths {
                                     };
                                     /** @enum {string} */
                                     schema: "document.v1";
+                                } | {
+                                    batchLot: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    dateMeaning: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        /** @enum {string} */
+                                        value: "due" | "given";
+                                    };
+                                    /** @enum {string} */
+                                    schema: "vaccination.v1";
+                                    vaccineName: string;
+                                } | {
+                                    followUpDate: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        /** Format: date */
+                                        value: string;
+                                    };
+                                    reasonForVisit: string;
+                                    /** @enum {string} */
+                                    schema: "doctor_visit.v1";
+                                    tags: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                } | {
+                                    duration: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    endDate: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        /** Format: date */
+                                        value: string;
+                                    };
+                                    medicines: string;
+                                    /** @enum {string} */
+                                    schema: "prescription.v1";
+                                    writtenSchedule: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
                                 };
                                 notes: {
                                     /** @enum {string} */
@@ -233,6 +304,77 @@ export interface paths {
                                         };
                                         /** @enum {string} */
                                         schema: "document.v1";
+                                    } | {
+                                        batchLot: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        dateMeaning: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** @enum {string} */
+                                            value: "due" | "given";
+                                        };
+                                        /** @enum {string} */
+                                        schema: "vaccination.v1";
+                                        vaccineName: string;
+                                    } | {
+                                        followUpDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        reasonForVisit: string;
+                                        /** @enum {string} */
+                                        schema: "doctor_visit.v1";
+                                        tags: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    } | {
+                                        duration: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        endDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        medicines: string;
+                                        /** @enum {string} */
+                                        schema: "prescription.v1";
+                                        writtenSchedule: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
                                     };
                                     notes: {
                                         /** @enum {string} */
@@ -1113,6 +1255,77 @@ export interface paths {
                                             };
                                             /** @enum {string} */
                                             schema: "document.v1";
+                                        } | {
+                                            batchLot: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            dateMeaning: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** @enum {string} */
+                                                value: "due" | "given";
+                                            };
+                                            /** @enum {string} */
+                                            schema: "vaccination.v1";
+                                            vaccineName: string;
+                                        } | {
+                                            followUpDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            reasonForVisit: string;
+                                            /** @enum {string} */
+                                            schema: "doctor_visit.v1";
+                                            tags: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        } | {
+                                            duration: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            endDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            medicines: string;
+                                            /** @enum {string} */
+                                            schema: "prescription.v1";
+                                            writtenSchedule: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
                                         };
                                         notes: {
                                             /** @enum {string} */
@@ -1466,6 +1679,77 @@ export interface paths {
                                         };
                                         /** @enum {string} */
                                         schema: "document.v1";
+                                    } | {
+                                        batchLot: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        dateMeaning: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** @enum {string} */
+                                            value: "due" | "given";
+                                        };
+                                        /** @enum {string} */
+                                        schema: "vaccination.v1";
+                                        vaccineName: string;
+                                    } | {
+                                        followUpDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        reasonForVisit: string;
+                                        /** @enum {string} */
+                                        schema: "doctor_visit.v1";
+                                        tags: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    } | {
+                                        duration: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        endDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        medicines: string;
+                                        /** @enum {string} */
+                                        schema: "prescription.v1";
+                                        writtenSchedule: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
                                     };
                                     notes: {
                                         /** @enum {string} */
@@ -1749,6 +2033,77 @@ export interface paths {
                                         };
                                         /** @enum {string} */
                                         schema: "document.v1";
+                                    } | {
+                                        batchLot: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        dateMeaning: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** @enum {string} */
+                                            value: "due" | "given";
+                                        };
+                                        /** @enum {string} */
+                                        schema: "vaccination.v1";
+                                        vaccineName: string;
+                                    } | {
+                                        followUpDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        reasonForVisit: string;
+                                        /** @enum {string} */
+                                        schema: "doctor_visit.v1";
+                                        tags: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    } | {
+                                        duration: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        endDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        medicines: string;
+                                        /** @enum {string} */
+                                        schema: "prescription.v1";
+                                        writtenSchedule: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
                                     };
                                     notes: {
                                         /** @enum {string} */
@@ -1806,6 +2161,77 @@ export interface paths {
                                         };
                                         /** @enum {string} */
                                         schema: "document.v1";
+                                    } | {
+                                        batchLot: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        dateMeaning: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** @enum {string} */
+                                            value: "due" | "given";
+                                        };
+                                        /** @enum {string} */
+                                        schema: "vaccination.v1";
+                                        vaccineName: string;
+                                    } | {
+                                        followUpDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        reasonForVisit: string;
+                                        /** @enum {string} */
+                                        schema: "doctor_visit.v1";
+                                        tags: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    } | {
+                                        duration: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        endDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        medicines: string;
+                                        /** @enum {string} */
+                                        schema: "prescription.v1";
+                                        writtenSchedule: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
                                     };
                                     notes: {
                                         /** @enum {string} */
@@ -1967,6 +2393,77 @@ export interface paths {
                                             };
                                             /** @enum {string} */
                                             schema: "document.v1";
+                                        } | {
+                                            batchLot: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            dateMeaning: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** @enum {string} */
+                                                value: "due" | "given";
+                                            };
+                                            /** @enum {string} */
+                                            schema: "vaccination.v1";
+                                            vaccineName: string;
+                                        } | {
+                                            followUpDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            reasonForVisit: string;
+                                            /** @enum {string} */
+                                            schema: "doctor_visit.v1";
+                                            tags: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        } | {
+                                            duration: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            endDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            medicines: string;
+                                            /** @enum {string} */
+                                            schema: "prescription.v1";
+                                            writtenSchedule: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
                                         };
                                         notes: {
                                             /** @enum {string} */
@@ -2117,6 +2614,77 @@ export interface paths {
                                             };
                                             /** @enum {string} */
                                             schema: "document.v1";
+                                        } | {
+                                            batchLot: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            dateMeaning: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** @enum {string} */
+                                                value: "due" | "given";
+                                            };
+                                            /** @enum {string} */
+                                            schema: "vaccination.v1";
+                                            vaccineName: string;
+                                        } | {
+                                            followUpDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            reasonForVisit: string;
+                                            /** @enum {string} */
+                                            schema: "doctor_visit.v1";
+                                            tags: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        } | {
+                                            duration: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            endDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            medicines: string;
+                                            /** @enum {string} */
+                                            schema: "prescription.v1";
+                                            writtenSchedule: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
                                         };
                                         notes: {
                                             /** @enum {string} */
@@ -2262,7 +2830,7 @@ export interface paths {
                         appVersion: string;
                         /** @description UUIDv7 identifier */
                         deviceId: string;
-                        localSchemaVersion: 1 | 2 | 3 | 4;
+                        localSchemaVersion: 1 | 2 | 3 | 4 | 5;
                         /** @enum {string} */
                         platform: "android" | "ios";
                     };
@@ -2282,7 +2850,7 @@ export interface paths {
                             enrollmentStatus: "active";
                             /** @description UUIDv7 identifier */
                             householdId: string;
-                            localSchemaVersion: 1 | 2 | 3 | 4;
+                            localSchemaVersion: 1 | 2 | 3 | 4 | 5;
                             replayed: boolean;
                         };
                     };
@@ -2300,7 +2868,7 @@ export interface paths {
                             enrollmentStatus: "active";
                             /** @description UUIDv7 identifier */
                             householdId: string;
-                            localSchemaVersion: 1 | 2 | 3 | 4;
+                            localSchemaVersion: 1 | 2 | 3 | 4 | 5;
                             replayed: boolean;
                         };
                     };
@@ -2970,6 +3538,77 @@ export interface components {
                         };
                         /** @enum {string} */
                         schema: "document.v1";
+                    } | {
+                        batchLot: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        dateMeaning: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** @enum {string} */
+                            value: "due" | "given";
+                        };
+                        /** @enum {string} */
+                        schema: "vaccination.v1";
+                        vaccineName: string;
+                    } | {
+                        followUpDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        reasonForVisit: string;
+                        /** @enum {string} */
+                        schema: "doctor_visit.v1";
+                        tags: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    } | {
+                        duration: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        endDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        medicines: string;
+                        /** @enum {string} */
+                        schema: "prescription.v1";
+                        writtenSchedule: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
                     };
                     notes: {
                         /** @enum {string} */
@@ -3120,6 +3759,77 @@ export interface components {
                         };
                         /** @enum {string} */
                         schema: "document.v1";
+                    } | {
+                        batchLot: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        dateMeaning: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** @enum {string} */
+                            value: "due" | "given";
+                        };
+                        /** @enum {string} */
+                        schema: "vaccination.v1";
+                        vaccineName: string;
+                    } | {
+                        followUpDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        reasonForVisit: string;
+                        /** @enum {string} */
+                        schema: "doctor_visit.v1";
+                        tags: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    } | {
+                        duration: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        endDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        medicines: string;
+                        /** @enum {string} */
+                        schema: "prescription.v1";
+                        writtenSchedule: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
                     };
                     notes: {
                         /** @enum {string} */
@@ -3331,6 +4041,77 @@ export interface components {
                             };
                             /** @enum {string} */
                             schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
                         };
                         notes: {
                             /** @enum {string} */
@@ -3562,6 +4343,77 @@ export interface components {
                         };
                         /** @enum {string} */
                         schema: "document.v1";
+                    } | {
+                        batchLot: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        dateMeaning: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** @enum {string} */
+                            value: "due" | "given";
+                        };
+                        /** @enum {string} */
+                        schema: "vaccination.v1";
+                        vaccineName: string;
+                    } | {
+                        followUpDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        reasonForVisit: string;
+                        /** @enum {string} */
+                        schema: "doctor_visit.v1";
+                        tags: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    } | {
+                        duration: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        endDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        medicines: string;
+                        /** @enum {string} */
+                        schema: "prescription.v1";
+                        writtenSchedule: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
                     };
                     notes: {
                         /** @enum {string} */
@@ -3758,6 +4610,77 @@ export interface components {
                             };
                             /** @enum {string} */
                             schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
                         };
                         notes: {
                             /** @enum {string} */
@@ -3815,6 +4738,77 @@ export interface components {
                             };
                             /** @enum {string} */
                             schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
                         };
                         notes: {
                             /** @enum {string} */
@@ -3967,6 +4961,77 @@ export interface components {
                             };
                             /** @enum {string} */
                             schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
                         };
                         notes: {
                             /** @enum {string} */
@@ -4117,6 +5182,77 @@ export interface components {
                             };
                             /** @enum {string} */
                             schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
                         };
                         notes: {
                             /** @enum {string} */
@@ -4210,7 +5346,7 @@ export interface components {
             appVersion: string;
             /** @description UUIDv7 identifier */
             deviceId: string;
-            localSchemaVersion: 1 | 2 | 3 | 4;
+            localSchemaVersion: 1 | 2 | 3 | 4 | 5;
             /** @enum {string} */
             platform: "android" | "ios";
         };
@@ -4221,7 +5357,7 @@ export interface components {
             enrollmentStatus: "active";
             /** @description UUIDv7 identifier */
             householdId: string;
-            localSchemaVersion: 1 | 2 | 3 | 4;
+            localSchemaVersion: 1 | 2 | 3 | 4 | 5;
             replayed: boolean;
         };
         EmergencyCardProjection: {
@@ -4387,6 +5523,77 @@ export interface components {
                     };
                     /** @enum {string} */
                     schema: "document.v1";
+                } | {
+                    batchLot: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    dateMeaning: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** @enum {string} */
+                        value: "due" | "given";
+                    };
+                    /** @enum {string} */
+                    schema: "vaccination.v1";
+                    vaccineName: string;
+                } | {
+                    followUpDate: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** Format: date */
+                        value: string;
+                    };
+                    reasonForVisit: string;
+                    /** @enum {string} */
+                    schema: "doctor_visit.v1";
+                    tags: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                } | {
+                    duration: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    endDate: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** Format: date */
+                        value: string;
+                    };
+                    medicines: string;
+                    /** @enum {string} */
+                    schema: "prescription.v1";
+                    writtenSchedule: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
                 };
                 notes: {
                     /** @enum {string} */
@@ -4443,6 +5650,77 @@ export interface components {
                     };
                     /** @enum {string} */
                     schema: "document.v1";
+                } | {
+                    batchLot: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    dateMeaning: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** @enum {string} */
+                        value: "due" | "given";
+                    };
+                    /** @enum {string} */
+                    schema: "vaccination.v1";
+                    vaccineName: string;
+                } | {
+                    followUpDate: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** Format: date */
+                        value: string;
+                    };
+                    reasonForVisit: string;
+                    /** @enum {string} */
+                    schema: "doctor_visit.v1";
+                    tags: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                } | {
+                    duration: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    endDate: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** Format: date */
+                        value: string;
+                    };
+                    medicines: string;
+                    /** @enum {string} */
+                    schema: "prescription.v1";
+                    writtenSchedule: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
                 };
                 notes: {
                     /** @enum {string} */
@@ -4498,6 +5776,77 @@ export interface components {
                         };
                         /** @enum {string} */
                         schema: "document.v1";
+                    } | {
+                        batchLot: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        dateMeaning: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** @enum {string} */
+                            value: "due" | "given";
+                        };
+                        /** @enum {string} */
+                        schema: "vaccination.v1";
+                        vaccineName: string;
+                    } | {
+                        followUpDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        reasonForVisit: string;
+                        /** @enum {string} */
+                        schema: "doctor_visit.v1";
+                        tags: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    } | {
+                        duration: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        endDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        medicines: string;
+                        /** @enum {string} */
+                        schema: "prescription.v1";
+                        writtenSchedule: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
                     };
                     notes: {
                         /** @enum {string} */

@@ -2,6 +2,7 @@ domains:
   vault-records:
     keywords:
       - vlt-01
+      - vlt-02
       - vault
       - record model
       - record version
@@ -9,12 +10,16 @@ domains:
       - timeline projection
       - correction
       - record tombstone
+      - manual record
+      - record draft
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/impl-plan/roadmap.md
       - docs/impl-plan/m3-vault-wedge/README.md
       - docs/impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md
       - docs/impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md
+      - docs/impl-plan/m3-vault-wedge/vlt-02-manual-record-creation-plan.md
+      - docs/impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md
       - docs/core/littlearc-complete-product-plan.md
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/core/backend-data-model-and-database-schema.md
