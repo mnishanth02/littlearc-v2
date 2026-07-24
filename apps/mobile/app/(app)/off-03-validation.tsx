@@ -59,11 +59,11 @@ export default function Off03ValidationScreen() {
         appVersion: Constants.expoConfig?.version ?? "0.0.1",
         deviceId,
         localSchemaVersion: 1,
-        platform: "android",
+        platform: process.env.EXPO_OS === "ios" ? "ios" : "android",
       }),
       headers: {
         "content-type": "application/json",
-        "x-littlearc-synthetic-session": "off03-pixel8",
+        "x-littlearc-synthetic-session": "off03-device-validation",
       },
       method: "POST",
     });
@@ -93,8 +93,8 @@ export default function Off03ValidationScreen() {
 
         {step === "capability" ? (
           <ValidationStep
-            action="Check physical-device security"
-            body="Confirm hardware, enrolled strong biometrics, and protected SecureStore support."
+            action="Check device security"
+            body="Confirm enrolled strong biometrics and protected SecureStore support."
             onPress={() =>
               void run(async () => {
                 const capability = await inspectLocalSecurityCapability();
@@ -109,6 +109,7 @@ export default function Off03ValidationScreen() {
                 setStep("enrollment");
               })
             }
+            testID="off03-capability"
             title="1. Device capability"
           />
         ) : null}
@@ -117,6 +118,7 @@ export default function Off03ValidationScreen() {
             action="Enroll this synthetic installation"
             body="Register the installation, create a protected random SQLCipher key, and apply local schema V1."
             onPress={() => void run(enroll)}
+            testID="off03-enrollment"
             title="2. Device and local enrollment"
           />
         ) : null}
@@ -141,6 +143,7 @@ export default function Off03ValidationScreen() {
                 setStep("invalidation");
               })
             }
+            testID="off03-unlock"
             title="3. App lock and encrypted storage"
           />
         ) : null}
@@ -160,6 +163,7 @@ export default function Off03ValidationScreen() {
                 setStep("recovery");
               })
             }
+            testID="off03-invalidation"
             title="4. Invalidation handling"
           />
         ) : null}
@@ -183,6 +187,7 @@ export default function Off03ValidationScreen() {
                 setStep("wipe");
               })
             }
+            testID="off03-recovery"
             title="5. Safe recovery"
           />
         ) : null}
@@ -200,6 +205,7 @@ export default function Off03ValidationScreen() {
                 setStep("complete");
               })
             }
+            testID="off03-wipe"
             title="6. Sign-out wipe"
           />
         ) : null}
@@ -226,7 +232,7 @@ export default function Off03ValidationScreen() {
         ) : null}
         {step === "complete" ? (
           <View
-            accessibilityLabel="OFF-03 physical Android validation passed"
+            accessibilityLabel="OFF-03 device validation passed"
             accessibilityRole="summary"
             style={styles.panel}
           >
@@ -251,13 +257,14 @@ function ValidationStep(props: {
   readonly action: string;
   readonly body: string;
   readonly onPress: () => void;
+  readonly testID: string;
   readonly title: string;
 }) {
   return (
     <View style={styles.panel}>
       <Typography textRole="sectionTitle">{props.title}</Typography>
       <Typography>{props.body}</Typography>
-      <Button label={props.action} onPress={props.onPress} />
+      <Button label={props.action} onPress={props.onPress} testID={props.testID} />
     </View>
   );
 }

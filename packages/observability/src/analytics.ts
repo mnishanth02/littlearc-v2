@@ -1,7 +1,22 @@
 import { assertNoSensitiveCanary, type SensitiveCanary } from "./canary.js";
 import type { RuntimeEnvironment, ServiceName } from "./types.js";
 
-export const analyticsEventNames = ["application_started", "foundation_health_checked"] as const;
+export const onboardingMilestones = [
+  "privacy_promise",
+  "account_ready",
+  "consent_accepted",
+  "child_created",
+  "emergency_card_synced",
+  "first_record_preview",
+  "onboarding_completed",
+] as const;
+export type OnboardingMilestone = (typeof onboardingMilestones)[number];
+
+export const analyticsEventNames = [
+  "application_started",
+  "foundation_health_checked",
+  "onboarding_milestone_reached",
+] as const;
 export type AnalyticsEventName = (typeof analyticsEventNames)[number];
 
 export type AnalyticsEventMap = {
@@ -14,6 +29,11 @@ export type AnalyticsEventMap = {
     readonly duration: "under_100ms" | "under_500ms" | "under_2s" | "over_2s";
     readonly outcome: "failure" | "success";
     readonly service: ServiceName;
+  };
+  readonly onboarding_milestone_reached: {
+    readonly milestone: OnboardingMilestone;
+    readonly outcome: "completed" | "previewed" | "skipped";
+    readonly platform: "android" | "ios";
   };
 };
 
@@ -80,6 +100,15 @@ export function sanitizeAnalyticsEvent(name: string, properties: unknown): SafeA
     const service = requireEnum(value.service, ["api", "worker", "mobile", "ops-web"]);
 
     return { name, properties: { duration, outcome, service } };
+  }
+
+  if (name === "onboarding_milestone_reached") {
+    const value = requireExactObject(properties, ["milestone", "outcome", "platform"]);
+    const milestone = requireEnum(value.milestone, onboardingMilestones);
+    const outcome = requireEnum(value.outcome, ["completed", "previewed", "skipped"]);
+    const platform = requireEnum(value.platform, ["android", "ios"]);
+
+    return { name, properties: { milestone, outcome, platform } };
   }
 
   throw new Error(`Analytics event is not allowlisted: ${name}`);

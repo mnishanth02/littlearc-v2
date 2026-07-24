@@ -48,7 +48,7 @@ export default function Off02ValidationScreen() {
         headers: {
           "content-type": "application/json",
           "idempotency-key": idempotencyKey,
-          "x-littlearc-synthetic-session": "off02-pixel8",
+          "x-littlearc-synthetic-session": "off02-device-validation",
         },
         method: "POST",
       });
@@ -82,6 +82,7 @@ export default function Off02ValidationScreen() {
             action="Acknowledge privacy promise"
             body="Review the current synthetic-only notice before any profile is created."
             onPress={() => setStep("verification")}
+            testID="off02-privacy"
             title="1. Privacy promise"
           />
         ) : null}
@@ -90,6 +91,7 @@ export default function Off02ValidationScreen() {
             action="Run synthetic adult verification"
             body="Use the injected local fixture. No document, provider response, or adult evidence is persisted."
             onPress={() => setStep("consent")}
+            testID="off02-verification"
             title="2. Adult verification"
           />
         ) : null}
@@ -98,6 +100,7 @@ export default function Off02ValidationScreen() {
             action="Grant required synthetic consent"
             body="Grant parent-notice-v1 and child-data-processing-v1. Optional AI and vision processing remain off."
             onPress={() => setStep("review")}
+            testID="off02-consent"
             title="3. Notice and consent"
           />
         ) : null}
@@ -107,7 +110,11 @@ export default function Off02ValidationScreen() {
             <Typography>Parent: Synthetic Parent · parent</Typography>
             <Typography>Child: Synthetic Child · 2020-01-01</Typography>
             <Typography>Country and time zone: IN · Asia/Kolkata</Typography>
-            <Button label="Create synthetic household" onPress={() => void submit()} />
+            <Button
+              label="Create synthetic household"
+              onPress={() => void submit()}
+              testID="off02-submit"
+            />
           </View>
         ) : null}
         {step === "submitting" ? (
@@ -127,7 +134,7 @@ export default function Off02ValidationScreen() {
         ) : null}
         {step === "complete" && result ? (
           <View
-            accessibilityLabel="OFF-02 physical Android validation passed"
+            accessibilityLabel="OFF-02 device validation passed"
             accessibilityRole="summary"
             style={styles.panel}
           >
@@ -153,13 +160,14 @@ function ValidationStep(props: {
   readonly action: string;
   readonly body: string;
   readonly onPress: () => void;
+  readonly testID: string;
   readonly title: string;
 }) {
   return (
     <View style={styles.panel}>
       <Typography textRole="sectionTitle">{props.title}</Typography>
       <Typography>{props.body}</Typography>
-      <Button label={props.action} onPress={props.onPress} />
+      <Button label={props.action} onPress={props.onPress} testID={props.testID} />
     </View>
   );
 }

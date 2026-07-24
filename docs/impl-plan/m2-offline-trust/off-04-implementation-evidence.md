@@ -157,3 +157,12 @@ server-authority and cursor decisions, transactional PostgreSQL and SQLCipher
 repositories, adversarial integration, all repository gates, and the complete
 bounded Pixel 8 lifecycle. OFF-05 planning is ready next; the real-provider,
 real-data, physical-iOS, two-device, and pre-pilot obligations remain unchanged.
+
+## iOS Simulator Parity Follow-Up — 23 July 2026
+
+The production custom development client passed enrollment, initial
+reset/snapshot, offline queue, push/pull, exact replay, stale conflict,
+tombstone, cursor expiry/reset, real process termination/relaunch, retained
+SQLCipher resume, discard warning, and wipe. The second writer remained
+server-simulated, so two-device and physical-iOS evidence stays open. See the
+[cross-milestone parity dossier](../ios-simulator-parity-validation-evidence.md).

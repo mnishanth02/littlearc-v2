@@ -287,9 +287,10 @@ Accepted implementation and validation evidence is recorded in the
   and physical-device abuse cases.
 - OFF-06 consumes the confirmed emergency-card setup and completion boundary in
   the onboarding activation shell.
-- Gate 2 still requires both-platform onboarding, a real two-device stale
-  conflict, duplicate/cursor/session/RLS evidence alignment, and its other
-  named criteria before M3 breadth is authorized.
+- OFF-06 later added bounded physical-Android plus iOS-Simulator onboarding
+  coverage. Gate 2 still requires a real two-device stale conflict,
+  duplicate/cursor/session/RLS evidence alignment, and its other unproven named
+  criteria before M3 breadth is authorized.
 - Physical iOS, actual biometric-set mutation, signed distribution, upgrade,
   lower-memory Android, and the complete assistive-technology matrix remain
   pre-pilot obligations.

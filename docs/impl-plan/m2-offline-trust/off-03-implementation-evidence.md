@@ -142,3 +142,12 @@ key custody and authority rules, adversarial PostgreSQL integration, repository
 gates, and a complete physical Pixel 8 native lifecycle. OFF-04 planning is
 ready next; the real-data, provider, physical-iOS, and pre-pilot obligations
 remain unchanged.
+
+## iOS Simulator Parity Follow-Up — 23 July 2026
+
+The production custom development client passed capability, enrollment,
+SQLCipher V3, matching simulated Face ID unlock, wrong-key/AAD/tamper
+rejection, key invalidation, recovery/re-enrollment, resynchronization, and
+sign-out wipe against a fresh disposable Aiven database. Simulated Face ID
+does not prove physical Secure Enclave behavior. See the
+[cross-milestone parity dossier](../ios-simulator-parity-validation-evidence.md).

@@ -39,7 +39,9 @@ type Step =
   | "working"
   | "error";
 
-const validationHeaders = { "x-littlearc-synthetic-session": "off04-pixel8" } as const;
+const validationHeaders = {
+  "x-littlearc-synthetic-session": "off04-device-validation",
+} as const;
 
 export default function Off04ValidationScreen() {
   const environment = getMobileEnvironment();
@@ -130,7 +132,7 @@ export default function Off04ValidationScreen() {
                       appVersion: Constants.expoConfig?.version ?? "0.0.1",
                       deviceId,
                       localSchemaVersion: 2,
-                      platform: "android",
+                      platform: process.env.EXPO_OS === "ios" ? "ios" : "android",
                     }),
                     method: "POST",
                   });
@@ -478,7 +480,7 @@ export default function Off04ValidationScreen() {
         ) : null}
         {step === "complete" ? (
           <View
-            accessibilityLabel="OFF-04 physical Android validation passed"
+            accessibilityLabel="OFF-04 device validation passed"
             accessibilityRole="summary"
             style={styles.panel}
           >

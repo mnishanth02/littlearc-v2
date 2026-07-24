@@ -2,7 +2,7 @@
 
 > **Status:** Accepted execution baseline — see the [Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) for live delivery state
 > **Version:** 1.2
-> **Last updated:** 22 July 2026
+> **Last updated:** 23 July 2026
 > **Product source:** [LittleArc Complete Product Plan](../core/littlearc-complete-product-plan.md)
 > **Architecture source:** [LittleArc Architecture and Technology Stack](../core/littlearc-architecture-and-tech-stack.md)
 > **Design-system source:** [LittleArc Design System](../core/design-system.md)
@@ -652,6 +652,30 @@ through the production-shaped architecture.
 - Defer shareable image/PDF unless explicitly promoted into committed MVP scope.
 
 #### `OFF-06` Onboarding activation shell
+
+> **Implementation status (23 July 2026): COMPLETE.** The accepted synthetic
+> slice composes the OFF-01 through OFF-05 boundaries into a seven-step
+> accessible shell with atomic owner/child creation, protected SQLCipher
+> enrollment, shared authoritative emergency-card synchronization, an
+> explicitly non-persisted first-record preview, strict coarse analytics, 176
+> tests, Aiven integration, Android/iOS exports, a bounded Pixel 8 lifecycle,
+> and an iOS 26.5 iPhone 17 Pro Simulator follow-up covering the full shell,
+> simulated Face ID, API-down safe retry, accessibility sizing, restart, and
+> API-offline SQLCipher read. See the
+> [OFF-06 evidence dossier](./m2-offline-trust/off-06-implementation-evidence.md).
+> The abandoned OnePlus attempt was blocked by unavailable enrolled biometrics
+> and is recorded as capability evidence only. Gate 2 remains open for
+> two-device conflict, the complete assistive-technology/low-end matrix, and
+> its other unproven named criteria. Physical-iOS pre-pilot evidence remains
+> unchanged; simulated Face ID is not physical Secure Enclave evidence.
+<!-- Follow-up evidence is a separate status callout. -->
+> **Cross-milestone validation follow-up (23 July 2026): COMPLETE.** A current
+> iPhone 17 Pro Simulator pass classified every implemented `RDY`, `FND`,
+> Gate 1, and `OFF-01` through `OFF-06` row and exercised every applicable
+> production mobile flow. See the
+> [cross-milestone evidence dossier](./ios-simulator-parity-validation-evidence.md).
+> The follow-up changes no roadmap order or gate definition and does not convert
+> Simulator results into physical-iOS evidence.
 
 - Implement value/privacy promise, account, consent, child basics, and emergency
   card setup.
@@ -1445,8 +1469,8 @@ The recommended M1 implementation sequence is:
 11. `OFF-03` + `OFF-04` — plan local security and synchronization.
 12. `OFF-05` — complete the emergency-card walking skeleton and its bounded
     standard-access Gate 2 contribution.
-13. `OFF-06` — plan the onboarding activation shell and the remaining
-    both-platform Gate 2 scenarios.
+13. `OFF-06` — complete the onboarding activation shell and record its bounded
+    Pixel 8 plus iOS Simulator Gate 2 contribution.
 
 This section expresses dependency order, not current delivery state. Use the
 [Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) to select the next

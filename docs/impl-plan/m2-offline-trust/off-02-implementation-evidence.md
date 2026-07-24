@@ -133,3 +133,12 @@ including encryption, atomicity, tenant isolation, append-only evidence,
 automated repository gates, real PostgreSQL integration, and the bounded Pixel
 8 UI/HTTP/database proof. OFF-03 planning is next; live verification providers,
 real data, physical iOS, and Gate 2 remain outside this acceptance.
+
+## iOS Simulator Parity Follow-Up — 23 July 2026
+
+The production custom development client completed privacy, synthetic adult
+verification, required consent, review, atomic submission, and completion
+against a fresh disposable Aiven database. Exact household/child/consent,
+audit, RLS, rollback, and plaintext-canary evidence passed. This is synthetic
+Simulator evidence, not live-provider or physical-iOS proof. See the
+[cross-milestone parity dossier](../ios-simulator-parity-validation-evidence.md).

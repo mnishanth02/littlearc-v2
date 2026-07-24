@@ -1,7 +1,7 @@
 # M2 Offline Trust Slice
 
 > **Status:** Active planning index
-> **Last updated:** 2026-07-22
+> **Last updated:** 2026-07-23
 > **Owner:** Engineering
 
 M2 delivers secure enrollment and an offline emergency-card walking skeleton.
@@ -21,6 +21,9 @@ stable plans and their validation evidence.
 - [`OFF-04` implementation evidence](./off-04-implementation-evidence.md)
 - [`OFF-05` Emergency-card vertical slice](./off-05-emergency-card-vertical-slice-plan.md)
 - [`OFF-05` implementation evidence](./off-05-implementation-evidence.md)
+- [`OFF-06` Onboarding activation shell](./off-06-onboarding-activation-shell-plan.md)
+- [`OFF-06` implementation evidence](./off-06-implementation-evidence.md)
+- [Cross-milestone iOS Simulator parity evidence](../ios-simulator-parity-validation-evidence.md)
 
 `OFF-01` and `OFF-02` are planned together because identity IDs, household
 membership, role language, consent, and child-creation gates cross their
@@ -40,5 +43,15 @@ a dedicated encrypted emergency-card aggregate, immutable versions, SQLCipher
 schema V3, and a standard post-unlock UI. Its Aiven, repository, accessibility,
 and bounded Pixel 8 evidence pass. OS-level locked quick access remains gated by
 the unresolved product, security, and privacy decision `OD-03`; Gate 2 remains
-open for `OFF-06`, both-platform onboarding, two physical devices, and its other
-named criteria.
+open for two-device conflict, the complete assistive-technology/low-end matrix,
+and its other unproven named criteria.
+
+`OFF-06` is complete. It composes the accepted authentication, atomic
+owner/child/consent creation, local enrollment, synchronization, and emergency-
+card paths into one activation shell. Its first-record step remains an
+explicitly synthetic, non-persisted M3 preview. Its comprehensive repository,
+Aiven, Android/iOS export, bounded Pixel 8 activation/restart/offline, and iOS
+Simulator activation/simulated-Face-ID/failure/accessibility/restart/offline
+evidence pass. The simulator follow-up contributes both-platform
+development-client coverage but is not physical-iOS or Secure Enclave
+evidence. Package completion does not close Gate 2.

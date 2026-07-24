@@ -1,7 +1,7 @@
 # Implementation Plans
 
 > **Status:** Active index
-> **Last updated:** 2026-07-20
+> **Last updated:** 2026-07-23
 > **Owner:** Engineering
 
 Implementation documents live here under stable milestone folders. Do not move a
@@ -12,6 +12,9 @@ module-status table, evidence links, and
 Current plans:
 
 - [Implementation Plan and Roadmap](./roadmap.md)
+- iOS Simulator Cross-Milestone Parity Validation:
+  [plan](./ios-simulator-parity-validation-plan.md) and
+  [evidence](./ios-simulator-parity-validation-evidence.md)
 - [`M1` Foundation](./m1-foundation/)
 - [`M2` Offline Trust Slice](./m2-offline-trust/)
 

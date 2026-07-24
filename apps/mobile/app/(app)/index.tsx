@@ -70,6 +70,12 @@ export default function LandingScreen() {
           {__DEV__ ? (
             <>
               <Button
+                label="Start OFF-06 synthetic onboarding"
+                onPress={() => router.push("/onboarding")}
+                testID="open-off06-onboarding"
+                variant="secondary"
+              />
+              <Button
                 label="Open OFF-01 device validation"
                 onPress={() => router.push("/off-01-validation")}
                 testID="open-off01-validation"
@@ -79,6 +85,12 @@ export default function LandingScreen() {
                 label="Open OFF-02 synthetic onboarding"
                 onPress={() => router.push("/off-02-validation")}
                 testID="open-off02-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open OFF-03 local-security validation"
+                onPress={() => router.push("/off-03-validation")}
+                testID="open-off03-validation"
                 variant="secondary"
               />
               <Button

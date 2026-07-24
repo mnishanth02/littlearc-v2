@@ -33,6 +33,7 @@ const deviceMode = process.argv.includes("--device");
 const off03DeviceMode = process.argv.includes("--device-off03");
 const off04DeviceMode = process.argv.includes("--device-off04");
 const off05DeviceMode = process.argv.includes("--device-off05");
+const off06DeviceMode = process.argv.includes("--device-off06");
 const syntheticRequest: OwnerOnboardingRequest = {
   adultVerificationAssertion: "synthetic-approved-off-02",
   child: { dateOfBirth: "2020-01-01", preferredName: "Synthetic Child" },
@@ -762,13 +763,13 @@ async function serveDevice(
   command: OwnerOnboardingCommand,
   client: Client,
 ): Promise<() => Promise<void>> {
-  const userId = "synthetic-off02-pixel8";
-  await insertAuthUser(client, userId, "synthetic.off02.pixel8@example.test");
+  const userId = "synthetic-off02-device";
+  await insertAuthUser(client, userId, "synthetic.off02.device@example.test");
   const validatingCommand: OwnerOnboardingCommand = {
     async execute(input) {
       const result = await command.execute(input);
       await assertDatabaseEvidence(client);
-      console.log("OFF-02 physical-device HTTP/database path passed.");
+      console.log("OFF-02 device HTTP/database path passed.");
       return result;
     },
   };
@@ -779,7 +780,9 @@ async function serveDevice(
     {
       command: validatingCommand,
       async getSessionIdentity(headers) {
-        return headers.get("x-littlearc-synthetic-session") === "off02-pixel8" ? { userId } : null;
+        return headers.get("x-littlearc-synthetic-session") === "off02-device-validation"
+          ? { userId }
+          : null;
       },
     },
   );
@@ -793,8 +796,8 @@ async function serveOff03Device(
   deviceCommand: DeviceEnrollmentCommand,
   client: Client,
 ): Promise<() => Promise<void>> {
-  const userId = "synthetic-off03-pixel8";
-  await insertAuthUser(client, userId, "synthetic.off03.pixel8@example.test");
+  const userId = "synthetic-off03-device";
+  await insertAuthUser(client, userId, "synthetic.off03.device@example.test");
   await execute(onboardingCommand, userId);
   const validatingCommand: DeviceEnrollmentCommand = {
     async execute(input) {
@@ -813,7 +816,7 @@ async function serveOff03Device(
       assert(evidence.rows[0]?.devices === "1", "OFF-03 device row was not active.");
       assert(evidence.rows[0]?.audit === "1", "OFF-03 device audit evidence was incomplete.");
       assert(evidence.rows[0]?.outbox === "1", "OFF-03 device outbox evidence was incomplete.");
-      console.log("OFF-03 physical-device HTTP/database path passed.");
+      console.log("OFF-03 device HTTP/database path passed.");
       return result;
     },
   };
@@ -825,7 +828,9 @@ async function serveOff03Device(
     {
       command: validatingCommand,
       async getSessionIdentity(headers) {
-        return headers.get("x-littlearc-synthetic-session") === "off03-pixel8" ? { userId } : null;
+        return headers.get("x-littlearc-synthetic-session") === "off03-device-validation"
+          ? { userId }
+          : null;
       },
     },
   );
@@ -840,11 +845,11 @@ async function serveOff04Device(
   syncService: SyncService,
   client: Client,
 ): Promise<() => Promise<void>> {
-  const userId = "synthetic-off04-pixel8";
-  await insertAuthUser(client, userId, "synthetic.off04.pixel8@example.test");
+  const userId = "synthetic-off04-device";
+  await insertAuthUser(client, userId, "synthetic.off04.device@example.test");
   const onboarding = await execute(onboardingCommand, userId);
   const getSessionIdentity = async (headers: Headers) =>
-    headers.get("x-littlearc-synthetic-session") === "off04-pixel8" ? { userId } : null;
+    headers.get("x-littlearc-synthetic-session") === "off04-device-validation" ? { userId } : null;
   const validatingSyncService: SyncService = {
     readEmergencyCard: syncService.readEmergencyCard,
     async pull(input) {
@@ -1024,12 +1029,12 @@ async function serveOff05Device(
   syncService: SyncService,
   client: Client,
 ): Promise<() => Promise<void>> {
-  const userId = "synthetic-off05-pixel8";
-  await insertAuthUser(client, userId, "synthetic.off05.pixel8@example.test");
+  const userId = "synthetic-off05-device";
+  await insertAuthUser(client, userId, "synthetic.off05.device@example.test");
   const onboarding = await execute(onboardingCommand, userId);
   const cardId = nextId();
   const getSessionIdentity = async (headers: Headers) =>
-    headers.get("x-littlearc-synthetic-session") === "off05-pixel8" ? { userId } : null;
+    headers.get("x-littlearc-synthetic-session") === "off05-device-validation" ? { userId } : null;
   const server = await createApiServer(
     loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
     undefined,
@@ -1038,6 +1043,32 @@ async function serveOff05Device(
     { command: deviceCommand, getSessionIdentity },
     { getSessionIdentity, service: syncService },
   );
+  let apiAvailable = true;
+
+  server.addHook("onRequest", async (request, reply) => {
+    if (!apiAvailable && request.url !== "/v1/validation/off05/connectivity") {
+      return reply.status(503).send({ error: "synthetic_api_unavailable" });
+    }
+  });
+
+  server.get("/v1/validation/off05/connectivity", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    return { available: apiAvailable };
+  });
+  server.post("/v1/validation/off05/connectivity", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const body = request.body as { readonly available?: unknown };
+    if (typeof body.available !== "boolean") {
+      return reply.status(400).send({ error: "invalid_availability" });
+    }
+    apiAvailable = body.available;
+    console.log(`OFF-05 synthetic API ${apiAvailable ? "restored" : "unavailable"}.`);
+    return { available: apiAvailable };
+  });
 
   server.get("/v1/validation/off05/bootstrap", async (request, reply) => {
     if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
@@ -1113,6 +1144,85 @@ async function serveOff05Device(
   return async () => server.close();
 }
 
+async function serveOff06Device(
+  onboardingCommand: OwnerOnboardingCommand,
+  deviceCommand: DeviceEnrollmentCommand,
+  syncService: SyncService,
+  client: Client,
+): Promise<() => Promise<void>> {
+  const userId = "synthetic-off06-device";
+  await insertAuthUser(client, userId, "synthetic.off06.device@example.test");
+  const getSessionIdentity = async (headers: Headers) =>
+    headers.get("x-littlearc-synthetic-session") === "off06-device-validation" ? { userId } : null;
+  const server = await createApiServer(
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    undefined,
+    undefined,
+    { command: onboardingCommand, getSessionIdentity },
+    { command: deviceCommand, getSessionIdentity },
+    { getSessionIdentity, service: syncService },
+  );
+
+  server.get("/v1/validation/off06/session", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    return { ready: true };
+  });
+
+  server.get("/v1/validation/off06/evidence", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const result = await client.query<{
+      readonly cards: string;
+      readonly children: string;
+      readonly consents: string;
+      readonly devices: string;
+      readonly households: string;
+      readonly versions: string;
+    }>(
+      `with owner_household as (
+         select household_id
+         from littlearc.household_memberships
+         where user_id = $1 and role = 'owner' and status = 'active'
+       )
+       select
+         (select count(*)::text from owner_household) households,
+         (select count(*)::text from littlearc.children
+           where household_id = (select household_id from owner_household)) children,
+         (select count(*)::text from littlearc.consent_events
+           where household_id = (select household_id from owner_household)
+             and state = 'granted'
+             and purpose in ('parent_notice', 'child_data_processing')) consents,
+         (select count(*)::text from littlearc.devices
+           where user_id = $1 and enrollment_status = 'active') devices,
+         (select count(*)::text from littlearc.emergency_cards
+           where household_id = (select household_id from owner_household)
+             and status = 'active') cards,
+         (select count(*)::text from littlearc.emergency_card_versions
+           where household_id = (select household_id from owner_household)) versions`,
+      [userId],
+    );
+    const evidence = result.rows[0];
+    assert(evidence, "OFF-06 evidence counts were unavailable.");
+    const passed =
+      evidence.households === "1" &&
+      evidence.children === "1" &&
+      evidence.consents === "2" &&
+      evidence.devices === "1" &&
+      evidence.cards === "1" &&
+      evidence.versions === "1";
+    assert(passed, "OFF-06 composed server evidence was incomplete.");
+    console.log("OFF-06 device HTTP/database composition passed.");
+    return { ...evidence, status: "passed" };
+  });
+
+  await server.listen({ host: "127.0.0.1", port: 3000 });
+  console.log("OFF-06 synthetic device API listening on 127.0.0.1:3000.");
+  return async () => server.close();
+}
+
 async function run(): Promise<void> {
   const sourceUrl = process.env.DATABASE_URL;
   assert(sourceUrl, "DATABASE_URL must be loaded from the untracked .env.aiven file.");
@@ -1166,7 +1276,13 @@ async function run(): Promise<void> {
       persistence: createSyncPersistence({ crypto, database: connection.database }),
     });
 
-    if (off05DeviceMode) {
+    if (off06DeviceMode) {
+      closeServer = await serveOff06Device(command, deviceCommand, syncService, databaseClient);
+      await new Promise<void>((resolve) => {
+        process.once("SIGINT", resolve);
+        process.once("SIGTERM", resolve);
+      });
+    } else if (off05DeviceMode) {
       closeServer = await serveOff05Device(command, deviceCommand, syncService, databaseClient);
       await new Promise<void>((resolve) => {
         process.once("SIGINT", resolve);

@@ -40,6 +40,39 @@ describe("analytics allowlist", () => {
     ]);
   });
 
+  it("accepts only coarse onboarding milestones without identifiers", () => {
+    expect(
+      sanitizeAnalyticsEvent("onboarding_milestone_reached", {
+        milestone: "emergency_card_synced",
+        outcome: "completed",
+        platform: "android",
+      }),
+    ).toEqual({
+      name: "onboarding_milestone_reached",
+      properties: {
+        milestone: "emergency_card_synced",
+        outcome: "completed",
+        platform: "android",
+      },
+    });
+
+    expect(() =>
+      sanitizeAnalyticsEvent("onboarding_milestone_reached", {
+        childId: "01900000-0000-7000-8000-000000000001",
+        milestone: "child_created",
+        outcome: "completed",
+        platform: "android",
+      }),
+    ).toThrow("do not match");
+    expect(() =>
+      sanitizeAnalyticsEvent("onboarding_milestone_reached", {
+        milestone: "child_01900000-0000-7000-8000-000000000001",
+        outcome: "completed",
+        platform: "android",
+      }),
+    ).toThrow("bounded value set");
+  });
+
   it("rejects unknown events, extra fields, free text, and canary values", () => {
     expect(() => sanitizeAnalyticsEvent("record_opened", {})).toThrow("not allowlisted");
     expect(() =>

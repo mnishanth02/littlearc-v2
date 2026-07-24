@@ -1,7 +1,7 @@
 # M1 Foundation Plans
 
 > **Status:** Active index
-> **Last updated:** 2026-07-20
+> **Last updated:** 2026-07-23
 > **Owner:** Engineering
 
 This folder contains implementation plans and validation evidence for M1
@@ -29,6 +29,7 @@ Current package documents:
 - [`FND-09` Implementation Evidence](./fnd-09-implementation-evidence.md)
 - [Gate 1 Mobile Device and Accessibility Evidence](./gate-1-mobile-device-and-accessibility-evidence.md)
 - [Gate 1 Aiven PostgreSQL RLS Evidence](./gate-1-aiven-rls-evidence.md)
+- [Cross-milestone iOS Simulator parity evidence](../ios-simulator-parity-validation-evidence.md)
 
 The live status for these work packages remains in
 [IMPLEMENTATION_STATUS.md](../../IMPLEMENTATION_STATUS.md).

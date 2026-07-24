@@ -2,7 +2,6 @@ import { createUuidV7, type EmergencyCardContent } from "@littlearc/domain";
 import { useQueryClient } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { getRandomBytes } from "expo-crypto";
-import * as Network from "expo-network";
 import { Redirect, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import { Linking, ScrollView, View } from "react-native";
@@ -37,7 +36,9 @@ type Step =
   | "working"
   | "error";
 
-const validationHeaders = { "x-littlearc-synthetic-session": "off05-pixel8" } as const;
+const validationHeaders = {
+  "x-littlearc-synthetic-session": "off05-device-validation",
+} as const;
 const content: EmergencyCardContent = {
   allergies: { state: "noneConfirmed" },
   bloodGroup: { state: "confirmed", value: "O+" },
@@ -100,6 +101,13 @@ export default function Off05ValidationScreen() {
     return response;
   }
 
+  async function setApiAvailability(available: boolean): Promise<void> {
+    await request("/v1/validation/off05/connectivity", {
+      body: JSON.stringify({ available }),
+      method: "POST",
+    });
+  }
+
   async function sync(householdId: string) {
     return withUnlockedLocalDatabase((database) =>
       queryClient.fetchQuery(
@@ -120,7 +128,7 @@ export default function Off05ValidationScreen() {
           OFF-05 emergency card
         </Typography>
         <Banner
-          message="This proof uses fixed synthetic contacts and health states, a disposable database, standard post-unlock access, and one Pixel 8. It is not a quick-access, real-data, physical-iOS, or two-device claim."
+          message="This proof uses fixed synthetic contacts and health states, a disposable database, standard post-unlock access, and one development client. It is not a quick-access, real-data, physical-iOS, or two-device claim."
           title="Synthetic evidence boundary"
           variant="warning"
         />
@@ -141,7 +149,7 @@ export default function Off05ValidationScreen() {
                       appVersion: Constants.expoConfig?.version ?? "0.0.1",
                       deviceId,
                       localSchemaVersion: 3,
-                      platform: "android",
+                      platform: process.env.EXPO_OS === "ios" ? "ios" : "android",
                     }),
                     method: "POST",
                   });
@@ -195,7 +203,6 @@ export default function Off05ValidationScreen() {
                     setStep("conflict");
                     return;
                   }
-                  const network = await Network.getNetworkStateAsync();
                   if (
                     resumed.card.revision !== 1 ||
                     resumed.card.version !== 1 ||
@@ -203,11 +210,14 @@ export default function Off05ValidationScreen() {
                   ) {
                     throw new Error("The retained confirmed card is incomplete.");
                   }
-                  if (network.isConnected === true) {
-                    throw new Error("Disable Wi-Fi and mobile data before resuming version 1.");
+                  const connectivity = (await (
+                    await request("/v1/validation/off05/connectivity")
+                  ).json()) as { available: boolean };
+                  if (connectivity.available) {
+                    throw new Error("Put the synthetic API into outage mode before resuming.");
                   }
                   setSummary(
-                    `${resumed.card.content.preferredName} · O+ · none confirmed allergies · offline version 1`,
+                    `${resumed.card.content.preferredName} · O+ · none confirmed allergies · API-offline version 1`,
                   );
                   setStep("reconnect");
                 })
@@ -263,9 +273,7 @@ export default function Off05ValidationScreen() {
                 if (card?.revision !== 1 || card.version !== 1 || card.syncStatus !== "synced") {
                   throw new Error("The confirmed emergency-card version did not synchronize.");
                 }
-                setSummary(
-                  "Version 1 confirmed · open Emergency from home, then enable airplane mode",
-                );
+                setSummary("Version 1 confirmed · open Emergency, then simulate an API outage");
                 setStep("offline");
               })
             }
@@ -279,8 +287,20 @@ export default function Off05ValidationScreen() {
             <Typography textRole="sectionTitle">4. Offline product route</Typography>
             <Typography>
               Open the production card, verify selectable facts and contact actions, return here,
-              enable airplane mode, force-stop LittleArc, relaunch, and use Resume.
+              simulate an API outage, terminate LittleArc, relaunch, and use Resume.
             </Typography>
+            <Button
+              label="Simulate API outage for restart"
+              onPress={() =>
+                void run(async () => {
+                  await setApiAvailability(false);
+                  setSummary("Synthetic API unavailable · restart and resume from SQLCipher");
+                  setStep("offline");
+                })
+              }
+              testID="off05-outage"
+              variant="secondary"
+            />
             <Button
               label="Open production emergency card"
               onPress={() => router.push("/emergency")}
@@ -303,10 +323,7 @@ export default function Off05ValidationScreen() {
               label="Reconnect and create stale conflict"
               onPress={() =>
                 void run(async () => {
-                  const network = await Network.getNetworkStateAsync();
-                  if (network.isConnected !== true) {
-                    throw new Error("Reconnect Wi-Fi or mobile data before conflict validation.");
-                  }
+                  await setApiAvailability(true);
                   await request("/v1/validation/off05/remote-edit", { method: "POST" });
                   await withUnlockedLocalDatabase((database) =>
                     queueEmergencyCardUpdate(database, {
@@ -385,7 +402,7 @@ export default function Off05ValidationScreen() {
                 if (!(await verifyLocalSecurityWiped())) {
                   throw new Error("Sensitive local emergency data remained after wipe.");
                 }
-                setSummary("OFF-05 physical Android validation passed");
+                setSummary("OFF-05 device validation passed");
                 setStep("complete");
               })
             }
@@ -407,7 +424,7 @@ export default function Off05ValidationScreen() {
         {step === "complete" ? (
           <Banner
             message="The standard-access encrypted emergency-card lifecycle completed on this device."
-            title="OFF-05 physical Android validation passed"
+            title="OFF-05 device validation passed"
             variant="success"
           />
         ) : null}

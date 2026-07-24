@@ -1,7 +1,7 @@
 # LittleArc Repository Knowledge Index
 
 > **Status:** Active context index
-> **Last updated:** 2026-07-22
+> **Last updated:** 2026-07-23
 > **Owner:** Engineering
 
 ---
@@ -31,6 +31,7 @@
 
 | Work | Status source | Detailed plan or evidence |
 | --- | --- | --- |
+| iOS Simulator cross-milestone parity validation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/ios-simulator-parity-validation-plan.md), [evidence](./impl-plan/ios-simulator-parity-validation-evidence.md) |
 | M1 foundation queue | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [impl-plan/roadmap.md](./impl-plan/roadmap.md) |
 | `FND-01` monorepo and toolchain | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-01-monorepo-and-toolchain-plan.md), [evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
 | `FND-02` CI and supply-chain baseline | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-02-ci-and-supply-chain-plan.md), [evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |
@@ -46,6 +47,7 @@
 | `OFF-03` local security and enrollment | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-03-local-security-and-enrollment-plan.md), [evidence](./impl-plan/m2-offline-trust/off-03-implementation-evidence.md) |
 | `OFF-04` repository and synchronization engine | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-04-repository-and-synchronization-engine-plan.md), [evidence](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) |
 | `OFF-05` emergency-card vertical slice | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-05-emergency-card-vertical-slice-plan.md), [evidence](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) |
+| `OFF-06` onboarding activation shell | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m2-offline-trust/off-06-onboarding-activation-shell-plan.md), [evidence](./impl-plan/m2-offline-trust/off-06-implementation-evidence.md) |
 
 ## Engineering Baseline
 

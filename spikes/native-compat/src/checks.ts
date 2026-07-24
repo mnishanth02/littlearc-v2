@@ -218,7 +218,21 @@ export async function probeBiometrics(): Promise<ProbeResult> {
 }
 
 export async function probeScannerAndOCR(): Promise<ProbeResult> {
-  const scan = await DocumentScanner.scanDocument({ maxNumDocuments: 3 });
+  let scan: Awaited<ReturnType<typeof DocumentScanner.scanDocument>>;
+  try {
+    scan = await DocumentScanner.scanDocument({ maxNumDocuments: 3 });
+  } catch (error) {
+    const message = errorMessage(error);
+    if (message.toLowerCase().includes('not supported')) {
+      return {
+        summary: 'Scanner API loaded and reported that document scanning is unsupported on this device.',
+        details: { pageCount: 0, supported: false },
+        followUp:
+          'This is the expected iOS Simulator boundary; complete multi-page camera and offline OCR checks on the required physical-device matrix.',
+      };
+    }
+    throw error;
+  }
   const scannedImages = scan.scannedImages ?? [];
   const scanStatus = scan.status ?? 'unknown';
   if (scannedImages.length === 0) {

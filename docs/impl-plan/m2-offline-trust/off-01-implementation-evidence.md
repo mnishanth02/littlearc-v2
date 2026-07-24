@@ -139,3 +139,12 @@ has real PostgreSQL lifecycle evidence, and now has a bounded physical-Android
 SecureStore and deep-link proof. OFF-02 has consumed this identity/session
 boundary without expanding OFF-01 into household authorization or real-data
 handling; OFF-03 planning is next.
+
+## iOS Simulator Parity Follow-Up — 23 July 2026
+
+The production custom development client passed the bounded OFF-01 iOS
+Simulator path: Better Auth client initialization, SecureStore
+write/read/delete, and `littlearc` deep-link routing. Live email/social
+providers, delivery, and physical-iOS session behavior remain outside this
+proof. See the
+[cross-milestone parity dossier](../ios-simulator-parity-validation-evidence.md).

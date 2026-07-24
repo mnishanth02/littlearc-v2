@@ -161,8 +161,10 @@ database state. It does not claim:
   mutation, or the complete pre-pilot matrix;
 - specialist approval of clinical terms, privacy/legal policy, retention,
   deletion, backup, or incident handling; or
-- Gate 2 closure. OFF-06, both-platform onboarding, real two-device conflict,
-  and the remaining gate criteria stay open.
+- Gate 2 closure. At OFF-05 acceptance, OFF-06 and both-platform onboarding
+  were still open. OFF-06 later added bounded physical-Android plus
+  iOS-Simulator onboarding coverage; real two-device conflict and the
+  remaining unproven gate criteria stay open.
 
 ## 8. Completion Decision
 
@@ -171,3 +173,13 @@ through a dedicated encrypted aggregate, immutable version history, shared
 synchronization, SQLCipher V3, accessible production UI, Aiven integration,
 all repository gates, and the bounded Pixel 8 lifecycle. `OD-03`, OFF-06, and
 the wider Gate 2/pre-pilot obligations remain unchanged.
+
+## iOS Simulator Parity Follow-Up — 23 July 2026
+
+The production custom development client passed create/sync, the production
+emergency route, a controlled API outage, real process termination/relaunch,
+API-offline SQLCipher version 1, stale conflict, two immutable versions,
+minimized server evidence, discard, and wipe. iOS emitted the expected
+Simulator warning that no Phone app is available for the `tel:` URL; a real
+dialer handoff and radio-off test remain physical-iPhone evidence. See the
+[cross-milestone parity dossier](../ios-simulator-parity-validation-evidence.md).
