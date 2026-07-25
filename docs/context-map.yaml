@@ -3,6 +3,7 @@ domains:
     keywords:
       - vlt-01
       - vlt-02
+      - vlt-03
       - vault
       - record model
       - record version
@@ -12,6 +13,11 @@ domains:
       - record tombstone
       - manual record
       - record draft
+      - capture
+      - scanner
+      - gallery
+      - document picker
+      - incoming share
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/impl-plan/roadmap.md
@@ -20,6 +26,9 @@ domains:
       - docs/impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md
       - docs/impl-plan/m3-vault-wedge/vlt-02-manual-record-creation-plan.md
       - docs/impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md
+      - docs/impl-plan/m3-vault-wedge/vlt-03-capture-and-import-adapters-plan.md
+      - docs/impl-plan/m3-vault-wedge/vlt-03-capture-and-import-adapters-research.md
+      - docs/impl-plan/m3-vault-wedge/vlt-03-implementation-evidence.md
       - docs/core/littlearc-complete-product-plan.md
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/core/backend-data-model-and-database-schema.md

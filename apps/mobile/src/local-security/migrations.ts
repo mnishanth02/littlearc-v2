@@ -214,6 +214,54 @@ export const localMigrations: ReadonlyArray<LocalMigration> = [
         ON local_record_drafts(child_id, updated_at DESC, draft_id DESC);
     `,
   },
+  {
+    version: 6,
+    sql: `
+      CREATE TABLE local_capture_drafts (
+        draft_id TEXT PRIMARY KEY NOT NULL,
+        child_id TEXT NOT NULL,
+        state TEXT NOT NULL CHECK (state IN ('editing', 'processing')),
+        safe_error_code TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (child_id) REFERENCES local_children(child_id) ON DELETE CASCADE
+      );
+      CREATE TABLE local_capture_assets (
+        asset_id TEXT PRIMARY KEY NOT NULL,
+        draft_id TEXT NOT NULL,
+        source_kind TEXT NOT NULL CHECK (
+          source_kind IN ('scanner', 'camera', 'gallery', 'file', 'share')
+        ),
+        display_order INTEGER NOT NULL CHECK (display_order >= 0),
+        detected_mime TEXT NOT NULL CHECK (
+          detected_mime IN ('image/jpeg', 'image/png', 'image/heic', 'application/pdf')
+        ),
+        original_bytes INTEGER NOT NULL CHECK (original_bytes > 0),
+        page_count INTEGER NOT NULL CHECK (page_count > 0 AND page_count <= 50),
+        width INTEGER,
+        height INTEGER,
+        original_file_id TEXT NOT NULL UNIQUE,
+        normalized_file_id TEXT UNIQUE,
+        thumbnail_file_id TEXT NOT NULL UNIQUE,
+        created_at TEXT NOT NULL,
+        UNIQUE (draft_id, display_order),
+        FOREIGN KEY (draft_id) REFERENCES local_capture_drafts(draft_id) ON DELETE CASCADE,
+        FOREIGN KEY (original_file_id) REFERENCES local_encrypted_files(file_id),
+        FOREIGN KEY (normalized_file_id) REFERENCES local_encrypted_files(file_id),
+        FOREIGN KEY (thumbnail_file_id) REFERENCES local_encrypted_files(file_id)
+      );
+      CREATE INDEX local_capture_drafts_child_updated_idx
+        ON local_capture_drafts(child_id, updated_at DESC, draft_id DESC);
+      CREATE INDEX local_capture_assets_draft_order_idx
+        ON local_capture_assets(draft_id, display_order, asset_id);
+    `,
+  },
+  {
+    version: 7,
+    sql: `
+      ALTER TABLE local_encrypted_files ADD COLUMN wrapped_key TEXT;
+    `,
+  },
 ] as const;
 
 export async function applyLocalMigrations(database: LocalMigrationDatabase): Promise<number> {

@@ -1,7 +1,7 @@
 # Implementation Plans
 
 > **Status:** Active index
-> **Last updated:** 2026-07-24
+> **Last updated:** 2026-07-25
 > **Owner:** Engineering
 
 Implementation documents live here under stable milestone folders. Do not move a
@@ -17,8 +17,8 @@ Current plans:
   [evidence](./ios-simulator-parity-validation-evidence.md)
 - [`M1` Foundation](./m1-foundation/)
 - [`M2` Offline Trust Slice](./m2-offline-trust/)
-- [`M3` Vault Wedge](./m3-vault-wedge/), including bounded `VLT-01` and
-  `VLT-02` [implementation evidence](./m3-vault-wedge/)
+- [`M3` Vault Wedge](./m3-vault-wedge/), including bounded `VLT-01` through
+  `VLT-03` completion evidence
 
 Use [the implementation-plan template](../templates/implementation-plan-template.md)
 for new work-package plans.

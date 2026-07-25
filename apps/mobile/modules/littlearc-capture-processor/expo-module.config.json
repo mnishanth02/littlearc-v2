@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["LittleArcCaptureProcessorModule"]
+  },
+  "android": {
+    "modules": ["app.littlearc.capture.LittleArcCaptureProcessorModule"]
+  }
+}

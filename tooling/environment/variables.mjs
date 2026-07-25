@@ -21,8 +21,15 @@ export const environmentCatalog = {
     S3_SECRET_ACCESS_KEY: { classification: "secret", owner: "FND-06", secret: true },
   },
   "apps/mobile/.env.example": {
+    ENABLE_IOS_SHARE_EXTENSION: { classification: "public", owner: "VLT-03", secret: false },
     EXPO_PUBLIC_API_BASE_URL: { classification: "public", owner: "FND-03", secret: false },
     EXPO_PUBLIC_APP_ENV: { classification: "public", owner: "FND-03", secret: false },
+    LITTLEARC_IOS_PERSONAL_BUNDLE_IDENTIFIER: {
+      classification: "public",
+      owner: "VLT-03",
+      secret: false,
+    },
+    LITTLEARC_IOS_SIGNING_MODE: { classification: "public", owner: "VLT-03", secret: false },
   },
   "apps/ops-web/.env.example": {
     APP_ENV: { classification: "public", owner: "FND-03", secret: false },

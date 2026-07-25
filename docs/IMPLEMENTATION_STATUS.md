@@ -2,7 +2,7 @@
 
 > **Status:** Active delivery dashboard
 > **Version:** 1.0
-> **Last updated:** 24 July 2026
+> **Last updated:** 25 July 2026
 > **Execution plan:** [Implementation Plan and Roadmap](./impl-plan/roadmap.md)
 > **Core documents:** [Product plan](./core/littlearc-complete-product-plan.md),
 > [architecture](./core/littlearc-architecture-and-tech-stack.md),
@@ -76,9 +76,10 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | `OFF-04` Repository and synchronization engine | `COMPLETE` | Engineering | Signed cursors, reset-safe SQLCipher repositories, ordered mutations, critical conflicts, 151 tests, Aiven PostgreSQL, repository gates, and the bounded Pixel 8 lifecycle passed; see [evidence](./impl-plan/m2-offline-trust/off-04-implementation-evidence.md) |
 | `OFF-05` Emergency-card vertical slice | `COMPLETE` | Engineering | Dedicated encrypted aggregate, immutable versions, shared sync, SQLCipher V3, accessible standard-access UI, 164 tests, Aiven PostgreSQL, repository gates, and the bounded Pixel 8 lifecycle passed; see [evidence](./impl-plan/m2-offline-trust/off-05-implementation-evidence.md) |
 | `OFF-06` Onboarding activation shell | `COMPLETE` | Engineering | Ordered accessible shell, atomic owner/child creation, protected enrollment, shared emergency sync, strict analytics, 179 tests, Aiven gates, Android/iOS exports with validation-bundle containment, bounded Pixel 8 lifecycle, and iOS Simulator activation/Face ID/failure/accessibility/restart/offline evidence passed; see [evidence](./impl-plan/m2-offline-trust/off-06-implementation-evidence.md) |
-| M3. Vault wedge | `IN PROGRESS` | Engineering | Bounded `VLT-01` and separately authorized `VLT-02` are complete; Gate 2 remains open and `VLT-03+` stay blocked |
+| M3. Vault wedge | `IN PROGRESS` | Engineering | Bounded `VLT-01` through `VLT-03` are complete; VLT-03 passed the requested physical-Pixel and applicable iOS-Simulator matrix, while physical-iPhone/Secure-Enclave and production Share Extension proof are deferred to the pre-pilot matrix; Gate 2 remains open and `VLT-04+` stay blocked |
 | `VLT-01` Record model, versions, provenance, and timeline projection | `COMPLETE` | Engineering | Implementation, 193 root tests, disposable Aiven checks, Android/iOS release containment, iOS Simulator lifecycle, and bounded Pixel 8 lifecycle/accessibility checks passed; see [plan](./impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md) and [evidence](./impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md) |
 | `VLT-02` Manual record creation | `COMPLETE` | Engineering | Four manual category payloads, SQLCipher V5 drafts, production create/view/correct/history/delete routes, 206 tests, disposable Aiven checks, release containment, and full Pixel 8 plus iOS-Simulator functional lifecycles passed; see [plan](./impl-plan/m3-vault-wedge/vlt-02-manual-record-creation-plan.md) and [evidence](./impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md) |
+| `VLT-03` Capture and import adapters | `COMPLETE` | Engineering | Capture/import adapters, SQLCipher V6/V7 protection, biometric prompt coalescing, 236 root tests, native/release checks, the requested Pixel adapter matrix, and the applicable iOS-Simulator restart/UI/log-safety flow pass; physical-iPhone proof is explicitly deferred; see [evidence](./impl-plan/m3-vault-wedge/vlt-03-implementation-evidence.md) |
 | M4 through M7 | `NOT STARTED` | See roadmap | Entry gates have not been reached |
 
 `FND-02` was completed by explicit delivery direction ahead of `FND-03`.
@@ -111,6 +112,7 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 | 24 Jul 2026 | OFF-06 validation-bundle containment | `COMPLETE` | Metro selects the retained synthetic OFF-06 route only for development bundles and a redirect-only implementation for release exports; 179 tests, Android/iOS Hermes scans, root validation, and clean-checkout proof passed |
 | 24 Jul 2026 | [`VLT-01` record model, versions, provenance, and Timeline projection](./impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md) | `COMPLETE` | Encrypted immutable records/versions, separated suggestions, generated Timeline projections, shared synchronization, SQLCipher V4, 193 tests, disposable Aiven validation, release containment, iOS Simulator lifecycle, and bounded physical Pixel 8 lifecycle/accessibility evidence passed |
 | 24 Jul 2026 | [`VLT-02` manual record creation](./impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md) | `COMPLETE` | Four manual category schemas and production routes, encrypted SQLCipher V5 drafts, atomic confirm/sync, immutable correction/history, tombstone delete, 206 tests, disposable Aiven validation, Android/iOS release containment, and complete functional restart lifecycles on physical Pixel 8 and iPhone 17 Pro Simulator passed |
+| 25 Jul 2026 | [`VLT-03` capture and import adapters](./impl-plan/m3-vault-wedge/vlt-03-implementation-evidence.md) | `COMPLETE` | Scanner/camera/gallery/file/share acquisition, native PNG/PDF processing, SQLCipher V6/V7 resumable encrypted drafts, biometric prompt coalescing, 236 tests, native/release containment, the requested Pixel adapter matrix, and the applicable iPhone 17 Pro Simulator terminate/resume/discard, dark, large-text, contrast, and log-safety checks passed; physical-iPhone proof remains deferred |
 | 18 Jul 2026 | `RDY-03` M0 taxonomy and data-map baseline | `COMPLETE` | Version 1 planning baseline is recorded; pediatric and privacy approval remains a deferred pre-real-data obligation |
 | 18 Jul 2026 | `RDY-04` product decision register | `COMPLETE` | Decisions `M0-D01` through `M0-D10` are accepted; provider-bound verification remains externally gated |
 | 18 Jul 2026 | `RDY-05` design-system foundation specification | `COMPLETE` | Component/state direction is accepted as a prototype input; implementation reconciliation belongs to `FND-08` |
@@ -125,13 +127,13 @@ M0 is `COMPLETE`, while a pre-pilot obligation first identified in M0 remains
 ## 6. In-Progress Register
 
 M2 remains open at the milestone level because Gate 2 is not closed. `VLT-01`
-and `VLT-02` are complete under separate founder-directed, package-specific
-exceptions. These exceptions do not authorize `VLT-03+`.
+through `VLT-03` are complete under separate founder-directed,
+package-specific exceptions. These exceptions do not authorize `VLT-04+`.
 
 ## 7. Ready Queue
 
-No M3 package is ready automatically. `VLT-03` and later packages remain gated
-by Gate 2 or separate founder direction.
+No further M3 package is ready automatically. `VLT-04` and later packages
+remain gated by Gate 2 or separate founder direction.
 
 The complete dependency order remains in Section 25 of the implementation
 roadmap. This section should show only the next few actionable packages.
@@ -143,7 +145,7 @@ roadmap. This section should show only the next few actionable packages.
 | Representative-parent research and five-flow validation (`RDY-01`, `RDY-02`) | `DEFERRED` | Invited pilot and product-direction claims; not synthetic M1 work | Founder/product + design | Required cohorts and five critical flows meet the recorded thresholds |
 | Pediatric terminology and safety approval (`RDY-03`) | `DEFERRED` | Real-data/pilot approval for clinical terminology and schedule behavior | Product + pediatric advisor | Specialist review is recorded against the taxonomy and safety copy |
 | Privacy/legal and security specialist approval (`RDY-08`) | `DEFERRED` | Real child data and invited pilot | Founder + privacy/legal + security | Required reviews approve consent, verification, processors, retention, deletion, incident handling, and controls |
-| Pre-pilot physical-device capability matrix | `DEFERRED` | Pilot distribution and claims beyond the accepted Gate 1 iOS-simulator plus physical-Android foundation matrix | Engineering | Physical iOS plus required Android coverage passes scanner, OCR, biometrics, imports, notifications, assistive-technology, signing/install, and upgrade checks |
+| Pre-pilot physical-device capability matrix | `DEFERRED` | Pilot distribution and claims beyond the accepted iOS-Simulator plus physical-Android package matrices; includes VLT-03 physical-iPhone/Secure-Enclave and production Share Extension proof | Engineering | Physical iOS plus required Android coverage passes scanner, OCR, biometrics, imports, notifications, assistive-technology, signing/install, extension/App Group, and upgrade checks |
 | Organization-owned provider, store, signing, and custody setup (`RDY-09`) | `BLOCKED` | Account-bound authentication, signed pilot distribution, and live recovery verification | Founder + engineering | Entity/accounts, credentials, signing access, live cost/capability checks, and recovery ownership are available and verified |
 | Real child or participant data | `BLOCKED` | Any real-data collection, storage, processing, or pilot use | Founder/product | Every named pre-real-data privacy, safety, security, provider, deletion, backup, and incident gate passes |
 | Native compatibility harness retirement | `DEFERRED` | Harness source retirement only; does not block accepted M1 packages | Engineering | Transfer or close its remaining physical-device evidence and review the root OCR override under [ADR-0002](./adr/0002-expo-native-development-and-spike-disposition.md) |
@@ -184,6 +186,7 @@ roadmap. This section should show only the next few actionable packages.
 | [`OFF-06` Onboarding activation shell](./impl-plan/m2-offline-trust/off-06-onboarding-activation-shell-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m2-offline-trust/off-06-implementation-evidence.md) |
 | [`VLT-01` Record model, versions, provenance, and timeline projection](./impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md) |
 | [`VLT-02` Manual record creation](./impl-plan/m3-vault-wedge/vlt-02-manual-record-creation-plan.md) | `COMPLETE` | [Evidence](./impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md) |
+| [`VLT-03` Capture and import adapters](./impl-plan/m3-vault-wedge/vlt-03-capture-and-import-adapters-plan.md) | `COMPLETE` | [Implementation, biometric repair, native/release checks, requested Pixel adapter matrix, and applicable iOS-Simulator acceptance pass; physical-iPhone proof is deferred](./impl-plan/m3-vault-wedge/vlt-03-implementation-evidence.md) |
 
 ## 11. Agent Workflow
 

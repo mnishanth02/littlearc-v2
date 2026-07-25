@@ -6,7 +6,7 @@
 > **Review date:** 2026-10-22
 > **Supersedes:** None
 > **Superseded by:** None
-> **Related documents:** [OFF-03 plan](../impl-plan/m2-offline-trust/off-03-local-security-and-enrollment-plan.md), [architecture](../core/littlearc-architecture-and-tech-stack.md), and [mobile flow](../core/mobile-application-flow.md)
+> **Related documents:** [OFF-03 plan](../impl-plan/m2-offline-trust/off-03-local-security-and-enrollment-plan.md), [architecture](../core/littlearc-architecture-and-tech-stack.md), [mobile flow](../core/mobile-application-flow.md), and [VLT-03 evidence](../impl-plan/m3-vault-wedge/vlt-03-implementation-evidence.md)
 
 ---
 
@@ -38,6 +38,11 @@ client device identifier to become household authority.
   which create a second unkeyed native connection.
 - Encrypt every local cached file independently with AES-256-GCM, a fresh key
   and nonce, immutable context AAD, opaque filenames, and metadata in SQLCipher.
+  Wrap each random file key with an AES-256-GCM key domain-separated from the
+  protected SQLCipher key, and store only that authenticated envelope in
+  SQLCipher. Keep the unlocked database and wrapping keys only in a coalesced
+  foreground session; clear that session and plaintext previews when the app
+  enters the background.
 - On sign-out, attempt remote session handling but never make local cleanup
   conditional on the network result. Close handles, delete SQLCipher and file
   ciphertext, then remove OFF-03 SecureStore entries and verify absence.
@@ -77,6 +82,20 @@ session-derived membership, RLS, exact replay, revoked/cross-identity rejection,
 audit, outbox, and rollback. Physical Android validation covers SQLCipher,
 SecureStore, a strong-biometric prompt, AES-GCM files, simulated invalidation,
 synthetic reauthentication/resync, and verified sign-out wipe.
+
+VLT-03 exercised the encrypted-file lifecycle review trigger on 24 July 2026.
+The accepted primitive now protects capture originals, normalized images, and
+thumbnails with separate keys, immutable purpose-bound AAD, opaque names, and
+SQLCipher metadata. Physical Pixel 8 validation on 25 July exposed a prompt
+storm because repeated database and per-file SecureStore reads each created an
+independent biometric request. SQLCipher schema V7 now stores authenticated
+file-key envelopes, derives a distinct wrapping key for the foreground
+session, coalesces concurrent unlock requests, and lazily migrates legacy
+per-file SecureStore keys. Plaintext remains staging-only, deletion keeps
+recoverable metadata until file/key cleanup succeeds, and VLT-03 adds no
+transport/server key wrapping, upload, server-object, or record-authority
+semantics. The original independent-file-key decision therefore remains
+accepted.
 
 ## Review Triggers
 

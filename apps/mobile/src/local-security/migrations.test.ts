@@ -42,13 +42,13 @@ function fakeDatabase(options: { readonly failMigration?: boolean } = {}) {
 describe("OFF-03 local migrations", () => {
   it("applies the forward schema once and remains idempotent", async () => {
     const fake = fakeDatabase();
-    await expect(applyLocalMigrations(fake.database)).resolves.toBe(5);
-    await expect(applyLocalMigrations(fake.database)).resolves.toBe(5);
-    expect(fake.applied).toEqual(new Set([1, 2, 3, 4, 5]));
+    await expect(applyLocalMigrations(fake.database)).resolves.toBe(7);
+    await expect(applyLocalMigrations(fake.database)).resolves.toBe(7);
+    expect(fake.applied).toEqual(new Set([1, 2, 3, 4, 5, 6, 7]));
     expect(
       fake.executed.filter((sql) => sql.includes("CREATE TABLE local_enrollment")),
     ).toHaveLength(1);
-    expect(localMigrations.map((migration) => migration.version)).toEqual([1, 2, 3, 4, 5]);
+    expect(localMigrations.map((migration) => migration.version)).toEqual([1, 2, 3, 4, 5, 6, 7]);
     expect(localMigrations[0]?.sql).toContain("CREATE TABLE local_encrypted_files");
     expect(localMigrations[0]?.sql).not.toContain("database_key");
     expect(localMigrations[0]?.sql).not.toContain("file_key");
@@ -59,6 +59,11 @@ describe("OFF-03 local migrations", () => {
     expect(localMigrations[3]?.sql).toContain("CREATE TABLE local_record_versions");
     expect(localMigrations[3]?.sql).toContain("CREATE TABLE local_timeline_entries");
     expect(localMigrations[4]?.sql).toContain("CREATE TABLE local_record_drafts");
+    expect(localMigrations[5]?.sql).toContain("CREATE TABLE local_capture_drafts");
+    expect(localMigrations[5]?.sql).toContain("CREATE TABLE local_capture_assets");
+    expect(localMigrations[6]?.sql).toContain(
+      "ALTER TABLE local_encrypted_files ADD COLUMN wrapped_key",
+    );
   });
 
   it("does not record a failed migration", async () => {

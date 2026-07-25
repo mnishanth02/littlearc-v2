@@ -12,6 +12,7 @@ import {
   parseLocalEnrollmentMarker,
   resolveLocalSecurityState,
 } from "./policy";
+import { createLocalSecuritySessionCache } from "./session";
 
 const databaseName = "littlearc-local-v1.db";
 const databaseKeyName = "littlearc.local-security.database-key.v1";
@@ -19,6 +20,8 @@ const enrollmentMarkerName = "littlearc.local-security.enrollment.v1";
 const fileKeyIndexName = "littlearc.local-security.file-key-index.v1";
 const fileKeyPrefix = "littlearc.local-security.file-key.v1.";
 const encryptedFileDirectoryName = "littlearc-encrypted-files-v1";
+const fileKeyWrappingDerivationPrefix = "littlearc-local-file-key-wrapping:v1:";
+const fileKeyWrappingAadPrefix = "littlearc-local-file-key:v1:";
 
 const deviceOnlyOptions = {
   keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
@@ -28,6 +31,13 @@ const protectedOptions = {
   authenticationPrompt: "Unlock LittleArc local data",
   requireAuthentication: true,
 } as const;
+
+type LocalSecuritySession = {
+  readonly databaseKey: string;
+  readonly fileKeyWrappingKey: Crypto.AESEncryptionKey;
+};
+
+const localSecuritySession = createLocalSecuritySessionCache<LocalSecuritySession>();
 
 export type LocalSecurityCapability = {
   readonly authenticationTypeCount: number;
@@ -64,6 +74,7 @@ export async function enrollLocalSecurity(input: {
   readonly deviceId: string;
   readonly householdId: string;
 }): Promise<{ readonly cipherVersion: string; readonly generationId: string }> {
+  lockLocalSecuritySession();
   const capability = await inspectLocalSecurityCapability();
   if (!capability.strongBiometricReady) {
     throw new Error("Strong biometric protection is required for this local enrollment.");
@@ -107,6 +118,7 @@ export async function enrollLocalSecurity(input: {
         new Date().toISOString(),
       ),
     );
+    await localSecuritySession.getOrUnlock(() => createLocalSecuritySession(databaseKey));
     return { cipherVersion, generationId: marker.generationId };
   } catch (error) {
     await database?.closeAsync();
@@ -126,6 +138,7 @@ export async function validateUnlockedLocalSecurity(): Promise<{
   readonly reopenPassed: boolean;
   readonly wrongDatabaseKeyRejected: boolean;
 }> {
+  lockLocalSecuritySession();
   const markerValue = await SecureStore.getItemAsync(enrollmentMarkerName, deviceOnlyOptions);
   if (!markerValue) {
     throw new Error("This installation is not enrolled.");
@@ -139,6 +152,7 @@ export async function validateUnlockedLocalSecurity(): Promise<{
   if (state !== "ready" || !databaseKey) {
     throw new Error("Account reauthentication is required before local data can be rebuilt.");
   }
+  await localSecuritySession.getOrUnlock(() => createLocalSecuritySession(databaseKey));
 
   const first = await openEncryptedDatabase(databaseKey);
   let cipherVersion: string;
@@ -192,16 +206,8 @@ export async function validateUnlockedLocalSecurity(): Promise<{
 export async function withUnlockedLocalDatabase<T>(
   task: (database: SQLite.SQLiteDatabase) => Promise<T>,
 ): Promise<T> {
-  const markerValue = await SecureStore.getItemAsync(enrollmentMarkerName, deviceOnlyOptions);
-  if (!markerValue) {
-    throw new Error("This installation is not enrolled.");
-  }
-  parseLocalEnrollmentMarker(markerValue);
-  const databaseKey = await SecureStore.getItemAsync(databaseKeyName, protectedOptions);
-  if (!databaseKey) {
-    throw new Error("Account reauthentication is required before synchronization.");
-  }
-  const database = await openEncryptedDatabase(databaseKey);
+  const session = await localSecuritySession.getOrUnlock(unlockLocalSecuritySession);
+  const database = await openEncryptedDatabase(session.databaseKey);
   try {
     await requireCipher(database);
     await applyLocalMigrations(database);
@@ -212,10 +218,180 @@ export async function withUnlockedLocalDatabase<T>(
   }
 }
 
+export function lockLocalSecuritySession(): void {
+  localSecuritySession.lock();
+  const previewDirectory = localPreviewDirectory();
+  if (previewDirectory.exists) {
+    previewDirectory.delete();
+  }
+}
+
+export type EncryptedLocalFile = {
+  readonly aad: string;
+  readonly ciphertextBytes: number;
+  readonly fileId: string;
+  readonly opaqueName: string;
+};
+
+export async function storeEncryptedLocalFile(
+  database: SQLite.SQLiteDatabase,
+  input: {
+    readonly fileId: string;
+    readonly plaintextUri: string;
+    readonly purpose: "capture-normalized" | "capture-original" | "capture-thumbnail";
+  },
+): Promise<EncryptedLocalFile> {
+  const source = new File(input.plaintextUri);
+  if (!source.exists || source.size <= 0) {
+    throw new Error("The staged local file is unavailable.");
+  }
+  const opaqueName = `${input.fileId}.lac`;
+  const aad = `littlearc-local-file:v1:${input.fileId}:${input.purpose}`;
+  const directory = encryptedFileDirectory();
+  const destination = new File(directory, opaqueName);
+  const key = await Crypto.AESEncryptionKey.generate(Crypto.AESKeySize.AES256);
+  const encodedKey = await key.encoded("base64");
+  let metadataInserted = false;
+  try {
+    const sealed = await Crypto.aesEncryptAsync(await source.bytes(), key, {
+      additionalData: new TextEncoder().encode(aad),
+      nonce: { length: 12 },
+      tagLength: 16,
+    });
+    const combined = await sealed.combined("bytes");
+    if (typeof combined === "string") {
+      throw new Error("The encrypted local-file primitive returned an unexpected encoding.");
+    }
+    directory.create({ idempotent: true, intermediates: true });
+    destination.create({ overwrite: false });
+    destination.write(combined);
+    const wrappedKey = await wrapLocalFileKey(input.fileId, encodedKey);
+    await database.runAsync(
+      `INSERT INTO local_encrypted_files (
+        file_id, opaque_name, aad, ciphertext_bytes, created_at, wrapped_key
+      ) VALUES (?, ?, ?, ?, ?, ?)`,
+      input.fileId,
+      opaqueName,
+      aad,
+      combined.length,
+      new Date().toISOString(),
+      wrappedKey,
+    );
+    metadataInserted = true;
+    return {
+      aad,
+      ciphertextBytes: combined.length,
+      fileId: input.fileId,
+      opaqueName,
+    };
+  } catch (error) {
+    if (metadataInserted) {
+      await database.runAsync("DELETE FROM local_encrypted_files WHERE file_id = ?", input.fileId);
+    }
+    if (destination.exists) {
+      destination.delete();
+    }
+    throw error;
+  }
+}
+
+export async function openEncryptedLocalFilePreview(
+  database: SQLite.SQLiteDatabase,
+  input: {
+    readonly extension: "jpg" | "pdf";
+    readonly fileId: string;
+  },
+): Promise<string> {
+  const metadata = await database.getFirstAsync<{
+    readonly aad: string;
+    readonly opaqueName: string;
+    readonly wrappedKey: string | null;
+  }>(
+    `SELECT aad, opaque_name AS "opaqueName", wrapped_key AS "wrappedKey"
+     FROM local_encrypted_files WHERE file_id = ?`,
+    input.fileId,
+  );
+  if (!metadata) {
+    throw new Error("The encrypted local file is unavailable.");
+  }
+  const keyValue = metadata.wrappedKey
+    ? await unwrapLocalFileKey(input.fileId, metadata.wrappedKey)
+    : await migrateLegacyLocalFileKey(database, input.fileId);
+  if (!keyValue) {
+    throw new Error("The protected local-file key is unavailable.");
+  }
+  const source = new File(encryptedFileDirectory(), metadata.opaqueName);
+  if (!source.exists) {
+    throw new Error("The encrypted local-file ciphertext is unavailable.");
+  }
+  const key = await Crypto.AESEncryptionKey.import(keyValue, "base64");
+  const opened = await Crypto.aesDecryptAsync(
+    Crypto.AESSealedData.fromCombined(await source.bytes()),
+    key,
+    {
+      additionalData: new TextEncoder().encode(metadata.aad),
+      output: "bytes",
+    },
+  );
+  if (typeof opened === "string") {
+    throw new Error("The encrypted local-file primitive returned an unexpected encoding.");
+  }
+  const directory = localPreviewDirectory();
+  directory.create({ idempotent: true, intermediates: true });
+  const preview = new File(directory, `${input.fileId}.${input.extension}`);
+  if (preview.exists) {
+    preview.delete();
+  }
+  preview.create({ overwrite: false });
+  preview.write(opened);
+  return preview.uri;
+}
+
+export function removeLocalFilePreview(uri: string): void {
+  const preview = new File(uri);
+  if (preview.exists) {
+    preview.delete();
+  }
+}
+
+export async function deleteEncryptedLocalFile(
+  database: SQLite.SQLiteDatabase,
+  fileId: string,
+): Promise<void> {
+  await deleteEncryptedLocalFileMaterial(database, fileId);
+  await deleteEncryptedLocalFileMetadata(database, fileId);
+}
+
+export async function deleteEncryptedLocalFileMaterial(
+  database: SQLite.SQLiteDatabase,
+  fileId: string,
+): Promise<void> {
+  const metadata = await database.getFirstAsync<{ readonly opaqueName: string }>(
+    `SELECT opaque_name AS "opaqueName"
+     FROM local_encrypted_files WHERE file_id = ?`,
+    fileId,
+  );
+  if (metadata) {
+    const ciphertext = new File(encryptedFileDirectory(), metadata.opaqueName);
+    if (ciphertext.exists) {
+      ciphertext.delete();
+    }
+  }
+  await deleteLegacyLocalFileKey(fileId);
+}
+
+export async function deleteEncryptedLocalFileMetadata(
+  database: SQLite.SQLiteDatabase,
+  fileId: string,
+): Promise<void> {
+  await database.runAsync("DELETE FROM local_encrypted_files WHERE file_id = ?", fileId);
+}
+
 export async function simulateProtectedKeyInvalidationForValidation(): Promise<void> {
   if (!__DEV__) {
     throw new Error("Synthetic key invalidation is development-only.");
   }
+  lockLocalSecuritySession();
   await SecureStore.deleteItemAsync(databaseKeyName);
 }
 
@@ -231,11 +407,16 @@ export async function confirmReauthenticationRequired(): Promise<boolean> {
 }
 
 export async function wipeLocalSecurity(): Promise<void> {
+  lockLocalSecuritySession();
   const fileIds = await readFileKeyIndex();
   await Promise.all(fileIds.map((fileId) => SecureStore.deleteItemAsync(fileKeyName(fileId))));
   const directory = encryptedFileDirectory();
   if (directory.exists) {
     directory.delete();
+  }
+  const previewDirectory = localPreviewDirectory();
+  if (previewDirectory.exists) {
+    previewDirectory.delete();
   }
   const [databaseFile, ...sidecars] = databaseArtifactFiles();
   if (databaseFile?.exists) {
@@ -264,6 +445,7 @@ export async function verifyLocalSecurityWiped(): Promise<boolean> {
     !marker &&
     !fileIndex &&
     !encryptedFileDirectory().exists &&
+    !localPreviewDirectory().exists &&
     !databaseArtifactsExist()
   );
 }
@@ -282,8 +464,6 @@ async function validateEncryptedFilePrimitive(database: SQLite.SQLiteDatabase): 
   const file = new File(directory, opaqueName);
   let metadataInserted = false;
   try {
-    await SecureStore.setItemAsync(fileKeyName(fileId), encodedKey, protectedOptions);
-    await addFileKeyToIndex(fileId);
     const sealed = await Crypto.aesEncryptAsync(plaintext, key, {
       additionalData: new TextEncoder().encode(aad),
       nonce: { length: 12 },
@@ -296,21 +476,29 @@ async function validateEncryptedFilePrimitive(database: SQLite.SQLiteDatabase): 
     directory.create({ idempotent: true, intermediates: true });
     file.create({ overwrite: false });
     file.write(combined);
+    const wrappedKey = await wrapLocalFileKey(fileId, encodedKey);
     await database.runAsync(
       `INSERT INTO local_encrypted_files (
-        file_id, opaque_name, aad, ciphertext_bytes, created_at
-      ) VALUES (?, ?, ?, ?, ?)`,
+        file_id, opaque_name, aad, ciphertext_bytes, created_at, wrapped_key
+      ) VALUES (?, ?, ?, ?, ?, ?)`,
       fileId,
       opaqueName,
       aad,
       combined.length,
       new Date().toISOString(),
+      wrappedKey,
     );
     metadataInserted = true;
-    const storedKey = await SecureStore.getItemAsync(fileKeyName(fileId), protectedOptions);
-    if (!storedKey) {
-      throw new Error("The protected local-file key is unavailable.");
+    let fileKeyWrongAadRejected = false;
+    try {
+      await unwrapLocalFileKey(`${fileId}:wrong`, wrappedKey);
+    } catch {
+      fileKeyWrongAadRejected = true;
     }
+    if (!fileKeyWrongAadRejected) {
+      throw new Error("The local-file key envelope accepted modified authentication data.");
+    }
+    const storedKey = await unwrapLocalFileKey(fileId, wrappedKey);
     const imported = await Crypto.AESEncryptionKey.import(storedKey, "base64");
     const storedCiphertext = await file.bytes();
     const opened = await Crypto.aesDecryptAsync(
@@ -355,9 +543,100 @@ async function validateEncryptedFilePrimitive(database: SQLite.SQLiteDatabase): 
     if (metadataInserted) {
       await database.runAsync("DELETE FROM local_encrypted_files WHERE file_id = ?", fileId);
     }
-    await SecureStore.deleteItemAsync(fileKeyName(fileId));
-    await removeFileKeyFromIndex(fileId);
   }
+}
+
+async function unlockLocalSecuritySession(): Promise<LocalSecuritySession> {
+  const markerValue = await SecureStore.getItemAsync(enrollmentMarkerName, deviceOnlyOptions);
+  if (!markerValue) {
+    throw new Error("This installation is not enrolled.");
+  }
+  parseLocalEnrollmentMarker(markerValue);
+  const databaseKey = await SecureStore.getItemAsync(databaseKeyName, protectedOptions);
+  if (!databaseKey) {
+    throw new Error("Account reauthentication is required before synchronization.");
+  }
+  return createLocalSecuritySession(databaseKey);
+}
+
+async function createLocalSecuritySession(databaseKey: string): Promise<LocalSecuritySession> {
+  if (!/^[0-9a-f]{64}$/.test(databaseKey)) {
+    throw new Error("The local database key has an invalid shape.");
+  }
+  const fileKeyWrappingKey = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    `${fileKeyWrappingDerivationPrefix}${databaseKey}`,
+    { encoding: Crypto.CryptoEncoding.HEX },
+  );
+  return {
+    databaseKey,
+    fileKeyWrappingKey: await Crypto.AESEncryptionKey.import(fileKeyWrappingKey, "hex"),
+  };
+}
+
+async function wrapLocalFileKey(fileId: string, encodedKey: string): Promise<string> {
+  const session = localSecuritySession.current();
+  if (!session) {
+    throw new Error("The protected local-security session is locked.");
+  }
+  const sealed = await Crypto.aesEncryptAsync(
+    new TextEncoder().encode(encodedKey),
+    session.fileKeyWrappingKey,
+    {
+      additionalData: new TextEncoder().encode(`${fileKeyWrappingAadPrefix}${fileId}`),
+      nonce: { length: 12 },
+      tagLength: 16,
+    },
+  );
+  const wrapped = await sealed.combined("base64");
+  if (typeof wrapped !== "string") {
+    throw new Error("The local-file key envelope returned an unexpected encoding.");
+  }
+  return wrapped;
+}
+
+async function unwrapLocalFileKey(fileId: string, wrappedKey: string): Promise<string> {
+  const session = localSecuritySession.current();
+  if (!session) {
+    throw new Error("The protected local-security session is locked.");
+  }
+  const opened = await Crypto.aesDecryptAsync(
+    Crypto.AESSealedData.fromCombined(
+      Uint8Array.from(atob(wrappedKey), (character) => character.charCodeAt(0)),
+    ),
+    session.fileKeyWrappingKey,
+    {
+      additionalData: new TextEncoder().encode(`${fileKeyWrappingAadPrefix}${fileId}`),
+      output: "bytes",
+    },
+  );
+  if (typeof opened === "string") {
+    throw new Error("The local-file key envelope returned an unexpected encoding.");
+  }
+  return new TextDecoder().decode(opened);
+}
+
+async function migrateLegacyLocalFileKey(
+  database: SQLite.SQLiteDatabase,
+  fileId: string,
+): Promise<string> {
+  const legacyKey = await SecureStore.getItemAsync(fileKeyName(fileId), protectedOptions);
+  if (!legacyKey) {
+    throw new Error("The protected local-file key is unavailable.");
+  }
+  const wrappedKey = await wrapLocalFileKey(fileId, legacyKey);
+  await database.runAsync(
+    "UPDATE local_encrypted_files SET wrapped_key = ? WHERE file_id = ?",
+    wrappedKey,
+    fileId,
+  );
+  await deleteLegacyLocalFileKey(fileId);
+  return legacyKey;
+}
+
+async function deleteLegacyLocalFileKey(fileId: string): Promise<void> {
+  await SecureStore.deleteItemAsync(fileKeyName(fileId));
+  await removeFileKeyFromIndex(fileId);
 }
 
 async function openEncryptedDatabase(key: string): Promise<SQLite.SQLiteDatabase> {
@@ -396,6 +675,10 @@ function encryptedFileDirectory(): Directory {
   return new Directory(Paths.document, encryptedFileDirectoryName);
 }
 
+function localPreviewDirectory(): Directory {
+  return new Directory(Paths.cache, "littlearc-local-previews-v1");
+}
+
 function databaseArtifactsExist(): boolean {
   return databaseArtifactFiles().some((file) => file.exists);
 }
@@ -422,11 +705,6 @@ async function readFileKeyIndex(): Promise<ReadonlyArray<string>> {
   }
   const parsed = JSON.parse(value) as unknown;
   return Array.isArray(parsed) && parsed.every((item) => typeof item === "string") ? parsed : [];
-}
-
-async function addFileKeyToIndex(fileId: string): Promise<void> {
-  const next = [...new Set([...(await readFileKeyIndex()), fileId])];
-  await SecureStore.setItemAsync(fileKeyIndexName, JSON.stringify(next), deviceOnlyOptions);
 }
 
 async function removeFileKeyFromIndex(fileId: string): Promise<void> {

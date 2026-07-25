@@ -1,0 +1,7 @@
+{
+  "name": "littlearc-capture-processor",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Local Expo module for bounded LittleArc capture preprocessing",
+  "license": "UNLICENSED"
+}

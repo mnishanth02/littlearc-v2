@@ -1,7 +1,7 @@
 # LittleArc Environment Variable Catalog
 
 > **Status:** Active runtime contract
-> **Last updated:** 22 July 2026
+> **Last updated:** 25 July 2026
 > **Machine-readable source:** `tooling/environment/variables.mjs`
 
 ## Rules
@@ -19,6 +19,9 @@
 | --- | --- | --- | --- |
 | `EXPO_PUBLIC_APP_ENV` | Public | `FND-03` | Client-visible environment label |
 | `EXPO_PUBLIC_API_BASE_URL` | Public | `FND-03` | Client-visible API origin |
+| `LITTLEARC_IOS_SIGNING_MODE` | Public | `VLT-03` | Build-time `registered` or opt-in `personal` iOS identity |
+| `ENABLE_IOS_SHARE_EXTENSION` | Public | `VLT-03` | Build-time iOS incoming-share target toggle |
+| `LITTLEARC_IOS_PERSONAL_BUNDLE_IDENTIFIER` | Public | `VLT-03` | Override for the temporary Personal Team bundle ID |
 
 ## API
 

@@ -2,7 +2,7 @@
 
 > **Status:** Accepted execution baseline — see the [Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) for live delivery state
 > **Version:** 1.2
-> **Last updated:** 23 July 2026
+> **Last updated:** 25 July 2026
 > **Product source:** [LittleArc Complete Product Plan](../core/littlearc-complete-product-plan.md)
 > **Architecture source:** [LittleArc Architecture and Technology Stack](../core/littlearc-architecture-and-tech-stack.md)
 > **Design-system source:** [LittleArc Design System](../core/design-system.md)
@@ -713,14 +713,22 @@ M3 feature breadth is authorized when:
 correct the MVP's core child records.
 
 > **Delivery note — 24 July 2026:** Founder direction separately authorized the
-> bounded `VLT-01` record-foundation and `VLT-02` manual-record packages.
-> Both are complete within their linked synthetic and device evidence
-> boundaries. These package-specific exceptions do not close Gate 2, authorize
-> `VLT-03` or later M3 breadth, or broaden real-data, provider, physical-iOS,
-> low-end-Android, two-device, or pilot claims. See the
-> [reviewed VLT-01 plan](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md)
+> bounded `VLT-01` record-foundation, `VLT-02` manual-record, and `VLT-03`
+> capture/import packages. `VLT-01` through `VLT-03` are complete within their
+> linked synthetic and device evidence boundaries. `VLT-03` implementation,
+> biometric remediation, automated validation, iOS Simulator flow, the
+> agent-captured Pixel restart/gallery/file/share evidence, and the
+> user-attested Pixel scanner/camera/permission rows pass. Its free Personal
+> Team iPhone profile is ready; physical-iPhone execution is deferred to the
+> pre-pilot physical-device capability matrix.
+> These package-specific
+> exceptions do not close Gate 2, authorize `VLT-04` or later M3 breadth, or
+> broaden real-data, provider, physical-iOS, low-end-Android, two-device, or
+> pilot claims. See the
+> [reviewed VLT-01 plan](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md),
 > the [VLT-02 plan](./m3-vault-wedge/vlt-02-manual-record-creation-plan.md),
-> and its [implementation evidence](./m3-vault-wedge/vlt-02-implementation-evidence.md).
+> its [implementation evidence](./m3-vault-wedge/vlt-02-implementation-evidence.md),
+> and the [VLT-03 evidence](./m3-vault-wedge/vlt-03-implementation-evidence.md).
 
 ### 12.1 Ordered work packages
 
@@ -749,7 +757,7 @@ correct the MVP's core child records.
 > tests, disposable Aiven validation, Android/iOS release containment, and the
 > complete functional lifecycle on physical Pixel 8 plus iPhone 17 Pro
 > Simulator passed. Gate 2, physical iOS, two-device, low-end Android,
-> complete assistive-technology, real-data, provider, and `VLT-03+` claims
+> complete assistive-technology, real-data, provider, and `VLT-04+` claims
 > remain open. See the
 > [implementation evidence](./m3-vault-wedge/vlt-02-implementation-evidence.md).
 
@@ -759,7 +767,22 @@ correct the MVP's core child records.
 - Save local drafts offline and synchronize confirmed records.
 - Add create, edit/correct, view, and delete tests before scanner integration.
 
-#### `VLT-03` Capture and import adapters
+#### [`VLT-03` Capture and import adapters](./m3-vault-wedge/vlt-03-capture-and-import-adapters-plan.md)
+
+> **Delivery status — 25 July 2026:** `COMPLETE` under the bounded
+> package-specific authorization above. Production adapters, SQLCipher V6
+> resumable drafts plus V7 wrapped file keys, native byte
+> inspection/normalization/thumbnails, independently encrypted local files,
+> one-foreground-unlock biometric remediation, 236 root tests, clean Android
+> arm64 and iOS Simulator builds, release containment, Pixel
+> restart/gallery/file/share/discard evidence, user-attested synthetic
+> scanner/camera/permission evidence, the iPhone 17 Pro Simulator
+> restart/discard flow, and the opt-in free Personal Team native profile pass.
+> Physical-iPhone camera/scanner, Secure Enclave, installation, and production
+> Share Extension/App Group proof are deferred to the pre-pilot matrix and are
+> not claimed by this package. Gate 2 remains open and `VLT-04+` remain
+> blocked. See the
+> [implementation evidence](./m3-vault-wedge/vlt-03-implementation-evidence.md).
 
 - Add camera, scanner, gallery, file/PDF picker, and incoming share paths in the
   order validated by M0 spikes.

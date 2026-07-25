@@ -1,5 +1,22 @@
+import { resolveIosSigningProfile } from "./config/ios-signing.mjs";
+
 const appEnv = process.env.EXPO_PUBLIC_APP_ENV || "local";
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || "http://127.0.0.1:3000";
+const iosSigningProfile = resolveIosSigningProfile();
+const iosSharingConfig = iosSigningProfile.shareExtensionEnabled
+  ? {
+      enabled: true,
+      extensionBundleIdentifier:
+        iosSigningProfile.extensionBundleIdentifier,
+      appGroupId: iosSigningProfile.appGroupId,
+      activationRule: {
+        supportsFileWithMaxCount: 50,
+        supportsImageWithMaxCount: 50,
+      },
+    }
+  : {
+      enabled: false,
+    };
 
 export default {
   expo: {
@@ -12,7 +29,7 @@ export default {
     newArchEnabled: true,
     userInterfaceStyle: "automatic",
     ios: {
-      bundleIdentifier: "app.littlearc.mobile",
+      bundleIdentifier: iosSigningProfile.bundleIdentifier,
       supportsTablet: true,
       infoPlist: {
         NSCameraUsageDescription: "Allow LittleArc to scan documents you choose.",
@@ -57,6 +74,29 @@ export default {
       "expo-local-authentication",
       "expo-notifications",
       "expo-web-browser",
+      [
+        "expo-sharing",
+        {
+          ios: iosSharingConfig,
+          android: {
+            enabled: true,
+            singleShareMimeTypes: [
+              "image/jpeg",
+              "image/png",
+              "image/heic",
+              "image/heif",
+              "application/pdf",
+            ],
+            multipleShareMimeTypes: [
+              "image/jpeg",
+              "image/png",
+              "image/heic",
+              "image/heif",
+              "application/pdf",
+            ],
+          },
+        },
+      ],
       [
         "react-native-document-scanner-plugin",
         {

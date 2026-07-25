@@ -14,8 +14,10 @@ build/
 .railway/
 
 .expo/
-android/
-ios/
+/apps/mobile/android/
+/apps/mobile/ios/
+/spikes/native-compat/android/
+/spikes/native-compat/ios/
 *.jks
 *.keystore
 *.mobileprovision

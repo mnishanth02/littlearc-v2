@@ -1,7 +1,7 @@
 # Development and Release
 
 > **Status:** Active
-> **Last updated:** 2026-07-19
+> **Last updated:** 2026-07-25
 > **Owner:** Engineering
 > **Applies to:** Local changes, CI, staging releases, and future production work
 
@@ -37,6 +37,41 @@ Use Expo custom development clients and direct local `expo run:ios` /
 `expo run:android` builds under [ADR-0002](../../adr/0002-expo-native-development-and-spike-disposition.md).
 Release exports and simulator runs are build evidence, not signed-device,
 installation, upgrade, accessibility, or store-distribution acceptance.
+
+### Free Personal Team iPhone Build
+
+VLT-03 adds an opt-in main-target-only profile for direct testing on the
+owner's iPhone without Apple Developer Program enrollment. Registered mode
+remains the default and retains the production bundle ID, Share Extension, and
+App Group. Personal Team mode uses `com.nishanth.littlearc.dev` and disables
+only incoming shares from other iOS apps:
+
+```sh
+cd apps/mobile
+pnpm run native:prebuild:ios:personal
+pnpm run ios:personal
+```
+
+Sign into **Xcode → Settings → Accounts** first, connect and trust the iPhone,
+and enable Developer Mode. If automatic signing needs help, open
+`apps/mobile/ios/LittleArc.xcworkspace`, select the LittleArc target, and choose
+the account's **Personal Team** under **Signing & Capabilities**.
+
+The clean prebuild deletes and regenerates only the ignored native iOS project;
+do not keep manual native changes there. Personal Team App IDs, devices, and
+provisioning profiles expire after seven days, so rebuild and reinstall after
+expiry. This path is local-only: it does not provide TestFlight, App Store,
+EAS internal distribution, or production signing evidence.
+
+Apple's current capability matrix includes App Groups for free registered
+developers. After the main-target-only build passes, the separate
+`native:prebuild:ios:personal-share` and `ios:personal:share` scripts may be
+used as an explicitly experimental iOS incoming-share check. Restore the
+registered native profile with:
+
+```sh
+pnpm run native:prebuild:ios:registered
+```
 
 ## Not Yet Authorized
 

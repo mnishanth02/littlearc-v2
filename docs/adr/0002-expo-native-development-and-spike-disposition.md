@@ -6,7 +6,7 @@
 > **Review date:** 2026-10-19
 > **Supersedes:** None
 > **Superseded by:** None
-> **Related documents:** [FND-03 evidence](../impl-plan/m1-foundation/fnd-03-implementation-evidence.md), [FND-08 evidence](../impl-plan/m1-foundation/fnd-08-implementation-evidence.md), [Gate 1 mobile evidence](../impl-plan/m1-foundation/gate-1-mobile-device-and-accessibility-evidence.md), [M0 evidence](../core/m0-readiness-and-evidence.md)
+> **Related documents:** [FND-03 evidence](../impl-plan/m1-foundation/fnd-03-implementation-evidence.md), [FND-08 evidence](../impl-plan/m1-foundation/fnd-08-implementation-evidence.md), [Gate 1 mobile evidence](../impl-plan/m1-foundation/gate-1-mobile-device-and-accessibility-evidence.md), [M0 evidence](../core/m0-readiness-and-evidence.md), and [VLT-03 evidence](../impl-plan/m3-vault-wedge/vlt-03-implementation-evidence.md)
 
 ---
 
@@ -36,6 +36,15 @@ device as the development-client and foundation-accessibility matrix. This
 20 July 2026 founder replan does not replace physical iOS, store, signing,
 upgrade, or broader native-capability evidence required before pilot use.
 
+Keep registered iOS configuration as the default build profile. For local
+physical-iPhone testing before paid-program enrollment, permit an explicit
+Personal Team profile with a separate development bundle identifier and the
+iOS incoming-share extension disabled. This profile must not mutate the
+production application identity or Android share-intent coverage. An
+experimental Personal Team extension profile may be generated separately
+because Apple's current free-developer capability matrix includes App Groups,
+but it does not replace production signing or distribution acceptance.
+
 ## Alternatives Considered
 
 - Expo Go: rejected because required custom native modules are unsupported.
@@ -52,6 +61,9 @@ Native development requires Xcode, Android tooling, CocoaPods, and development
 clients. The team must keep Expo/RN/native versions compatible and cannot claim
 device acceptance from release exports. The harness no longer blocks M1, but
 its retirement has an explicit evidence trigger instead of a stale FND-03 gate.
+Free Personal Team installs expire after seven days and must be rebuilt; they
+cannot be distributed through TestFlight, EAS internal distribution, or the
+App Store.
 
 ## Validation
 
@@ -60,6 +72,14 @@ release export. The accepted Gate 1 matrix additionally passes iOS-simulator
 and physical-Android development-client execution plus accessible foundation
 reference states. Physical iOS, OCR, store distribution, upgrade, and the
 broader capability matrix remain named pre-pilot obligations.
+
+The VLT-03 review trigger was exercised on 24 July 2026 when capture required a
+narrow production Expo module. Its Kotlin and Swift source lives under
+`apps/mobile/modules/littlearc-capture-processor`; generated application-native
+projects remain ignored. Clean autolinking/prebuild, native compilation, Expo
+Doctor, release containment, and the linked bounded runtime evidence keep this
+decision valid. The module does not make the retained M0 harness production
+authority.
 
 ## Review Triggers
 

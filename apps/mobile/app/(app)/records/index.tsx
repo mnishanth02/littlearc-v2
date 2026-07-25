@@ -2,6 +2,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { StyleSheet } from "react-native-unistyles";
+import { type LocalCaptureDraft, listCaptureDrafts } from "../../../src/capture/repository";
 import { Banner } from "../../../src/components/ui/Banner";
 import { Button } from "../../../src/components/ui/Button";
 import { Typography } from "../../../src/components/ui/Typography";
@@ -19,6 +20,7 @@ type ScreenState =
   | { readonly kind: "unavailable" }
   | {
       readonly drafts: ReadonlyArray<LocalRecordDraft>;
+      readonly captureDrafts: ReadonlyArray<LocalCaptureDraft>;
       readonly kind: "ready";
       readonly records: ReadonlyArray<LocalRecordProjection>;
     };
@@ -48,9 +50,14 @@ export default function ManualRecordsScreen() {
           Manual records
         </Typography>
         <Banner
-          message="Create and manage encrypted manual records already stored on this device. Search, capture, attachments, and full Vault browsing arrive in later packages."
+          message="Create manual records or keep encrypted capture sources on this device. Upload, OCR, attachments, search, and full Vault browsing arrive in later packages."
           title="Bounded record management"
           variant="info"
+        />
+        <Button
+          label="Capture or import source"
+          onPress={() => router.push("/capture")}
+          testID="record-capture"
         />
         <Button
           label="Add manual record"
@@ -69,6 +76,22 @@ export default function ManualRecordsScreen() {
         ) : null}
         {state.kind === "ready" ? (
           <>
+            <Typography accessibilityRole="header" textRole="sectionTitle">
+              Capture drafts
+            </Typography>
+            {state.captureDrafts.length === 0 ? (
+              <Typography tone="muted">No protected capture drafts on this device.</Typography>
+            ) : (
+              state.captureDrafts.map((draft) => (
+                <Button
+                  key={draft.draftId}
+                  label={`Capture draft · ${draft.assets.length} sources · ${draft.updatedAt.slice(0, 10)}`}
+                  onPress={() => router.push(`/capture?draftId=${draft.draftId}` as never)}
+                  testID={`capture-draft-${draft.draftId}`}
+                  variant="secondary"
+                />
+              ))
+            )}
             <Typography accessibilityRole="header" textRole="sectionTitle">
               Saved drafts
             </Typography>
@@ -123,11 +146,12 @@ async function loadRecords(): Promise<ScreenState> {
     if (!child) {
       return { kind: "unavailable" };
     }
-    const [drafts, records] = await Promise.all([
+    const [captureDrafts, drafts, records] = await Promise.all([
+      listCaptureDrafts(database, child.childId),
       listLocalRecordDrafts(database, child.childId),
       listLocalManualRecords(database, child.childId),
     ]);
-    return { drafts, kind: "ready", records };
+    return { captureDrafts, drafts, kind: "ready", records };
   });
 }
 
