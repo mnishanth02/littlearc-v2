@@ -95,6 +95,9 @@ function buildRecord<Code extends LogCode>(
   if (code === logCodes.workerStopped) {
     return { ...base, outcome: "stopped" };
   }
+  if (code === logCodes.workerUploadCleanupFailed) {
+    return { ...base, outcome: "failed" };
+  }
 
   return assertNever(code);
 }

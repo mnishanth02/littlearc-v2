@@ -18,7 +18,7 @@ Current plans:
 - [`M1` Foundation](./m1-foundation/)
 - [`M2` Offline Trust Slice](./m2-offline-trust/)
 - [`M3` Vault Wedge](./m3-vault-wedge/), including bounded `VLT-01` through
-  `VLT-03` completion evidence
+  `VLT-04` completion evidence
 
 Use [the implementation-plan template](../templates/implementation-plan-template.md)
 for new work-package plans.

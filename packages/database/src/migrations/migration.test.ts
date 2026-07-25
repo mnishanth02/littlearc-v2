@@ -31,6 +31,11 @@ const generatedRecordFoundationSql = readFileSync(
   join("migrations", recordFoundation.filename),
   "utf8",
 );
+const fileUpload = databaseMigrations()[5];
+if (!fileUpload) {
+  throw new Error("Expected the VLT-04 file-upload migration to be registered.");
+}
+const generatedFileUploadSql = readFileSync(join("migrations", fileUpload.filename), "utf8");
 
 describe("database migration foundation", () => {
   it("keeps the generated migration artifact in sync with the reviewed source", () => {
@@ -87,6 +92,29 @@ describe("database migration foundation", () => {
     expect(foundation.sql).toContain("create table if not exists littlearc.outbox_events");
     expect(foundation.sql).toContain("create table if not exists littlearc.schema_migrations");
     expect(foundation.sql).not.toContain("__CHECKSUM_SHA256__");
+  });
+});
+
+describe("VLT-04 file upload migration", () => {
+  it("keeps the reviewed source and generated artifact synchronized", () => {
+    expect(generatedFileUploadSql).toBe(`${fileUpload.sql}\n`);
+  });
+
+  it("keeps ciphertext tenant-scoped and worker cleanup least-authority", () => {
+    for (const table of ["upload_sessions", "file_objects"]) {
+      expect(fileUpload.sql).toContain(`alter table littlearc.${table} enable row level security;`);
+      expect(fileUpload.sql).toContain(`alter table littlearc.${table} force row level security;`);
+    }
+    expect(fileUpload.sql).toContain("claim_expired_upload_sessions");
+    expect(fileUpload.sql).toContain("finish_expired_upload_session");
+    expect(fileUpload.sql).toContain("security definer");
+    expect(fileUpload.sql).toContain(
+      "revoke all on littlearc.upload_sessions, littlearc.file_objects",
+    );
+    expect(fileUpload.sql).toContain("from littlearc_worker, littlearc_ops_readonly");
+    expect(fileUpload.sql).not.toContain(
+      "grant select, insert, update, delete on littlearc.file_objects to littlearc_worker",
+    );
   });
 });
 

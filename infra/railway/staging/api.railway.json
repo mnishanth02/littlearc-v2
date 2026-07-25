@@ -6,7 +6,9 @@
     "watchPatterns": [
       "/apps/api/**",
       "/packages/contracts/**",
+      "/packages/crypto/**",
       "/packages/database/**",
+      "/packages/storage/**",
       "/package.json",
       "/pnpm-lock.yaml",
       "/pnpm-workspace.yaml",

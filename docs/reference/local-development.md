@@ -5,7 +5,7 @@
 
 ## Prerequisites
 
-- Node.js 24.18.0, selected through the existing version manager
+- Node.js 26.4.0, selected through the existing version manager
 - Corepack with pnpm 11.14.0
 - Git
 - JDK 17, Xcode, CocoaPods, and Android SDK tooling when native work begins

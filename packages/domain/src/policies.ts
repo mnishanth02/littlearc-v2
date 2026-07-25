@@ -85,6 +85,10 @@ export const auditActions = [
   "device_enrolled",
   "emergency_card_created",
   "emergency_card_updated",
+  "file_upload_created",
+  "file_upload_completed",
+  "file_upload_cancelled",
+  "file_download_authorized",
   "staff_action_recorded",
 ] as const;
 export type AuditAction = (typeof auditActions)[number];

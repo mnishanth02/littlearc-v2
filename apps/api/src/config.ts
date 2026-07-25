@@ -4,8 +4,19 @@ export type ApiConfig = {
   readonly appEnv: AppEnvironment;
   readonly consumerAuth?: ConsumerAuthConfig;
   readonly host: string;
+  readonly keyWrapping?: OwnerOnboardingConfig;
   readonly ownerOnboarding?: OwnerOnboardingConfig;
   readonly port: number;
+  readonly uploadsEnabled: boolean;
+  readonly uploadStorage?: UploadStorageConfig;
+};
+
+export type UploadStorageConfig = {
+  readonly accessKeyId: string;
+  readonly bucket: string;
+  readonly endpoint: string;
+  readonly region: string;
+  readonly secretAccessKey: string;
 };
 
 export type OwnerOnboardingConfig = {
@@ -38,13 +49,41 @@ export function loadApiConfig(environment: ApiEnvironment = process.env): ApiCon
 
   const consumerAuth = parseConsumerAuthConfig(environment);
   const ownerOnboarding = parseOwnerOnboardingConfig(environment, appEnv, consumerAuth);
+  const keyWrapping = parseKeyWrappingConfig(environment);
+  const uploadsEnabled = parseBoolean(environment.UPLOADS_ENABLED, false);
+  const uploadStorage = parseUploadStorageConfig(environment, uploadsEnabled);
 
   return {
     appEnv,
     ...(consumerAuth ? { consumerAuth } : {}),
     host: environment.HOST?.trim() || "127.0.0.1",
+    ...(keyWrapping ? { keyWrapping } : {}),
     ...(ownerOnboarding ? { ownerOnboarding } : {}),
     port: parsePort(environment.PORT),
+    ...(uploadStorage ? { uploadStorage } : {}),
+    uploadsEnabled,
+  };
+}
+
+function parseUploadStorageConfig(
+  environment: ApiEnvironment,
+  uploadsEnabled: boolean,
+): UploadStorageConfig | undefined {
+  const values = [
+    environment.S3_ENDPOINT,
+    environment.S3_ACCESS_KEY_ID,
+    environment.S3_SECRET_ACCESS_KEY,
+    environment.S3_BUCKET_NAME,
+  ];
+  if (!uploadsEnabled && values.every((value) => !value?.trim())) {
+    return undefined;
+  }
+  return {
+    accessKeyId: requiredStorageValue("S3_ACCESS_KEY_ID", environment.S3_ACCESS_KEY_ID),
+    bucket: requiredStorageValue("S3_BUCKET_NAME", environment.S3_BUCKET_NAME),
+    endpoint: requiredStorageValue("S3_ENDPOINT", environment.S3_ENDPOINT),
+    region: environment.S3_REGION?.trim() || "auto",
+    secretAccessKey: requiredStorageValue("S3_SECRET_ACCESS_KEY", environment.S3_SECRET_ACCESS_KEY),
   };
 }
 
@@ -55,7 +94,7 @@ function parseOwnerOnboardingConfig(
 ): OwnerOnboardingConfig | undefined {
   const key = environment.KEY_WRAPPING_SECRET_V1?.trim();
   const mode = environment.OFF02_ADULT_VERIFICATION_MODE?.trim();
-  if (!key && !mode) {
+  if (!mode) {
     return undefined;
   }
   if (appEnv !== "local" || mode !== "synthetic") {
@@ -72,6 +111,18 @@ function parseOwnerOnboardingConfig(
     keyEncryptionKey: key as string,
     wrappingKeyVersion: 1,
   };
+}
+
+function parseKeyWrappingConfig(environment: ApiEnvironment): OwnerOnboardingConfig | undefined {
+  const key = environment.KEY_WRAPPING_SECRET_V1?.trim();
+  if (!key) {
+    return undefined;
+  }
+  const decoded = Buffer.from(key, "base64url");
+  if (decoded.length !== 32) {
+    throw new Error("KEY_WRAPPING_SECRET_V1 must decode to exactly 32 bytes.");
+  }
+  return { keyEncryptionKey: key, wrappingKeyVersion: 1 };
 }
 
 function parseConsumerAuthConfig(environment: ApiEnvironment): ConsumerAuthConfig | undefined {
@@ -148,6 +199,27 @@ function requiredValue(name: string, value: string | undefined): string {
     throw new Error(`${name} is required when consumer auth is configured.`);
   }
   return normalized;
+}
+
+function requiredStorageValue(name: string, value: string | undefined): string {
+  const normalized = value?.trim();
+  if (!normalized) {
+    throw new Error(`${name} is required when encrypted uploads are configured.`);
+  }
+  return normalized;
+}
+
+function parseBoolean(value: string | undefined, fallback: boolean): boolean {
+  if (!value?.trim()) {
+    return fallback;
+  }
+  if (value === "true") {
+    return true;
+  }
+  if (value === "false") {
+    return false;
+  }
+  throw new Error(`Boolean environment value must be true or false; received ${value}`);
 }
 
 function parseAppEnvironment(value: string | undefined): AppEnvironment {

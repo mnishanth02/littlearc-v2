@@ -56,6 +56,9 @@ export default function AppGroupLayout() {
       {__DEV__ ? (
         <Stack.Screen name="vlt-03-validation" options={{ title: "VLT-03 validation" }} />
       ) : null}
+      {__DEV__ ? (
+        <Stack.Screen name="vlt-04-validation" options={{ title: "VLT-04 validation" }} />
+      ) : null}
     </Stack>
   );
 }

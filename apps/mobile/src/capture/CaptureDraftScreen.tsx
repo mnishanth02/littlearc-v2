@@ -28,6 +28,8 @@ import {
   createOrReadCaptureDraft,
   discardCaptureDraft,
 } from "./service";
+import { cancelCaptureUpload, readCaptureUpload, uploadCaptureAsset } from "./upload";
+import type { LocalUploadSession } from "./upload-repository";
 
 type CaptureScreenState =
   | { readonly kind: "loading" }
@@ -117,8 +119,8 @@ export function CaptureDraftScreen(props: {
           Capture a record source
         </Typography>
         <Banner
-          message="Use synthetic sources only in this environment. LittleArc keeps accepted sources encrypted on this device; upload, OCR, and record confirmation arrive in later packages."
-          title="Local capture draft"
+          message="Use synthetic sources only in this environment. LittleArc encrypts accepted sources before transport. An uploaded source is still pending safety validation and is not yet a confirmed health record."
+          title="Protected capture draft"
           variant="info"
         />
         <Banner
@@ -237,6 +239,10 @@ export function CaptureDraftScreen(props: {
 function CaptureAssetCard(props: { readonly asset: LocalCaptureAsset }) {
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [previewFailed, setPreviewFailed] = useState(false);
+  const [upload, setUpload] = useState<LocalUploadSession | null>(null);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -268,6 +274,76 @@ function CaptureAssetCard(props: { readonly asset: LocalCaptureAsset }) {
     };
   }, [props.asset.thumbnailFileId]);
 
+  useEffect(() => {
+    let active = true;
+    void readCaptureUpload(props.asset.assetId)
+      .then((session) => {
+        if (active) {
+          setUpload(session);
+          setProgress(
+            session
+              ? session.parts.reduce((total, part) => total + part.byteCount, 0) /
+                  session.expectedCiphertextBytes
+              : 0,
+          );
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setUploadMessage("Upload status is unavailable until local data is unlocked.");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [props.asset.assetId]);
+
+  async function startUpload(): Promise<void> {
+    setUploadBusy(true);
+    setUploadMessage(null);
+    try {
+      const result = await uploadCaptureAsset(props.asset.assetId, {
+        onProgress(next) {
+          setProgress(next.totalBytes === 0 ? 0 : next.completedBytes / next.totalBytes);
+        },
+      });
+      setUpload(result);
+    } catch {
+      setUpload(await readCaptureUpload(props.asset.assetId).catch(() => null));
+      setUploadMessage(
+        "Upload paused safely. The encrypted source remains on this device and can be retried.",
+      );
+    } finally {
+      setUploadBusy(false);
+    }
+  }
+
+  async function cancelUpload(): Promise<void> {
+    setUploadBusy(true);
+    setUploadMessage(null);
+    try {
+      await cancelCaptureUpload(props.asset.assetId);
+      setUpload(await readCaptureUpload(props.asset.assetId));
+      setUploadMessage("Upload cancelled. The encrypted local source was preserved.");
+    } catch {
+      setUploadMessage("The upload could not be cancelled safely. Try again when online.");
+    } finally {
+      setUploadBusy(false);
+    }
+  }
+
+  const uploadState = upload?.state;
+  const canUpload =
+    !uploadState ||
+    uploadState === "created" ||
+    uploadState === "expired" ||
+    uploadState === "failed";
+  const canCancel =
+    uploadState === "created" ||
+    uploadState === "uploading" ||
+    uploadState === "completing" ||
+    uploadState === "failed";
+
   return (
     <View
       accessibilityLabel={`Protected source. ${captureAssetLabel(props.asset)}`}
@@ -284,7 +360,39 @@ function CaptureAssetCard(props: { readonly asset: LocalCaptureAsset }) {
       ) : null}
       {previewFailed ? <Typography tone="muted">Thumbnail unavailable.</Typography> : null}
       <Typography textRole="bodyEmphasis">{captureAssetLabel(props.asset)}</Typography>
-      <Typography tone="muted">Encrypted on this device · not uploaded</Typography>
+      <Typography tone="muted">
+        {uploadState === "uploaded"
+          ? "Encrypted upload verified · safety validation pending"
+          : uploadState === "cancelled"
+            ? "Encrypted on this device · upload cancelled"
+            : uploadState
+              ? `Encrypted upload ${uploadState} · ${Math.round(progress * 100)}%`
+              : "Encrypted on this device · ready to upload"}
+      </Typography>
+      {uploadMessage ? <Typography tone="secondary">{uploadMessage}</Typography> : null}
+      {uploadState !== "cancelled" && uploadState !== "uploaded" ? (
+        <View style={styles.actions}>
+          {canUpload ? (
+            <Button
+              disabled={uploadBusy}
+              label={uploadState ? "Retry encrypted upload" : "Upload encrypted source"}
+              loading={uploadBusy}
+              onPress={() => void startUpload()}
+              testID={`capture-upload-${props.asset.displayOrder}`}
+              variant="secondary"
+            />
+          ) : null}
+          {canCancel ? (
+            <Button
+              disabled={uploadBusy}
+              label="Cancel upload"
+              onPress={() => void cancelUpload()}
+              testID={`capture-cancel-upload-${props.asset.displayOrder}`}
+              variant="destructive"
+            />
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }

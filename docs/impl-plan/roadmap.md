@@ -712,7 +712,7 @@ M3 feature breadth is authorized when:
 **Goal:** Let a parent reliably capture, store, confirm, search, retrieve, and
 correct the MVP's core child records.
 
-> **Delivery note — 24 July 2026:** Founder direction separately authorized the
+> **Delivery note — 25 July 2026:** Founder direction separately authorized the
 > bounded `VLT-01` record-foundation, `VLT-02` manual-record, and `VLT-03`
 > capture/import packages. `VLT-01` through `VLT-03` are complete within their
 > linked synthetic and device evidence boundaries. `VLT-03` implementation,
@@ -721,8 +721,14 @@ correct the MVP's core child records.
 > user-attested Pixel scanner/camera/permission rows pass. Its free Personal
 > Team iPhone profile is ready; physical-iPhone execution is deferred to the
 > pre-pilot physical-device capability matrix.
-> These package-specific
-> exceptions do not close Gate 2, authorize `VLT-04` or later M3 breadth, or
+> The reviewed `VLT-04` plan was separately accepted on 25 July 2026. Its
+> bounded implementation, review remediation, automated/Aiven checks, hosted
+> migration, final healthy staging API/worker deployments, storage-provider
+> probe and cleanup, physical Pixel 8 and iOS-Simulator client flows, broad
+> validation, and clean-checkout proof pass. `VLT-04` is `COMPLETE` within its
+> linked evidence boundary.
+> These package-specific exceptions do not close Gate 2, authorize `VLT-05` or
+> later M3 breadth, or
 > broaden real-data, provider, physical-iOS, low-end-Android, two-device, or
 > pilot claims. See the
 > [reviewed VLT-01 plan](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md),
@@ -791,7 +797,18 @@ correct the MVP's core child records.
 - Normalize orientation and create bounded thumbnails off the JS thread.
 - Preserve an opaque, resumable draft when capture or import is interrupted.
 
-#### `VLT-04` File encryption and resumable upload
+#### [`VLT-04` File encryption and resumable upload](./m3-vault-wedge/vlt-04-file-encryption-and-resumable-upload-plan.md)
+
+> **Delivery status — 25 July 2026:** `COMPLETE` under the bounded
+> package-specific authorization above. Encrypted multipart upload/download,
+> SQLCipher V8 resume, concurrent exact idempotency, cleanup failure isolation,
+> disposable Aiven authorization/RLS, hosted staging migration/provider/health,
+> release containment, repository gates, and bounded physical Pixel 8 plus
+> iPhone 17 Pro Simulator flows pass. Device flows use local synthetic
+> orchestration while the real provider is proven separately by the complete
+> Railway staging probe. Gate 2 remains open and `VLT-05+` is not authorized.
+> See the
+> [implementation evidence](./m3-vault-wedge/vlt-04-implementation-evidence.md).
 
 - Generate per-file data-encryption keys on device.
 - Encrypt with AES-256-GCM and bind AAD to household/object context.

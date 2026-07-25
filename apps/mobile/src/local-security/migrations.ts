@@ -262,6 +262,49 @@ export const localMigrations: ReadonlyArray<LocalMigration> = [
       ALTER TABLE local_encrypted_files ADD COLUMN wrapped_key TEXT;
     `,
   },
+  {
+    version: 8,
+    sql: `
+      ALTER TABLE local_encrypted_files ADD COLUMN file_object_id TEXT;
+      ALTER TABLE local_encrypted_files ADD COLUMN aad_version INTEGER;
+      ALTER TABLE local_encrypted_files ADD COLUMN content_nonce TEXT;
+      ALTER TABLE local_encrypted_files ADD COLUMN auth_tag TEXT;
+      ALTER TABLE local_encrypted_files ADD COLUMN ciphertext_sha256 TEXT;
+      ALTER TABLE local_encrypted_files ADD COLUMN transport_ready INTEGER NOT NULL DEFAULT 0;
+      CREATE UNIQUE INDEX local_encrypted_files_file_object_idx
+        ON local_encrypted_files(file_object_id)
+        WHERE file_object_id IS NOT NULL;
+      CREATE TABLE local_upload_sessions (
+        session_id TEXT PRIMARY KEY NOT NULL,
+        file_object_id TEXT NOT NULL UNIQUE,
+        capture_asset_id TEXT NOT NULL,
+        child_id TEXT NOT NULL,
+        local_file_id TEXT NOT NULL,
+        state TEXT NOT NULL CHECK (
+          state IN ('created', 'uploading', 'completing', 'uploaded', 'cancelled', 'expired', 'failed')
+        ),
+        safe_error_code TEXT,
+        expected_ciphertext_bytes INTEGER NOT NULL CHECK (expected_ciphertext_bytes > 0),
+        expected_ciphertext_sha256 TEXT NOT NULL,
+        expires_at TEXT,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (capture_asset_id) REFERENCES local_capture_assets(asset_id) ON DELETE CASCADE,
+        FOREIGN KEY (child_id) REFERENCES local_children(child_id) ON DELETE CASCADE,
+        FOREIGN KEY (local_file_id) REFERENCES local_encrypted_files(file_id) ON DELETE CASCADE
+      );
+      CREATE TABLE local_upload_parts (
+        session_id TEXT NOT NULL,
+        part_number INTEGER NOT NULL CHECK (part_number > 0),
+        etag TEXT NOT NULL,
+        byte_count INTEGER NOT NULL CHECK (byte_count > 0),
+        uploaded_at TEXT NOT NULL,
+        PRIMARY KEY (session_id, part_number),
+        FOREIGN KEY (session_id) REFERENCES local_upload_sessions(session_id) ON DELETE CASCADE
+      );
+      CREATE INDEX local_upload_sessions_state_updated_idx
+        ON local_upload_sessions(state, updated_at);
+    `,
+  },
 ] as const;
 
 export async function applyLocalMigrations(database: LocalMigrationDatabase): Promise<number> {

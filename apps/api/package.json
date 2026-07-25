@@ -18,6 +18,7 @@
     "validate:device:off05": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off05",
     "validate:device:off06": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off06",
     "validate:device:vlt01": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-vlt01",
+    "validate:device:vlt04": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && pnpm --filter @littlearc/storage build && tsx integration/off-02-household.ts --device-vlt04",
     "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.integration.json"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "@littlearc/database": "workspace:*",
     "@littlearc/domain": "workspace:*",
     "@littlearc/observability": "workspace:*",
+    "@littlearc/storage": "workspace:*",
     "fastify": "5.10.0"
   },
   "devDependencies": {

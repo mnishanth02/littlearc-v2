@@ -4,28 +4,35 @@ import {
   childIdentifierSchema,
   childProfileProjectionSchema,
   childProfileSyncMutationSchema,
+  completeUploadRequestSchema,
   consentEventSchema,
   contractMetadataSchema,
+  createUploadSessionRequestSchema,
   deviceEnrollmentRequestSchema,
   deviceEnrollmentResponseSchema,
   emergencyCardProjectionSchema,
   emergencyCardPutRequestSchema,
+  fileDownloadGrantSchema,
+  fileObjectProjectionSchema,
   householdIdentifierSchema,
   idempotencyKeySchema,
   ownerOnboardingRequestSchema,
   ownerOnboardingResponseSchema,
   paginatedResponseSchema,
   problemDetailsSchema,
+  reconcileUploadPartsRequestSchema,
   recordDescriptorSchema,
   recordProjectionSchema,
   recordVersionPageSchema,
   recordVersionProjectionSchema,
+  signedUploadPartSchema,
   syncMutationPushRequestSchema,
   syncMutationPushResponseSchema,
   syncMutationResultSchema,
   syncMutationSchema,
   syncPullResponseSchema,
   syncSnapshotPageSchema,
+  uploadSessionSchema,
   uuidV7Schema,
   z,
 } from "../schema-source/index.js";
@@ -76,6 +83,177 @@ registry.register("EmergencyCardPutRequest", emergencyCardPutRequestSchema);
 registry.register("RecordProjection", recordProjectionSchema);
 registry.register("RecordVersionProjection", recordVersionProjectionSchema);
 registry.register("RecordVersionPage", recordVersionPageSchema);
+registry.register("CreateUploadSessionRequest", createUploadSessionRequestSchema);
+registry.register("UploadSession", uploadSessionSchema);
+registry.register("SignedUploadPart", signedUploadPartSchema);
+registry.register("ReconcileUploadPartsRequest", reconcileUploadPartsRequestSchema);
+registry.register("CompleteUploadRequest", completeUploadRequestSchema);
+registry.register("FileObjectProjection", fileObjectProjectionSchema);
+registry.register("FileDownloadGrant", fileDownloadGrantSchema);
+
+registry.registerPath({
+  method: "post",
+  path: "/v1/files/uploads",
+  tags: ["files"],
+  summary: "Create an authorized encrypted multipart upload session",
+  security: [{ consumerSession: [] }],
+  request: {
+    headers: z.object({ "idempotency-key": idempotencyKeySchema }),
+    body: { content: { "application/json": { schema: createUploadSessionRequestSchema } } },
+  },
+  responses: {
+    201: {
+      description: "Encrypted upload session created",
+      content: { "application/json": { schema: uploadSessionSchema } },
+    },
+    200: {
+      description: "Idempotent upload session replayed",
+      content: { "application/json": { schema: uploadSessionSchema } },
+    },
+    400: {
+      description: "Upload request is invalid",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    401: {
+      description: "Consumer session required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    403: {
+      description: "Active enrollment and record capability required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    503: {
+      description: "Encrypted uploads are disabled or unavailable",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/files/uploads/{sessionId}",
+  tags: ["files"],
+  summary: "Read safe resumable upload state",
+  security: [{ consumerSession: [] }],
+  request: { params: z.object({ sessionId: uuidV7Schema }) },
+  responses: {
+    200: {
+      description: "Current authorized upload state",
+      content: { "application/json": { schema: uploadSessionSchema } },
+    },
+    404: {
+      description: "Upload session not found",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/v1/files/uploads/{sessionId}/parts/{partNumber}",
+  tags: ["files"],
+  summary: "Issue a short-lived signed ciphertext part URL",
+  security: [{ consumerSession: [] }],
+  request: {
+    params: z.object({
+      partNumber: z.coerce.number().int().min(1).max(10_000),
+      sessionId: uuidV7Schema,
+    }),
+  },
+  responses: {
+    200: {
+      description: "Short-lived signed part URL",
+      content: { "application/json": { schema: signedUploadPartSchema } },
+    },
+    409: {
+      description: "Upload session is not retryable",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/v1/files/uploads/{sessionId}/reconcile",
+  tags: ["files"],
+  summary: "Reconcile client and provider multipart facts",
+  security: [{ consumerSession: [] }],
+  request: {
+    params: z.object({ sessionId: uuidV7Schema }),
+    body: { content: { "application/json": { schema: reconcileUploadPartsRequestSchema } } },
+  },
+  responses: {
+    200: {
+      description: "Reconciled upload state",
+      content: { "application/json": { schema: uploadSessionSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/v1/files/uploads/{sessionId}/complete",
+  tags: ["files"],
+  summary: "Complete and verify encrypted multipart upload",
+  security: [{ consumerSession: [] }],
+  request: {
+    headers: z.object({ "idempotency-key": idempotencyKeySchema }),
+    params: z.object({ sessionId: uuidV7Schema }),
+    body: { content: { "application/json": { schema: completeUploadRequestSchema } } },
+  },
+  responses: {
+    200: {
+      description: "Uploaded ciphertext integrity accepted",
+      content: { "application/json": { schema: fileObjectProjectionSchema } },
+    },
+    409: {
+      description: "Multipart or integrity state conflicts",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/v1/files/uploads/{sessionId}",
+  tags: ["files"],
+  summary: "Cancel an encrypted multipart upload while preserving the device source",
+  security: [{ consumerSession: [] }],
+  request: { params: z.object({ sessionId: uuidV7Schema }) },
+  responses: {
+    204: { description: "Upload cancelled or already cancelled" },
+    409: {
+      description: "Completed upload cannot be cancelled",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/files/{fileObjectId}/download",
+  tags: ["files"],
+  summary: "Authorize encrypted download to an active enrolled device",
+  security: [{ consumerSession: [] }],
+  request: {
+    headers: z.object({ "x-littlearc-device-id": uuidV7Schema }),
+    params: z.object({ fileObjectId: uuidV7Schema }),
+  },
+  responses: {
+    200: {
+      description: "Short-lived ciphertext download and transient file key",
+      content: { "application/json": { schema: fileDownloadGrantSchema } },
+    },
+    403: {
+      description: "Active enrolled device required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    404: {
+      description: "File object not found",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
 
 registry.registerPath({
   method: "get",

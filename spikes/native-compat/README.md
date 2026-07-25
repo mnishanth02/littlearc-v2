@@ -23,7 +23,7 @@ accounts or physical devices and are not converted into passes by this harness.
 
 ## Local commands
 
-Use Node 24.18.0 and pnpm 11.14.0 without changing unrelated global defaults.
+Use Node 26.4.0 and pnpm 11.14.0 without changing unrelated global defaults.
 
 ```sh
 pnpm install --frozen-lockfile

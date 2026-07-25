@@ -1,6 +1,7 @@
 export * from "./change-feed.js";
 export * from "./client.js";
 export * from "./device-enrollment.js";
+export * from "./file-upload.js";
 export * from "./idempotency.js";
 export * from "./migrations/metadata.js";
 export * from "./outbox.js";
@@ -11,3 +12,4 @@ export * from "./roles.js";
 export * from "./schema/index.js";
 export * from "./sync.js";
 export * from "./tenant-context.js";
+export * from "./upload-cleanup.js";

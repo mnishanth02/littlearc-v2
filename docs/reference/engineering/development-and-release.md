@@ -7,7 +7,7 @@
 
 ## Development Path
 
-1. Select exact Node 24.18.0 and pnpm 11.14.0.
+1. Select exact Node 26.4.0 and pnpm 11.14.0.
 2. Install with `pnpm install --frozen-lockfile`.
 3. Open the delivery dashboard, nearest `AGENTS.md`, and focused package plan.
 4. Change source and tests within declared package boundaries.

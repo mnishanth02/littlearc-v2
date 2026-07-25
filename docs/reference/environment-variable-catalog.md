@@ -45,6 +45,8 @@
 | `S3_ACCESS_KEY_ID` | Secret | `FND-06` | Private bucket access identifier |
 | `S3_SECRET_ACCESS_KEY` | Secret | `FND-06` | Private bucket access secret |
 | `S3_BUCKET_NAME` | Sensitive | `FND-06` | Private document bucket name |
+| `S3_REGION` | Public | `VLT-04` | S3-compatible signing region, normally `auto` for Railway buckets |
+| `UPLOADS_ENABLED` | Public | `VLT-04` | Fail-closed encrypted upload feature switch; false by default |
 | `KEY_WRAPPING_SECRET_V1` | Secret | `FND-06` | Versioned initial key-wrapping secret |
 
 ## Worker
@@ -57,6 +59,7 @@
 | `S3_ACCESS_KEY_ID` | Secret | `FND-06` | Private bucket access identifier |
 | `S3_SECRET_ACCESS_KEY` | Secret | `FND-06` | Private bucket access secret |
 | `S3_BUCKET_NAME` | Sensitive | `FND-06` | Private document bucket name |
+| `S3_REGION` | Public | `VLT-04` | S3-compatible signing region, normally `auto` for Railway buckets |
 | `KEY_WRAPPING_SECRET_V1` | Secret | `FND-06` | Versioned initial key-wrapping secret |
 | `EMAIL_PROVIDER_API_KEY` | Secret | `FND-07` | Email adapter credential placeholder |
 | `PUSH_PROVIDER_CREDENTIALS` | Secret | `FND-07` | Push adapter credential placeholder |

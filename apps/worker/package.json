@@ -16,6 +16,7 @@
   "dependencies": {
     "@littlearc/database": "workspace:*",
     "@littlearc/observability": "workspace:*",
+    "@littlearc/storage": "workspace:*",
     "pg-boss": "12.26.1"
   }
 }

@@ -6,7 +6,7 @@
   "description": "LittleArc mobile-first pediatric history platform",
   "packageManager": "pnpm@11.14.0",
   "engines": {
-    "node": "24.18.0",
+    "node": "26.4.0",
     "pnpm": "11.14.0"
   },
   "scripts": {

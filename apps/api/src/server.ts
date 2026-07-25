@@ -20,6 +20,7 @@ import {
   registerDeviceEnrollmentRoute,
 } from "./device-enrollment-route.js";
 import { registerEmergencyCardRoutes } from "./emergency-card-route.js";
+import { type FileUploadRouteDependencies, registerFileUploadRoutes } from "./file-upload-route.js";
 import { nextId } from "./owner-onboarding.js";
 import {
   type OwnerOnboardingRouteDependencies,
@@ -37,7 +38,7 @@ export type HealthResponse = {
 };
 
 export type ReadinessResponse = {
-  readonly ready: true;
+  readonly ready: boolean;
   readonly service: "api";
   readonly appEnv: ApiConfig["appEnv"];
   readonly databaseFoundation: typeof databaseFoundationReadiness;
@@ -59,6 +60,7 @@ export async function createApiServer(
   ownerOnboarding?: OwnerOnboardingRouteDependencies,
   deviceEnrollment?: DeviceEnrollmentRouteDependencies,
   sync?: SyncRouteDependencies,
+  files?: FileUploadRouteDependencies,
 ): Promise<FastifyInstance> {
   const server = Fastify({
     genReqId: () => nextId(),
@@ -107,6 +109,9 @@ export async function createApiServer(
     registerEmergencyCardRoutes(server, sync);
     registerRecordRoutes(server, sync);
   }
+  if (files) {
+    registerFileUploadRoutes(server, files);
+  }
 
   server.get("/v1", async () => contractMetadata);
 
@@ -132,43 +137,35 @@ export async function createApiServer(
     }),
   );
 
-  server.get(
-    "/ready",
-    async (): Promise<ReadinessResponse> => ({
-      ready: true,
-      service: "api",
-      appEnv: config.appEnv,
-      databaseFoundation: databaseFoundationReadiness,
-      checks: [
-        {
-          name: "auth",
-          status: consumerAuth ? "foundation-ready" : "deferred",
-          owner: "OFF-01",
-        },
-        ...databaseReadinessChecks,
-        { name: "object-storage", status: "deferred", owner: "FND-06" },
-      ],
-    }),
-  );
+  const readiness = (): ReadinessResponse => ({
+    ready: !config.uploadsEnabled || Boolean(files),
+    service: "api",
+    appEnv: config.appEnv,
+    databaseFoundation: databaseFoundationReadiness,
+    checks: [
+      {
+        name: "auth",
+        status: consumerAuth ? "foundation-ready" : "deferred",
+        owner: "OFF-01",
+      },
+      ...databaseReadinessChecks,
+      {
+        name: "object-storage",
+        status: files ? "foundation-ready" : "deferred",
+        owner: files ? "VLT-04" : "FND-06",
+      },
+    ],
+  });
 
-  server.get(
-    "/health/ready",
-    async (): Promise<ReadinessResponse> => ({
-      ready: true,
-      service: "api",
-      appEnv: config.appEnv,
-      databaseFoundation: databaseFoundationReadiness,
-      checks: [
-        {
-          name: "auth",
-          status: consumerAuth ? "foundation-ready" : "deferred",
-          owner: "OFF-01",
-        },
-        ...databaseReadinessChecks,
-        { name: "object-storage", status: "deferred", owner: "FND-06" },
-      ],
-    }),
-  );
+  for (const path of ["/ready", "/health/ready"]) {
+    server.get(path, async (_request, reply): Promise<ReadinessResponse> => {
+      const response = readiness();
+      if (!response.ready) {
+        reply.status(503);
+      }
+      return response;
+    });
+  }
 
   registerProblemDetails(server);
 

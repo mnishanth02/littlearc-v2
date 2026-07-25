@@ -35,6 +35,26 @@
           "source": "railway-secret"
         },
         {
+          "classification": "public",
+          "name": "AUTH_BASE_URL",
+          "source": "railway-domain"
+        },
+        {
+          "classification": "sensitive",
+          "name": "AUTH_TRUSTED_ORIGINS",
+          "source": "explicit-staging-origins"
+        },
+        {
+          "classification": "public",
+          "name": "AUTH_EMAIL_FROM",
+          "source": "synthetic-staging-sender"
+        },
+        {
+          "classification": "secret",
+          "name": "RESEND_API_KEY",
+          "source": "railway-secret"
+        },
+        {
           "classification": "sensitive",
           "name": "S3_ENDPOINT",
           "source": "railway-bucket-reference"
@@ -53,6 +73,16 @@
           "classification": "sensitive",
           "name": "S3_BUCKET_NAME",
           "source": "railway-bucket-reference"
+        },
+        {
+          "classification": "public",
+          "name": "S3_REGION",
+          "source": "literal:auto"
+        },
+        {
+          "classification": "public",
+          "name": "UPLOADS_ENABLED",
+          "source": "literal:true"
         },
         {
           "classification": "secret",
@@ -95,6 +125,11 @@
           "classification": "sensitive",
           "name": "S3_BUCKET_NAME",
           "source": "railway-bucket-reference"
+        },
+        {
+          "classification": "public",
+          "name": "S3_REGION",
+          "source": "literal:auto"
         },
         {
           "classification": "secret",

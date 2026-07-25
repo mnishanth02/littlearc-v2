@@ -12,6 +12,7 @@ export const logCodes = {
   workerHeartbeat: "worker.runtime.heartbeat",
   workerStarted: "worker.runtime.started",
   workerStopped: "worker.runtime.stopped",
+  workerUploadCleanupFailed: "worker.upload_cleanup.failed",
 } as const;
 
 export type LogCode = (typeof logCodes)[keyof typeof logCodes];
@@ -32,6 +33,9 @@ export type LogContextMap = {
   };
   readonly [logCodes.workerStopped]: {
     readonly outcome: "stopped";
+  };
+  readonly [logCodes.workerUploadCleanupFailed]: {
+    readonly outcome: "failed";
   };
 };
 

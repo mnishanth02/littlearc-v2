@@ -16,9 +16,15 @@ const requiredServices = new Map([
 ]);
 
 const requiredWatchRoots = {
-  "api.railway.json": ["/apps/api/**", "/packages/contracts/**", "/packages/database/**"],
+  "api.railway.json": [
+    "/apps/api/**",
+    "/packages/contracts/**",
+    "/packages/crypto/**",
+    "/packages/database/**",
+    "/packages/storage/**",
+  ],
   "ops-web.railway.json": ["/apps/ops-web/**", "/packages/contracts/**"],
-  "worker.railway.json": ["/apps/worker/**", "/packages/database/**"],
+  "worker.railway.json": ["/apps/worker/**", "/packages/database/**", "/packages/storage/**"],
 };
 
 const requiredSharedWatchRoots = ["/package.json", "/pnpm-lock.yaml", "/pnpm-workspace.yaml", "/turbo.json"];

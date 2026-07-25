@@ -129,6 +129,12 @@ export default function LandingScreen() {
                 variant="secondary"
               />
               <Button
+                label="Open VLT-04 encrypted-upload validation"
+                onPress={() => router.push("/vlt-04-validation")}
+                testID="open-vlt04-validation"
+                variant="secondary"
+              />
+              <Button
                 label="Open design-system gallery"
                 onPress={() => router.push("/design-system")}
                 variant="secondary"

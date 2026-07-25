@@ -361,6 +361,10 @@ export const openApiDocument = {
               "device_enrolled",
               "emergency_card_created",
               "emergency_card_updated",
+              "file_upload_created",
+              "file_upload_completed",
+              "file_upload_cancelled",
+              "file_download_authorized",
               "staff_action_recorded"
             ]
           },
@@ -9324,6 +9328,24 @@ export const openApiDocument = {
                 "enum": [
                   5
                 ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  6
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  7
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  8
+                ]
               }
             ]
           },
@@ -9391,6 +9413,24 @@ export const openApiDocument = {
                 "type": "number",
                 "enum": [
                   5
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  6
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  7
+                ]
+              },
+              {
+                "type": "number",
+                "enum": [
+                  8
                 ]
               }
             ]
@@ -11853,11 +11893,2295 @@ export const openApiDocument = {
           "items",
           "nextCursor"
         ]
+      },
+      "CreateUploadSessionRequest": {
+        "type": "object",
+        "properties": {
+          "aadVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "authTag": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "captureAssetId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "childId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "ciphertextBytes": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 26214428
+          },
+          "ciphertextSha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "contentNonce": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "declaredMime": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/heic",
+              "application/pdf"
+            ]
+          },
+          "deviceId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "encodedFileKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "fileObjectId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "uploadSessionId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          }
+        },
+        "required": [
+          "aadVersion",
+          "authTag",
+          "captureAssetId",
+          "childId",
+          "ciphertextBytes",
+          "ciphertextSha256",
+          "contentNonce",
+          "declaredMime",
+          "deviceId",
+          "encodedFileKey",
+          "fileObjectId",
+          "uploadSessionId"
+        ],
+        "additionalProperties": false
+      },
+      "UploadSession": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+            "description": "Normalized UTC ISO 8601 timestamp"
+          },
+          "fileObjectId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "partBytes": {
+            "type": "number",
+            "enum": [
+              5242880
+            ]
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "etag": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "partNumber": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000
+                },
+                "size": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 5242880
+                }
+              },
+              "required": [
+                "etag",
+                "partNumber",
+                "size"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "safeErrorCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 80
+          },
+          "sessionId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "created",
+              "uploading",
+              "completing",
+              "uploaded",
+              "cancelled",
+              "expired",
+              "failed"
+            ]
+          }
+        },
+        "required": [
+          "expiresAt",
+          "fileObjectId",
+          "partBytes",
+          "parts",
+          "safeErrorCode",
+          "sessionId",
+          "state"
+        ],
+        "additionalProperties": false
+      },
+      "SignedUploadPart": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+            "description": "Normalized UTC ISO 8601 timestamp"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "PUT"
+            ]
+          },
+          "partNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "expiresAt",
+          "method",
+          "partNumber",
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "ReconcileUploadPartsRequest": {
+        "type": "object",
+        "properties": {
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "etag": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "partNumber": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000
+                },
+                "size": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 5242880
+                }
+              },
+              "required": [
+                "etag",
+                "partNumber",
+                "size"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 6
+          }
+        },
+        "required": [
+          "parts"
+        ],
+        "additionalProperties": false
+      },
+      "CompleteUploadRequest": {
+        "type": "object",
+        "properties": {
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "etag": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "partNumber": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000
+                },
+                "size": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 5242880
+                }
+              },
+              "required": [
+                "etag",
+                "partNumber",
+                "size"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 6
+          }
+        },
+        "required": [
+          "parts"
+        ],
+        "additionalProperties": false
+      },
+      "FileObjectProjection": {
+        "type": "object",
+        "properties": {
+          "ciphertextBytes": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "ciphertextSha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "fileObjectId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "uploadState": {
+            "type": "string",
+            "enum": [
+              "uploaded"
+            ]
+          },
+          "validationState": {
+            "type": "string",
+            "enum": [
+              "pending"
+            ]
+          }
+        },
+        "required": [
+          "ciphertextBytes",
+          "ciphertextSha256",
+          "fileObjectId",
+          "uploadState",
+          "validationState"
+        ],
+        "additionalProperties": false
+      },
+      "FileDownloadGrant": {
+        "type": "object",
+        "properties": {
+          "aadVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "authTag": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "ciphertextBytes": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "ciphertextSha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "contentNonce": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "declaredMime": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/heic",
+              "application/pdf"
+            ]
+          },
+          "encodedFileKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "expiresAt": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+            "description": "Normalized UTC ISO 8601 timestamp"
+          },
+          "fileObjectId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "aadVersion",
+          "authTag",
+          "ciphertextBytes",
+          "ciphertextSha256",
+          "contentNonce",
+          "declaredMime",
+          "encodedFileKey",
+          "expiresAt",
+          "fileObjectId",
+          "method",
+          "url"
+        ],
+        "additionalProperties": false
       }
     },
     "parameters": {}
   },
   "paths": {
+    "/v1/files/uploads": {
+      "post": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Create an authorized encrypted multipart upload session",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "Client-generated UUIDv7 idempotency key"
+            },
+            "required": true,
+            "description": "Client-generated UUIDv7 idempotency key",
+            "name": "idempotency-key",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "aadVersion": {
+                    "type": "number",
+                    "enum": [
+                      1
+                    ]
+                  },
+                  "authTag": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                  },
+                  "captureAssetId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                    "description": "UUIDv7 identifier"
+                  },
+                  "childId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                    "description": "UUIDv7 identifier"
+                  },
+                  "ciphertextBytes": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 26214428
+                  },
+                  "ciphertextSha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "contentNonce": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                  },
+                  "declaredMime": {
+                    "type": "string",
+                    "enum": [
+                      "image/jpeg",
+                      "image/png",
+                      "image/heic",
+                      "application/pdf"
+                    ]
+                  },
+                  "deviceId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                    "description": "UUIDv7 identifier"
+                  },
+                  "encodedFileKey": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                  },
+                  "fileObjectId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                    "description": "UUIDv7 identifier"
+                  },
+                  "uploadSessionId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                    "description": "UUIDv7 identifier"
+                  }
+                },
+                "required": [
+                  "aadVersion",
+                  "authTag",
+                  "captureAssetId",
+                  "childId",
+                  "ciphertextBytes",
+                  "ciphertextSha256",
+                  "contentNonce",
+                  "declaredMime",
+                  "deviceId",
+                  "encodedFileKey",
+                  "fileObjectId",
+                  "uploadSessionId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Idempotent upload session replayed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "expiresAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "fileObjectId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "partBytes": {
+                      "type": "number",
+                      "enum": [
+                        5242880
+                      ]
+                    },
+                    "parts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "etag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "partNumber": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10000
+                          },
+                          "size": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 5242880
+                          }
+                        },
+                        "required": [
+                          "etag",
+                          "partNumber",
+                          "size"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "safeErrorCode": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 80
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "created",
+                        "uploading",
+                        "completing",
+                        "uploaded",
+                        "cancelled",
+                        "expired",
+                        "failed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "expiresAt",
+                    "fileObjectId",
+                    "partBytes",
+                    "parts",
+                    "safeErrorCode",
+                    "sessionId",
+                    "state"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Encrypted upload session created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "expiresAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "fileObjectId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "partBytes": {
+                      "type": "number",
+                      "enum": [
+                        5242880
+                      ]
+                    },
+                    "parts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "etag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "partNumber": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10000
+                          },
+                          "size": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 5242880
+                          }
+                        },
+                        "required": [
+                          "etag",
+                          "partNumber",
+                          "size"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "safeErrorCode": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 80
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "created",
+                        "uploading",
+                        "completing",
+                        "uploaded",
+                        "cancelled",
+                        "expired",
+                        "failed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "expiresAt",
+                    "fileObjectId",
+                    "partBytes",
+                    "parts",
+                    "safeErrorCode",
+                    "sessionId",
+                    "state"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Upload request is invalid",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Consumer session required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Active enrollment and record capability required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Encrypted uploads are disabled or unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/uploads/{sessionId}": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Read safe resumable upload state",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "sessionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized upload state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "expiresAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "fileObjectId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "partBytes": {
+                      "type": "number",
+                      "enum": [
+                        5242880
+                      ]
+                    },
+                    "parts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "etag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "partNumber": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10000
+                          },
+                          "size": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 5242880
+                          }
+                        },
+                        "required": [
+                          "etag",
+                          "partNumber",
+                          "size"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "safeErrorCode": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 80
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "created",
+                        "uploading",
+                        "completing",
+                        "uploaded",
+                        "cancelled",
+                        "expired",
+                        "failed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "expiresAt",
+                    "fileObjectId",
+                    "partBytes",
+                    "parts",
+                    "safeErrorCode",
+                    "sessionId",
+                    "state"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Upload session not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Cancel an encrypted multipart upload while preserving the device source",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "sessionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Upload cancelled or already cancelled"
+          },
+          "409": {
+            "description": "Completed upload cannot be cancelled",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/uploads/{sessionId}/parts/{partNumber}": {
+      "post": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Issue a short-lived signed ciphertext part URL",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "required": true,
+            "name": "partNumber",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "sessionId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Short-lived signed part URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "expiresAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "PUT"
+                      ]
+                    },
+                    "partNumber": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 10000
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "expiresAt",
+                    "method",
+                    "partNumber",
+                    "url"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Upload session is not retryable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/uploads/{sessionId}/reconcile": {
+      "post": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Reconcile client and provider multipart facts",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "sessionId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "etag": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "partNumber": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 10000
+                        },
+                        "size": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 5242880
+                        }
+                      },
+                      "required": [
+                        "etag",
+                        "partNumber",
+                        "size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 6
+                  }
+                },
+                "required": [
+                  "parts"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reconciled upload state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "expiresAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "fileObjectId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "partBytes": {
+                      "type": "number",
+                      "enum": [
+                        5242880
+                      ]
+                    },
+                    "parts": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "etag": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256
+                          },
+                          "partNumber": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 10000
+                          },
+                          "size": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0,
+                            "maximum": 5242880
+                          }
+                        },
+                        "required": [
+                          "etag",
+                          "partNumber",
+                          "size"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "safeErrorCode": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 80
+                    },
+                    "sessionId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "created",
+                        "uploading",
+                        "completing",
+                        "uploaded",
+                        "cancelled",
+                        "expired",
+                        "failed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "expiresAt",
+                    "fileObjectId",
+                    "partBytes",
+                    "parts",
+                    "safeErrorCode",
+                    "sessionId",
+                    "state"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/uploads/{sessionId}/complete": {
+      "post": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Complete and verify encrypted multipart upload",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "sessionId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "Client-generated UUIDv7 idempotency key"
+            },
+            "required": true,
+            "description": "Client-generated UUIDv7 idempotency key",
+            "name": "idempotency-key",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "etag": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "partNumber": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 10000
+                        },
+                        "size": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0,
+                          "maximum": 5242880
+                        }
+                      },
+                      "required": [
+                        "etag",
+                        "partNumber",
+                        "size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1,
+                    "maxItems": 6
+                  }
+                },
+                "required": [
+                  "parts"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Uploaded ciphertext integrity accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ciphertextBytes": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0
+                    },
+                    "ciphertextSha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "fileObjectId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "uploadState": {
+                      "type": "string",
+                      "enum": [
+                        "uploaded"
+                      ]
+                    },
+                    "validationState": {
+                      "type": "string",
+                      "enum": [
+                        "pending"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "ciphertextBytes",
+                    "ciphertextSha256",
+                    "fileObjectId",
+                    "uploadState",
+                    "validationState"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Multipart or integrity state conflicts",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/{fileObjectId}/download": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Authorize encrypted download to an active enrolled device",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "fileObjectId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "x-littlearc-device-id",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Short-lived ciphertext download and transient file key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aadVersion": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "authTag": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    },
+                    "ciphertextBytes": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0
+                    },
+                    "ciphertextSha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "contentNonce": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    },
+                    "declaredMime": {
+                      "type": "string",
+                      "enum": [
+                        "image/jpeg",
+                        "image/png",
+                        "image/heic",
+                        "application/pdf"
+                      ]
+                    },
+                    "encodedFileKey": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "fileObjectId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET"
+                      ]
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "aadVersion",
+                    "authTag",
+                    "ciphertextBytes",
+                    "ciphertextSha256",
+                    "contentNonce",
+                    "declaredMime",
+                    "encodedFileKey",
+                    "expiresAt",
+                    "fileObjectId",
+                    "method",
+                    "url"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Active enrolled device required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "File object not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/records/{recordId}": {
       "get": {
         "tags": [
@@ -23116,6 +25440,24 @@ export const openApiDocument = {
                         "enum": [
                           5
                         ]
+                      },
+                      {
+                        "type": "number",
+                        "enum": [
+                          6
+                        ]
+                      },
+                      {
+                        "type": "number",
+                        "enum": [
+                          7
+                        ]
+                      },
+                      {
+                        "type": "number",
+                        "enum": [
+                          8
+                        ]
                       }
                     ]
                   },
@@ -23192,6 +25534,24 @@ export const openApiDocument = {
                           "enum": [
                             5
                           ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            6
+                          ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            7
+                          ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            8
+                          ]
                         }
                       ]
                     },
@@ -23263,6 +25623,24 @@ export const openApiDocument = {
                           "type": "number",
                           "enum": [
                             5
+                          ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            6
+                          ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            7
+                          ]
+                        },
+                        {
+                          "type": "number",
+                          "enum": [
+                            8
                           ]
                         }
                       ]

@@ -4,6 +4,704 @@
  */
 
 export interface paths {
+    "/v1/files/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create an authorized encrypted multipart upload session */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Client-generated UUIDv7 idempotency key */
+                    "idempotency-key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** @enum {number} */
+                        aadVersion: 1;
+                        authTag: string;
+                        /** @description UUIDv7 identifier */
+                        captureAssetId: string;
+                        /** @description UUIDv7 identifier */
+                        childId: string;
+                        ciphertextBytes: number;
+                        ciphertextSha256: string;
+                        contentNonce: string;
+                        /** @enum {string} */
+                        declaredMime: "image/jpeg" | "image/png" | "image/heic" | "application/pdf";
+                        /** @description UUIDv7 identifier */
+                        deviceId: string;
+                        encodedFileKey: string;
+                        /** @description UUIDv7 identifier */
+                        fileObjectId: string;
+                        /** @description UUIDv7 identifier */
+                        uploadSessionId: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Idempotent upload session replayed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {number} */
+                            partBytes: 5242880;
+                            parts: {
+                                etag: string;
+                                partNumber: number;
+                                size: number;
+                            }[];
+                            safeErrorCode: string | null;
+                            /** @description UUIDv7 identifier */
+                            sessionId: string;
+                            /** @enum {string} */
+                            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+                        };
+                    };
+                };
+                /** @description Encrypted upload session created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {number} */
+                            partBytes: 5242880;
+                            parts: {
+                                etag: string;
+                                partNumber: number;
+                                size: number;
+                            }[];
+                            safeErrorCode: string | null;
+                            /** @description UUIDv7 identifier */
+                            sessionId: string;
+                            /** @enum {string} */
+                            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+                        };
+                    };
+                };
+                /** @description Upload request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Active enrollment and record capability required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Encrypted uploads are disabled or unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/uploads/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read safe resumable upload state */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Current authorized upload state */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {number} */
+                            partBytes: 5242880;
+                            parts: {
+                                etag: string;
+                                partNumber: number;
+                                size: number;
+                            }[];
+                            safeErrorCode: string | null;
+                            /** @description UUIDv7 identifier */
+                            sessionId: string;
+                            /** @enum {string} */
+                            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+                        };
+                    };
+                };
+                /** @description Upload session not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Cancel an encrypted multipart upload while preserving the device source */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Upload cancelled or already cancelled */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Completed upload cannot be cancelled */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/uploads/{sessionId}/parts/{partNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue a short-lived signed ciphertext part URL */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    partNumber: number;
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Short-lived signed part URL */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @enum {string} */
+                            method: "PUT";
+                            partNumber: number;
+                            /** Format: uri */
+                            url: string;
+                        };
+                    };
+                };
+                /** @description Upload session is not retryable */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/uploads/{sessionId}/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reconcile client and provider multipart facts */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        parts: {
+                            etag: string;
+                            partNumber: number;
+                            size: number;
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Reconciled upload state */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {number} */
+                            partBytes: 5242880;
+                            parts: {
+                                etag: string;
+                                partNumber: number;
+                                size: number;
+                            }[];
+                            safeErrorCode: string | null;
+                            /** @description UUIDv7 identifier */
+                            sessionId: string;
+                            /** @enum {string} */
+                            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/uploads/{sessionId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete and verify encrypted multipart upload */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Client-generated UUIDv7 idempotency key */
+                    "idempotency-key": string;
+                };
+                path: {
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        parts: {
+                            etag: string;
+                            partNumber: number;
+                            size: number;
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Uploaded ciphertext integrity accepted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ciphertextBytes: number;
+                            ciphertextSha256: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {string} */
+                            uploadState: "uploaded";
+                            /** @enum {string} */
+                            validationState: "pending";
+                        };
+                    };
+                };
+                /** @description Multipart or integrity state conflicts */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/{fileObjectId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Authorize encrypted download to an active enrolled device */
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description UUIDv7 identifier */
+                    "x-littlearc-device-id": string;
+                };
+                path: {
+                    /** @description UUIDv7 identifier */
+                    fileObjectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Short-lived ciphertext download and transient file key */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            aadVersion: 1;
+                            authTag: string;
+                            ciphertextBytes: number;
+                            ciphertextSha256: string;
+                            contentNonce: string;
+                            /** @enum {string} */
+                            declaredMime: "image/jpeg" | "image/png" | "image/heic" | "application/pdf";
+                            encodedFileKey: string;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {string} */
+                            method: "GET";
+                            /** Format: uri */
+                            url: string;
+                        };
+                    };
+                };
+                /** @description Active enrolled device required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description File object not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/records/{recordId}": {
         parameters: {
             query?: never;
@@ -2830,7 +3528,7 @@ export interface paths {
                         appVersion: string;
                         /** @description UUIDv7 identifier */
                         deviceId: string;
-                        localSchemaVersion: 1 | 2 | 3 | 4 | 5;
+                        localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
                         /** @enum {string} */
                         platform: "android" | "ios";
                     };
@@ -2850,7 +3548,7 @@ export interface paths {
                             enrollmentStatus: "active";
                             /** @description UUIDv7 identifier */
                             householdId: string;
-                            localSchemaVersion: 1 | 2 | 3 | 4 | 5;
+                            localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
                             replayed: boolean;
                         };
                     };
@@ -2868,7 +3566,7 @@ export interface paths {
                             enrollmentStatus: "active";
                             /** @description UUIDv7 identifier */
                             householdId: string;
-                            localSchemaVersion: 1 | 2 | 3 | 4 | 5;
+                            localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
                             replayed: boolean;
                         };
                     };
@@ -3351,7 +4049,7 @@ export interface components {
             /** @description UUIDv7 identifier */
             actorId: string;
             /** @enum {string} */
-            action: "household_created" | "child_created" | "child_updated" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "emergency_card_created" | "emergency_card_updated" | "staff_action_recorded";
+            action: "household_created" | "child_created" | "child_updated" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "emergency_card_created" | "emergency_card_updated" | "file_upload_created" | "file_upload_completed" | "file_upload_cancelled" | "file_download_authorized" | "staff_action_recorded";
             targetType: string;
             /** @description UUIDv7 identifier */
             targetId: string;
@@ -5346,7 +6044,7 @@ export interface components {
             appVersion: string;
             /** @description UUIDv7 identifier */
             deviceId: string;
-            localSchemaVersion: 1 | 2 | 3 | 4 | 5;
+            localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
             /** @enum {string} */
             platform: "android" | "ios";
         };
@@ -5357,7 +6055,7 @@ export interface components {
             enrollmentStatus: "active";
             /** @description UUIDv7 identifier */
             householdId: string;
-            localSchemaVersion: 1 | 2 | 3 | 4 | 5;
+            localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
             replayed: boolean;
         };
         EmergencyCardProjection: {
@@ -5886,6 +6584,97 @@ export interface components {
             }[];
             /** @description Opaque pagination or synchronization cursor */
             nextCursor: string | null;
+        };
+        CreateUploadSessionRequest: {
+            /** @enum {number} */
+            aadVersion: 1;
+            authTag: string;
+            /** @description UUIDv7 identifier */
+            captureAssetId: string;
+            /** @description UUIDv7 identifier */
+            childId: string;
+            ciphertextBytes: number;
+            ciphertextSha256: string;
+            contentNonce: string;
+            /** @enum {string} */
+            declaredMime: "image/jpeg" | "image/png" | "image/heic" | "application/pdf";
+            /** @description UUIDv7 identifier */
+            deviceId: string;
+            encodedFileKey: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @description UUIDv7 identifier */
+            uploadSessionId: string;
+        };
+        UploadSession: {
+            /** @description Normalized UTC ISO 8601 timestamp */
+            expiresAt: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {number} */
+            partBytes: 5242880;
+            parts: {
+                etag: string;
+                partNumber: number;
+                size: number;
+            }[];
+            safeErrorCode: string | null;
+            /** @description UUIDv7 identifier */
+            sessionId: string;
+            /** @enum {string} */
+            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+        };
+        SignedUploadPart: {
+            /** @description Normalized UTC ISO 8601 timestamp */
+            expiresAt: string;
+            /** @enum {string} */
+            method: "PUT";
+            partNumber: number;
+            /** Format: uri */
+            url: string;
+        };
+        ReconcileUploadPartsRequest: {
+            parts: {
+                etag: string;
+                partNumber: number;
+                size: number;
+            }[];
+        };
+        CompleteUploadRequest: {
+            parts: {
+                etag: string;
+                partNumber: number;
+                size: number;
+            }[];
+        };
+        FileObjectProjection: {
+            ciphertextBytes: number;
+            ciphertextSha256: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {string} */
+            uploadState: "uploaded";
+            /** @enum {string} */
+            validationState: "pending";
+        };
+        FileDownloadGrant: {
+            /** @enum {number} */
+            aadVersion: 1;
+            authTag: string;
+            ciphertextBytes: number;
+            ciphertextSha256: string;
+            contentNonce: string;
+            /** @enum {string} */
+            declaredMime: "image/jpeg" | "image/png" | "image/heic" | "application/pdf";
+            encodedFileKey: string;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            expiresAt: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {string} */
+            method: "GET";
+            /** Format: uri */
+            url: string;
         };
     };
     responses: never;

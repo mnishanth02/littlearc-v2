@@ -1,7 +1,8 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import {
+  createFileKeyCrypto,
   createStructuredPayloadCrypto,
   type StructuredPayloadCrypto,
   type WrappedHouseholdKey,
@@ -9,8 +10,10 @@ import {
 import type { DeviceEnrollmentPersistenceError } from "@littlearc/database";
 import {
   createDatabaseConnection,
+  createFileUploadPersistence,
   createSyncCursorCodec,
   createSyncPersistence,
+  createUploadCleanupPersistence,
 } from "@littlearc/database";
 import type {
   EmergencyCardContent,
@@ -18,10 +21,15 @@ import type {
   RecordVersionContentV1,
   UuidV7,
 } from "@littlearc/domain";
+import {
+  createMemoryEncryptedObjectStorage,
+  type EncryptedObjectStorage,
+} from "@littlearc/storage";
 import { Client } from "pg";
 import { loadApiConfig } from "../src/config.js";
 import { createDeviceEnrollmentCommand } from "../src/device-enrollment.js";
 import type { DeviceEnrollmentCommand } from "../src/device-enrollment-route.js";
+import { createFileUploadService } from "../src/file-upload.js";
 import {
   createOwnerOnboardingCommand,
   createSyntheticAdultVerification,
@@ -38,6 +46,7 @@ const migrationPaths = [
   "../../../packages/database/migrations/0003_off_02_household_consent_audit.sql",
   "../../../packages/database/migrations/0004_off_05_emergency_card.sql",
   "../../../packages/database/migrations/0005_vlt_01_record_foundation.sql",
+  "../../../packages/database/migrations/0006_vlt_04_file_upload.sql",
 ].map((path) => fileURLToPath(new URL(path, import.meta.url)));
 const deviceMode = process.argv.includes("--device");
 const off03DeviceMode = process.argv.includes("--device-off03");
@@ -45,6 +54,7 @@ const off04DeviceMode = process.argv.includes("--device-off04");
 const off05DeviceMode = process.argv.includes("--device-off05");
 const off06DeviceMode = process.argv.includes("--device-off06");
 const vlt01DeviceMode = process.argv.includes("--device-vlt01");
+const vlt04DeviceMode = process.argv.includes("--device-vlt04");
 const deviceApiPort = Number(process.env.LITTLEARC_DEVICE_API_PORT ?? "3000");
 const syntheticRequest: OwnerOnboardingRequest = {
   adultVerificationAssertion: "synthetic-approved-off-02",
@@ -169,6 +179,7 @@ async function runAutomated(
   currentUser: string,
   syncService: SyncService,
   crypto: StructuredPayloadCrypto,
+  database: ReturnType<typeof createDatabaseConnection>["database"],
 ): Promise<void> {
   const firstUser = "synthetic-off02-owner-one";
   const secondUser = "synthetic-off02-owner-two";
@@ -376,6 +387,24 @@ async function runAutomated(
   console.log("- Cross-identity reuse, revoked reactivation, and forced rollback failed closed.");
   console.log("- RLS-bound device, minimized audit, and outbox evidence passed.");
 
+  const fileDeviceId = nextId();
+  await deviceCommand.execute({
+    identityUserId: firstUser,
+    request: {
+      appVersion: "0.0.1",
+      deviceId: fileDeviceId,
+      localSchemaVersion: 8,
+      platform: "android",
+    },
+    requestId: nextId(),
+  });
+  await runFileUploadAutomated(database, client, crypto, {
+    childId: first.childId,
+    deviceId: fileDeviceId,
+    firstUser,
+    secondUser,
+  });
+
   await runSyncAutomated(syncService, client, {
     firstChildId: first.childId,
     firstHouseholdId: first.householdId,
@@ -395,6 +424,227 @@ async function runAutomated(
     firstUser,
     secondUser,
   });
+}
+
+async function runFileUploadAutomated(
+  database: ReturnType<typeof createDatabaseConnection>["database"],
+  client: Client,
+  crypto: StructuredPayloadCrypto,
+  input: {
+    readonly childId: UuidV7;
+    readonly deviceId: UuidV7;
+    readonly firstUser: string;
+    readonly secondUser: string;
+  },
+): Promise<void> {
+  const storage = createMemoryEncryptedObjectStorage();
+  const persistence = createFileUploadPersistence({
+    crypto,
+    database,
+    fileKeyCrypto: createFileKeyCrypto({ currentKeyVersion: 1 }),
+  });
+  const service = createFileUploadService({ enabled: true, persistence, storage });
+  const ciphertext = Buffer.from("VLT04_SYNTHETIC_CIPHERTEXT_ONLY");
+  const fileKey = randomBytes(32);
+  const fileObjectId = nextId();
+  const sessionId = nextId();
+  const digest = createHash("sha256").update(ciphertext).digest("hex");
+  const createRequest = {
+    aadVersion: 1 as const,
+    authTag: randomBytes(16).toString("base64"),
+    captureAssetId: nextId(),
+    childId: input.childId,
+    ciphertextBytes: ciphertext.length,
+    ciphertextSha256: digest,
+    contentNonce: randomBytes(12).toString("base64"),
+    declaredMime: "application/pdf" as const,
+    deviceId: input.deviceId,
+    encodedFileKey: fileKey.toString("base64"),
+    fileObjectId,
+    uploadSessionId: sessionId,
+  };
+  const createResults = await Promise.all([
+    service.create({
+      identityUserId: input.firstUser,
+      request: createRequest,
+      requestId: nextId(),
+    }),
+    service.create({
+      identityUserId: input.firstUser,
+      request: createRequest,
+      requestId: nextId(),
+    }),
+  ]);
+  assert(
+    createResults.filter((result) => result.replayed).length === 1 &&
+      createResults.filter((result) => !result.replayed).length === 1,
+    "VLT-04 concurrent exact replay was not idempotent.",
+  );
+  let conflictCode: string | undefined;
+  try {
+    await service.create({
+      identityUserId: input.firstUser,
+      request: {
+        ...createRequest,
+        ciphertextSha256: "f".repeat(64),
+      },
+      requestId: nextId(),
+    });
+  } catch (error) {
+    conflictCode = persistenceCode(error);
+  }
+  assert(conflictCode === "invalid_state", "VLT-04 changed replay did not fail closed.");
+  conflictCode = undefined;
+  try {
+    await service.create({
+      identityUserId: input.firstUser,
+      request: {
+        ...createRequest,
+        encodedFileKey: randomBytes(32).toString("base64"),
+      },
+      requestId: nextId(),
+    });
+  } catch (error) {
+    conflictCode = persistenceCode(error);
+  }
+  assert(conflictCode === "invalid_state", "VLT-04 changed-key replay did not fail closed.");
+  const internal = await persistence.readSession({
+    identityUserId: input.firstUser,
+    sessionId,
+  });
+  assert(internal, "VLT-04 upload session was not persisted.");
+  const part = await storage.putPart({
+    bytes: ciphertext,
+    objectKey: internal.objectKey,
+    partNumber: 1,
+    providerUploadId: internal.providerUploadId,
+  });
+  await service.reconcile({ identityUserId: input.firstUser, sessionId });
+  const completed = await service.complete({
+    identityUserId: input.firstUser,
+    request: { parts: [part] },
+    requestId: nextId(),
+    sessionId,
+  });
+  assert(
+    completed.uploadState === "uploaded" && completed.validationState === "pending",
+    "VLT-04 completion claimed an invalid state.",
+  );
+  const download = await service.download({
+    deviceId: input.deviceId,
+    fileObjectId,
+    identityUserId: input.firstUser,
+    requestId: nextId(),
+  });
+  assert(
+    download.ciphertextSha256 === digest &&
+      download.encodedFileKey === fileKey.toString("base64") &&
+      Buffer.from(storage.readObject(internal.objectKey) ?? []).equals(ciphertext),
+    "VLT-04 encrypted download material did not match the verified upload.",
+  );
+
+  let crossHouseholdCode: string | undefined;
+  try {
+    await service.read({ identityUserId: input.secondUser, sessionId });
+  } catch (error) {
+    crossHouseholdCode =
+      error && typeof error === "object" && "code" in error ? String(error.code) : undefined;
+  }
+  assert(crossHouseholdCode === "not_found", "Cross-household upload lookup did not fail closed.");
+
+  await client.query(
+    "update littlearc.devices set enrollment_status = 'revoked', revoked_at = now() where id = $1",
+    [input.deviceId],
+  );
+  let revokedCode: string | undefined;
+  try {
+    await service.download({
+      deviceId: input.deviceId,
+      fileObjectId,
+      identityUserId: input.firstUser,
+      requestId: nextId(),
+    });
+  } catch (error) {
+    revokedCode = persistenceCode(error);
+  }
+  assert(revokedCode === "device_required", "A revoked device received download authority.");
+  await client.query(
+    "update littlearc.devices set enrollment_status = 'active', revoked_at = null where id = $1",
+    [input.deviceId],
+  );
+
+  const evidence = await client.query<{
+    readonly completed: string;
+    readonly created: string;
+    readonly downloaded: string;
+    readonly files: string;
+  }>(
+    `select
+       (select count(*)::text from littlearc.file_objects where id = $1) files,
+       (select count(*)::text from littlearc.audit_events
+         where target_id = $2 and action = 'file_upload_created') created,
+       (select count(*)::text from littlearc.audit_events
+         where target_id = $1 and action = 'file_upload_completed') completed,
+       (select count(*)::text from littlearc.audit_events
+         where target_id = $1 and action = 'file_download_authorized') downloaded`,
+    [fileObjectId, sessionId],
+  );
+  assert(
+    evidence.rows[0]?.files === "1" &&
+      evidence.rows[0].created === "1" &&
+      evidence.rows[0].completed === "1" &&
+      evidence.rows[0].downloaded === "1",
+    "VLT-04 file-object or audit evidence is incomplete.",
+  );
+  fileKey.fill(0);
+  console.log("VLT-04 PostgreSQL encrypted upload validation passed.");
+  console.log(
+    "- Exact replay, changed-metadata/key rejection, multipart resume facts, full digest verification, and pending validation passed.",
+  );
+  console.log("- Cross-household lookup and revoked-device download failed closed.");
+  console.log("- PostgreSQL retained wrapped key material and ciphertext metadata only.");
+
+  const cleanupSessionId = nextId();
+  const cleanupFileObjectId = nextId();
+  await service.create({
+    identityUserId: input.firstUser,
+    request: {
+      aadVersion: 1,
+      authTag: randomBytes(16).toString("base64"),
+      captureAssetId: nextId(),
+      childId: input.childId,
+      ciphertextBytes: ciphertext.length,
+      ciphertextSha256: digest,
+      contentNonce: randomBytes(12).toString("base64"),
+      declaredMime: "application/pdf",
+      deviceId: input.deviceId,
+      encodedFileKey: randomBytes(32).toString("base64"),
+      fileObjectId: cleanupFileObjectId,
+      uploadSessionId: cleanupSessionId,
+    },
+    requestId: nextId(),
+  });
+  await client.query(
+    "update littlearc.upload_sessions set expires_at = now() - interval '1 minute' where id = $1",
+    [cleanupSessionId],
+  );
+  const cleanup = createUploadCleanupPersistence(database);
+  const claims = await cleanup.claim(20);
+  const claim = claims.find((item) => item.sessionId === cleanupSessionId);
+  assert(claim, "The least-authority worker did not claim the expired multipart session.");
+  await storage.abortMultipart({
+    objectKey: claim.objectKey,
+    providerUploadId: claim.providerUploadId,
+  });
+  await cleanup.finish(cleanupSessionId, true);
+  const expired = await client.query<{ readonly status: string }>(
+    "select status from littlearc.upload_sessions where id = $1",
+    [cleanupSessionId],
+  );
+  assert(expired.rows[0]?.status === "expired", "Worker cleanup did not record terminal expiry.");
+  console.log(
+    "- Least-authority worker expiry claim, provider abort, and terminal cleanup passed.",
+  );
 }
 
 const syntheticRecordContent: RecordVersionContentV1 = {
@@ -1935,6 +2185,172 @@ async function serveVlt01Device(
   return async () => server.close();
 }
 
+async function serveVlt04Device(
+  onboardingCommand: OwnerOnboardingCommand,
+  deviceCommand: DeviceEnrollmentCommand,
+  database: ReturnType<typeof createDatabaseConnection>["database"],
+  crypto: StructuredPayloadCrypto,
+  client: Client,
+): Promise<() => Promise<void>> {
+  const userId = "synthetic-vlt04-device";
+  await insertAuthUser(client, userId, "synthetic.vlt04.device@example.test");
+  const onboarding = await execute(onboardingCommand, userId);
+  const memory = createMemoryEncryptedObjectStorage();
+  let failSecondPartOnce = true;
+  let tamperNextDownload = false;
+  const baseUrl = `http://127.0.0.1:${deviceApiPort}`;
+  const storage: EncryptedObjectStorage = {
+    ...memory,
+    async signDownload(input) {
+      await memory.headObject(input.objectKey);
+      return `${baseUrl}/v1/validation/vlt04/provider/download?objectKey=${encodeURIComponent(input.objectKey)}`;
+    },
+    async signUploadPart(input) {
+      await memory.listParts({
+        objectKey: input.objectKey,
+        providerUploadId: input.providerUploadId,
+      });
+      return `${baseUrl}/v1/validation/vlt04/provider/upload/${encodeURIComponent(input.providerUploadId)}/${input.partNumber}?objectKey=${encodeURIComponent(input.objectKey)}`;
+    },
+  };
+  const getSessionIdentity = async (headers: Headers) =>
+    headers.get("x-littlearc-synthetic-session") === "vlt04-device-validation" ? { userId } : null;
+  const service = createFileUploadService({
+    enabled: true,
+    persistence: createFileUploadPersistence({
+      crypto,
+      database,
+      fileKeyCrypto: createFileKeyCrypto({ currentKeyVersion: 1 }),
+    }),
+    storage,
+  });
+  const server = await createApiServer(
+    {
+      ...loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: String(deviceApiPort) }),
+      uploadsEnabled: true,
+    },
+    undefined,
+    undefined,
+    undefined,
+    { command: deviceCommand, getSessionIdentity },
+    undefined,
+    { getSessionIdentity, service },
+  );
+
+  server.addContentTypeParser(
+    "application/octet-stream",
+    { parseAs: "buffer" },
+    (_request, body, done) => done(null, body),
+  );
+  server.addHook("onError", async (request, _reply, error) => {
+    console.error(
+      `VLT-04 synthetic route failed: ${request.method} ${request.routeOptions.url}: ${error.message}`,
+    );
+  });
+  server.post("/v1/validation/vlt04/bootstrap", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const body = request.body as {
+      readonly appVersion?: unknown;
+      readonly deviceId?: unknown;
+      readonly platform?: unknown;
+    };
+    if (
+      typeof body.appVersion !== "string" ||
+      typeof body.deviceId !== "string" ||
+      (body.platform !== "android" && body.platform !== "ios")
+    ) {
+      return reply.status(400).send({ error: "invalid_bootstrap" });
+    }
+    await deviceCommand.execute({
+      identityUserId: userId,
+      request: {
+        appVersion: body.appVersion,
+        deviceId: body.deviceId as UuidV7,
+        localSchemaVersion: 8,
+        platform: body.platform,
+      },
+      requestId: nextId(),
+    });
+    return {
+      childId: onboarding.childId,
+      householdId: onboarding.householdId,
+    };
+  });
+  server.put(
+    "/v1/validation/vlt04/provider/upload/:uploadId/:partNumber",
+    { bodyLimit: 5 * 1024 * 1024 },
+    async (request, reply) => {
+      const parameters = request.params as {
+        readonly partNumber: string;
+        readonly uploadId: string;
+      };
+      const query = request.query as { readonly objectKey?: string };
+      const partNumber = Number(parameters.partNumber);
+      if (!query.objectKey || !Number.isInteger(partNumber)) {
+        return reply.status(400).send({ error: "invalid_part" });
+      }
+      if (partNumber === 2 && failSecondPartOnce) {
+        failSecondPartOnce = false;
+        return reply.status(503).send({ error: "synthetic_network_interruption" });
+      }
+      const part = await memory.putPart({
+        bytes: request.body as Buffer,
+        objectKey: query.objectKey,
+        partNumber,
+        providerUploadId: parameters.uploadId,
+      });
+      return reply.header("etag", part.etag).status(200).send();
+    },
+  );
+  server.get("/v1/validation/vlt04/provider/download", async (request, reply) => {
+    const query = request.query as { readonly objectKey?: string };
+    const object = query.objectKey ? memory.readObject(query.objectKey) : undefined;
+    if (!object) {
+      return reply.status(404).send({ error: "not_found" });
+    }
+    const bytes = Buffer.from(object);
+    if (tamperNextDownload) {
+      tamperNextDownload = false;
+      bytes[bytes.length - 1] = (bytes[bytes.length - 1] ?? 0) ^ 1;
+    }
+    return reply.type("application/octet-stream").send(bytes);
+  });
+  server.post("/v1/validation/vlt04/tamper-next-download", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    tamperNextDownload = true;
+    return { ready: true };
+  });
+  server.get("/v1/validation/vlt04/evidence", async (request, reply) => {
+    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+      return reply.status(401).send({ error: "authentication_required" });
+    }
+    const result = await client.query<{
+      readonly completed: string;
+      readonly created: string;
+      readonly downloaded: string;
+      readonly files: string;
+    }>(
+      `select
+         (select count(*)::text from littlearc.file_objects) files,
+         (select count(*)::text from littlearc.audit_events
+           where action = 'file_upload_created') created,
+         (select count(*)::text from littlearc.audit_events
+           where action = 'file_upload_completed') completed,
+         (select count(*)::text from littlearc.audit_events
+           where action = 'file_download_authorized') downloaded`,
+    );
+    return result.rows[0];
+  });
+
+  await server.listen({ host: "127.0.0.1", port: deviceApiPort });
+  console.log(`VLT-04 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
+  return async () => server.close();
+}
+
 async function serveOff06Device(
   onboardingCommand: OwnerOnboardingCommand,
   deviceCommand: DeviceEnrollmentCommand,
@@ -2049,7 +2465,9 @@ async function run(): Promise<void> {
     for (const path of migrationPaths) {
       await databaseClient.query(await readFile(path, "utf8"));
     }
-    await databaseClient.query(`grant littlearc_app to ${quoteIdentifier(currentUser)}`);
+    await databaseClient.query(
+      `grant littlearc_app, littlearc_worker to ${quoteIdentifier(currentUser)}`,
+    );
     connection = createDatabaseConnection(databaseUrl);
     const keyEncryptionKey = randomBytes(32);
     const crypto = createStructuredPayloadCrypto({
@@ -2067,7 +2485,19 @@ async function run(): Promise<void> {
       persistence: createSyncPersistence({ crypto, database: connection.database }),
     });
 
-    if (vlt01DeviceMode) {
+    if (vlt04DeviceMode) {
+      closeServer = await serveVlt04Device(
+        command,
+        deviceCommand,
+        connection.database,
+        crypto,
+        databaseClient,
+      );
+      await new Promise<void>((resolve) => {
+        process.once("SIGINT", resolve);
+        process.once("SIGTERM", resolve);
+      });
+    } else if (vlt01DeviceMode) {
       closeServer = await serveVlt01Device(command, deviceCommand, syncService, databaseClient);
       await new Promise<void>((resolve) => {
         process.once("SIGINT", resolve);
@@ -2104,7 +2534,15 @@ async function run(): Promise<void> {
         process.once("SIGTERM", resolve);
       });
     } else {
-      await runAutomated(command, deviceCommand, databaseClient, currentUser, syncService, crypto);
+      await runAutomated(
+        command,
+        deviceCommand,
+        databaseClient,
+        currentUser,
+        syncService,
+        crypto,
+        connection.database,
+      );
     }
   } finally {
     await closeServer?.();

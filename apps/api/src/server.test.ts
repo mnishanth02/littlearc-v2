@@ -89,6 +89,26 @@ describe("API skeleton", () => {
     });
   });
 
+  it("fails readiness closed when uploads are enabled without a composed storage boundary", async () => {
+    const server = await createApiServer({
+      ...loadApiConfig({ APP_ENV: "staging" }),
+      uploadsEnabled: true,
+    });
+
+    const response = await server.inject({ method: "GET", url: "/health/ready" });
+
+    expect(response.statusCode).toBe(503);
+    expect(response.json()).toMatchObject({
+      ready: false,
+      checks: [
+        { name: "auth", status: "deferred" },
+        { name: "database" },
+        { name: "queue" },
+        { name: "object-storage", status: "deferred" },
+      ],
+    });
+  });
+
   it("serves shared /v1 contract metadata and OpenAPI", async () => {
     const server = await createApiServer(loadApiConfig({ APP_ENV: "local" }));
 

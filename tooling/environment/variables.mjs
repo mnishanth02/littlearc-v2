@@ -18,7 +18,9 @@ export const environmentCatalog = {
     S3_ACCESS_KEY_ID: { classification: "secret", owner: "FND-06", secret: true },
     S3_BUCKET_NAME: { classification: "sensitive", owner: "FND-06", secret: true },
     S3_ENDPOINT: { classification: "sensitive", owner: "FND-06", secret: true },
+    S3_REGION: { classification: "public", owner: "VLT-04", secret: false },
     S3_SECRET_ACCESS_KEY: { classification: "secret", owner: "FND-06", secret: true },
+    UPLOADS_ENABLED: { classification: "public", owner: "VLT-04", secret: false },
   },
   "apps/mobile/.env.example": {
     ENABLE_IOS_SHARE_EXTENSION: { classification: "public", owner: "VLT-03", secret: false },
@@ -47,6 +49,7 @@ export const environmentCatalog = {
     S3_ACCESS_KEY_ID: { classification: "secret", owner: "FND-06", secret: true },
     S3_BUCKET_NAME: { classification: "sensitive", owner: "FND-06", secret: true },
     S3_ENDPOINT: { classification: "sensitive", owner: "FND-06", secret: true },
+    S3_REGION: { classification: "public", owner: "VLT-04", secret: false },
     S3_SECRET_ACCESS_KEY: { classification: "secret", owner: "FND-06", secret: true },
   },
 };

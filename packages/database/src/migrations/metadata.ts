@@ -10,6 +10,7 @@ import {
   vlt01RecordFoundationMigration,
   vlt01RecordFoundationMigrationSql,
 } from "./vlt-01-record-foundation.js";
+import { vlt04FileUploadMigration, vlt04FileUploadMigrationSql } from "./vlt-04-file-upload.js";
 
 const checksumPlaceholder = "__CHECKSUM_SHA256__";
 
@@ -28,6 +29,7 @@ export function databaseMigrations(): ReadonlyArray<DatabaseMigration> {
     migrationWithChecksum(off02HouseholdMigration, off02HouseholdMigrationSql),
     migrationWithChecksum(off05EmergencyCardMigration, off05EmergencyCardMigrationSql),
     migrationWithChecksum(vlt01RecordFoundationMigration, vlt01RecordFoundationMigrationSql),
+    migrationWithChecksum(vlt04FileUploadMigration, vlt04FileUploadMigrationSql),
   ];
 }
 

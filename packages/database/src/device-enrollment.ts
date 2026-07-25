@@ -6,7 +6,7 @@ export type DeviceEnrollmentResponse = {
   readonly deviceId: UuidV7;
   readonly enrollmentStatus: "active";
   readonly householdId: UuidV7;
-  readonly localSchemaVersion: 1 | 2 | 3 | 4 | 5;
+  readonly localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
   readonly replayed: boolean;
 };
 
@@ -14,7 +14,7 @@ export type PersistDeviceEnrollmentInput = {
   readonly appVersion: string;
   readonly deviceId: UuidV7;
   readonly identityUserId: string;
-  readonly localSchemaVersion: 1 | 2 | 3 | 4 | 5;
+  readonly localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
   readonly platform: "android" | "ios";
   readonly requestId: UuidV7;
 };

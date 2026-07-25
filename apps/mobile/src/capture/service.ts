@@ -104,10 +104,22 @@ export async function addSourcesToCaptureDraft(input: {
         thumbnailFileId,
       ];
       await withUnlockedLocalDatabase(async (database) => {
+        const enrollment = await database.getFirstAsync<{ readonly householdId: string }>(
+          `select household_id as "householdId"
+           from local_enrollment where singleton = 1`,
+        );
+        if (!enrollment) {
+          throw new Error("The local enrollment is unavailable.");
+        }
         await storeEncryptedLocalFile(database, {
           fileId: originalFileId,
           plaintextUri: processed.originalUri,
           purpose: "capture-original",
+          transport: {
+            format: processed.mimeType,
+            householdId: enrollment.householdId,
+            objectId: originalFileId,
+          },
         });
         if (normalizedFileId && processed.normalizedUri) {
           await storeEncryptedLocalFile(database, {

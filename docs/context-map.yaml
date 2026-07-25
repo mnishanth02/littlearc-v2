@@ -4,6 +4,7 @@ domains:
       - vlt-01
       - vlt-02
       - vlt-03
+      - vlt-04
       - vault
       - record model
       - record version
@@ -18,6 +19,11 @@ domains:
       - gallery
       - document picker
       - incoming share
+      - file encryption
+      - resumable upload
+      - multipart
+      - object storage
+      - file key
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/impl-plan/roadmap.md
@@ -29,6 +35,9 @@ domains:
       - docs/impl-plan/m3-vault-wedge/vlt-03-capture-and-import-adapters-plan.md
       - docs/impl-plan/m3-vault-wedge/vlt-03-capture-and-import-adapters-research.md
       - docs/impl-plan/m3-vault-wedge/vlt-03-implementation-evidence.md
+      - docs/impl-plan/m3-vault-wedge/vlt-04-file-encryption-and-resumable-upload-plan.md
+      - docs/impl-plan/m3-vault-wedge/vlt-04-file-encryption-and-resumable-upload-research.md
+      - docs/impl-plan/m3-vault-wedge/vlt-04-implementation-evidence.md
       - docs/core/littlearc-complete-product-plan.md
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/core/backend-data-model-and-database-schema.md
@@ -41,13 +50,16 @@ domains:
       - packages/domain/**
       - packages/contracts/**
       - packages/database/**
+      - packages/crypto/**
       - apps/api/**
+      - apps/worker/**
       - apps/mobile/**
     tests:
       - packages/domain/src/**/*.test.ts
       - packages/contracts/src/**/*.test.ts
       - packages/database/src/**/*.test.ts
       - apps/api/src/**/*.test.ts
+      - apps/worker/src/**/*.test.ts
       - apps/mobile/src/**/*.test.ts
       - apps/api/integration/off-02-household.ts
     validation:

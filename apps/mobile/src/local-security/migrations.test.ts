@@ -42,13 +42,13 @@ function fakeDatabase(options: { readonly failMigration?: boolean } = {}) {
 describe("OFF-03 local migrations", () => {
   it("applies the forward schema once and remains idempotent", async () => {
     const fake = fakeDatabase();
-    await expect(applyLocalMigrations(fake.database)).resolves.toBe(7);
-    await expect(applyLocalMigrations(fake.database)).resolves.toBe(7);
-    expect(fake.applied).toEqual(new Set([1, 2, 3, 4, 5, 6, 7]));
+    await expect(applyLocalMigrations(fake.database)).resolves.toBe(8);
+    await expect(applyLocalMigrations(fake.database)).resolves.toBe(8);
+    expect(fake.applied).toEqual(new Set([1, 2, 3, 4, 5, 6, 7, 8]));
     expect(
       fake.executed.filter((sql) => sql.includes("CREATE TABLE local_enrollment")),
     ).toHaveLength(1);
-    expect(localMigrations.map((migration) => migration.version)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    expect(localMigrations.map((migration) => migration.version)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(localMigrations[0]?.sql).toContain("CREATE TABLE local_encrypted_files");
     expect(localMigrations[0]?.sql).not.toContain("database_key");
     expect(localMigrations[0]?.sql).not.toContain("file_key");
@@ -64,6 +64,9 @@ describe("OFF-03 local migrations", () => {
     expect(localMigrations[6]?.sql).toContain(
       "ALTER TABLE local_encrypted_files ADD COLUMN wrapped_key",
     );
+    expect(localMigrations[7]?.sql).toContain("CREATE TABLE local_upload_sessions");
+    expect(localMigrations[7]?.sql).toContain("CREATE TABLE local_upload_parts");
+    expect(localMigrations[7]?.sql).not.toContain("signed_url");
   });
 
   it("does not record a failed migration", async () => {

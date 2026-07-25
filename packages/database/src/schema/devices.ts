@@ -1,4 +1,4 @@
-import { index, text, timestamp } from "drizzle-orm/pg-core";
+import { index, text, timestamp, unique } from "drizzle-orm/pg-core";
 import { createdAtColumn, updatedAtColumn, uuidV7Column } from "./_columns.js";
 import { auth_user } from "./auth.js";
 import { households } from "./households.js";
@@ -23,6 +23,7 @@ export const devices = littlearcSchema.table(
     updatedAt: updatedAtColumn(),
   },
   (table) => [
+    unique("devices_id_household_unique").on(table.id, table.householdId),
     index("devices_user_status_idx").on(table.userId, table.enrollmentStatus),
     index("devices_household_status_idx").on(table.householdId, table.enrollmentStatus),
   ],

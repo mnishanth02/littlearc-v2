@@ -228,9 +228,30 @@ export function lockLocalSecuritySession(): void {
 
 export type EncryptedLocalFile = {
   readonly aad: string;
+  readonly authTag: string | null;
   readonly ciphertextBytes: number;
+  readonly ciphertextSha256: string | null;
+  readonly contentNonce: string | null;
   readonly fileId: string;
+  readonly fileObjectId: string | null;
   readonly opaqueName: string;
+};
+
+export type EncryptedLocalFileUploadMaterial = {
+  readonly aadVersion: 1;
+  readonly authTag: string;
+  readonly ciphertextBytes: number;
+  readonly ciphertextSha256: string;
+  readonly ciphertextUri: string;
+  readonly contentNonce: string;
+  readonly encodedFileKey: string;
+  readonly fileObjectId: string;
+};
+
+type FileTransportContext = {
+  readonly format: "application/pdf" | "image/heic" | "image/jpeg" | "image/png";
+  readonly householdId: string;
+  readonly objectId: string;
 };
 
 export async function storeEncryptedLocalFile(
@@ -239,6 +260,7 @@ export async function storeEncryptedLocalFile(
     readonly fileId: string;
     readonly plaintextUri: string;
     readonly purpose: "capture-normalized" | "capture-original" | "capture-thumbnail";
+    readonly transport?: FileTransportContext;
   },
 ): Promise<EncryptedLocalFile> {
   const source = new File(input.plaintextUri);
@@ -246,7 +268,9 @@ export async function storeEncryptedLocalFile(
     throw new Error("The staged local file is unavailable.");
   }
   const opaqueName = `${input.fileId}.lac`;
-  const aad = `littlearc-local-file:v1:${input.fileId}:${input.purpose}`;
+  const aad = input.transport
+    ? canonicalTransportAad(input.transport)
+    : `littlearc-local-file:v1:${input.fileId}:${input.purpose}`;
   const directory = encryptedFileDirectory();
   const destination = new File(directory, opaqueName);
   const key = await Crypto.AESEncryptionKey.generate(Crypto.AESKeySize.AES256);
@@ -262,26 +286,41 @@ export async function storeEncryptedLocalFile(
     if (typeof combined === "string") {
       throw new Error("The encrypted local-file primitive returned an unexpected encoding.");
     }
+    const contentNonce = combined.slice(0, 12);
+    const authTag = combined.slice(-16);
+    const ciphertextSha256 = await digestHex(combined);
     directory.create({ idempotent: true, intermediates: true });
     destination.create({ overwrite: false });
     destination.write(combined);
     const wrappedKey = await wrapLocalFileKey(input.fileId, encodedKey);
     await database.runAsync(
       `INSERT INTO local_encrypted_files (
-        file_id, opaque_name, aad, ciphertext_bytes, created_at, wrapped_key
-      ) VALUES (?, ?, ?, ?, ?, ?)`,
+        file_id, opaque_name, aad, ciphertext_bytes, created_at, wrapped_key,
+        file_object_id, aad_version, content_nonce, auth_tag, ciphertext_sha256,
+        transport_ready
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       input.fileId,
       opaqueName,
       aad,
       combined.length,
       new Date().toISOString(),
       wrappedKey,
+      input.transport?.objectId ?? null,
+      input.transport ? 1 : null,
+      input.transport ? encodeBase64(contentNonce) : null,
+      input.transport ? encodeBase64(authTag) : null,
+      input.transport ? ciphertextSha256 : null,
+      input.transport ? 1 : 0,
     );
     metadataInserted = true;
     return {
       aad,
+      authTag: input.transport ? encodeBase64(authTag) : null,
       ciphertextBytes: combined.length,
+      ciphertextSha256: input.transport ? ciphertextSha256 : null,
+      contentNonce: input.transport ? encodeBase64(contentNonce) : null,
       fileId: input.fileId,
+      fileObjectId: input.transport?.objectId ?? null,
       opaqueName,
     };
   } catch (error) {
@@ -293,6 +332,244 @@ export async function storeEncryptedLocalFile(
     }
     throw error;
   }
+}
+
+export async function prepareEncryptedLocalFileUpload(
+  database: SQLite.SQLiteDatabase,
+  input: {
+    readonly fileId: string;
+    readonly transport: FileTransportContext;
+  },
+): Promise<EncryptedLocalFileUploadMaterial> {
+  const metadata = await database.getFirstAsync<{
+    readonly aad: string;
+    readonly authTag: string | null;
+    readonly ciphertextBytes: number;
+    readonly ciphertextSha256: string | null;
+    readonly contentNonce: string | null;
+    readonly fileObjectId: string | null;
+    readonly opaqueName: string;
+    readonly transportReady: number;
+    readonly wrappedKey: string | null;
+  }>(
+    `SELECT
+       aad,
+       auth_tag AS "authTag",
+       ciphertext_bytes AS "ciphertextBytes",
+       ciphertext_sha256 AS "ciphertextSha256",
+       content_nonce AS "contentNonce",
+       file_object_id AS "fileObjectId",
+       opaque_name AS "opaqueName",
+       transport_ready AS "transportReady",
+       wrapped_key AS "wrappedKey"
+     FROM local_encrypted_files WHERE file_id = ?`,
+    input.fileId,
+  );
+  if (!metadata) {
+    throw new Error("The encrypted local file is unavailable.");
+  }
+  if (
+    metadata.transportReady === 1 &&
+    metadata.fileObjectId === input.transport.objectId &&
+    metadata.authTag &&
+    metadata.contentNonce &&
+    metadata.ciphertextSha256 &&
+    metadata.wrappedKey
+  ) {
+    return {
+      aadVersion: 1,
+      authTag: metadata.authTag,
+      ciphertextBytes: metadata.ciphertextBytes,
+      ciphertextSha256: metadata.ciphertextSha256,
+      ciphertextUri: requireEncryptedCiphertext(metadata.opaqueName).uri,
+      contentNonce: metadata.contentNonce,
+      encodedFileKey: await unwrapLocalFileKey(input.fileId, metadata.wrappedKey),
+      fileObjectId: metadata.fileObjectId,
+    };
+  }
+
+  const previous = requireEncryptedCiphertext(metadata.opaqueName);
+  const previousKeyValue = metadata.wrappedKey
+    ? await unwrapLocalFileKey(input.fileId, metadata.wrappedKey)
+    : await migrateLegacyLocalFileKey(database, input.fileId);
+  if (!previousKeyValue) {
+    throw new Error("The protected local-file key is unavailable.");
+  }
+  const previousKey = await Crypto.AESEncryptionKey.import(previousKeyValue, "base64");
+  const plaintext = await Crypto.aesDecryptAsync(
+    Crypto.AESSealedData.fromCombined(await previous.bytes()),
+    previousKey,
+    {
+      additionalData: new TextEncoder().encode(metadata.aad),
+      output: "bytes",
+    },
+  );
+  if (typeof plaintext === "string") {
+    throw new Error("The encrypted local-file primitive returned an unexpected encoding.");
+  }
+
+  const nextKey = await Crypto.AESEncryptionKey.generate(Crypto.AESKeySize.AES256);
+  const nextEncodedKey = await nextKey.encoded("base64");
+  const nextAad = canonicalTransportAad(input.transport);
+  const sealed = await Crypto.aesEncryptAsync(plaintext, nextKey, {
+    additionalData: new TextEncoder().encode(nextAad),
+    nonce: { length: 12 },
+    tagLength: 16,
+  });
+  const combined = await sealed.combined("bytes");
+  if (typeof combined === "string") {
+    throw new Error("The encrypted local-file primitive returned an unexpected encoding.");
+  }
+  const nextOpaqueName = `${input.fileId}.transport.lac`;
+  const nextCiphertext = new File(encryptedFileDirectory(), nextOpaqueName);
+  if (nextCiphertext.exists) {
+    nextCiphertext.delete();
+  }
+  nextCiphertext.create({ overwrite: false });
+  nextCiphertext.write(combined);
+  const contentNonce = encodeBase64(combined.slice(0, 12));
+  const authTag = encodeBase64(combined.slice(-16));
+  const ciphertextSha256 = await digestHex(combined);
+  const wrappedKey = await wrapLocalFileKey(input.fileId, nextEncodedKey);
+  try {
+    await database.withTransactionAsync(async () => {
+      await database.runAsync(
+        `UPDATE local_encrypted_files
+         SET opaque_name = ?, aad = ?, ciphertext_bytes = ?, wrapped_key = ?,
+             file_object_id = ?, aad_version = 1, content_nonce = ?, auth_tag = ?,
+             ciphertext_sha256 = ?, transport_ready = 1
+         WHERE file_id = ?`,
+        nextOpaqueName,
+        nextAad,
+        combined.length,
+        wrappedKey,
+        input.transport.objectId,
+        contentNonce,
+        authTag,
+        ciphertextSha256,
+        input.fileId,
+      );
+    });
+  } catch (error) {
+    if (nextCiphertext.exists) {
+      nextCiphertext.delete();
+    }
+    throw error;
+  }
+  if (previous.exists && previous.uri !== nextCiphertext.uri) {
+    previous.delete();
+  }
+  await deleteLegacyLocalFileKey(input.fileId);
+  return {
+    aadVersion: 1,
+    authTag,
+    ciphertextBytes: combined.length,
+    ciphertextSha256,
+    ciphertextUri: nextCiphertext.uri,
+    contentNonce,
+    encodedFileKey: nextEncodedKey,
+    fileObjectId: input.transport.objectId,
+  };
+}
+
+export async function importEncryptedLocalFileDownload(
+  database: SQLite.SQLiteDatabase,
+  input: {
+    readonly authTag: string;
+    readonly ciphertext: Uint8Array;
+    readonly ciphertextSha256: string;
+    readonly contentNonce: string;
+    readonly encodedFileKey: string;
+    readonly transport: FileTransportContext;
+  },
+): Promise<EncryptedLocalFile> {
+  if (
+    input.ciphertext.length <= 28 ||
+    (await digestHex(input.ciphertext)) !== input.ciphertextSha256 ||
+    encodeBase64(input.ciphertext.slice(0, 12)) !== input.contentNonce ||
+    encodeBase64(input.ciphertext.slice(-16)) !== input.authTag
+  ) {
+    throw new Error("Downloaded ciphertext integrity verification failed.");
+  }
+  const aad = canonicalTransportAad(input.transport);
+  const key = await Crypto.AESEncryptionKey.import(input.encodedFileKey, "base64");
+  const opened = await Crypto.aesDecryptAsync(
+    Crypto.AESSealedData.fromCombined(input.ciphertext),
+    key,
+    {
+      additionalData: new TextEncoder().encode(aad),
+      output: "bytes",
+    },
+  );
+  if (typeof opened === "string") {
+    throw new Error("Downloaded ciphertext authentication failed.");
+  }
+  const existing = await database.getFirstAsync<{
+    readonly ciphertextSha256: string | null;
+    readonly opaqueName: string;
+  }>(
+    `select
+       ciphertext_sha256 as "ciphertextSha256",
+       opaque_name as "opaqueName"
+     from local_encrypted_files
+     where file_object_id = ?`,
+    input.transport.objectId,
+  );
+  if (existing?.ciphertextSha256 === input.ciphertextSha256) {
+    return {
+      aad,
+      authTag: input.authTag,
+      ciphertextBytes: input.ciphertext.length,
+      ciphertextSha256: input.ciphertextSha256,
+      contentNonce: input.contentNonce,
+      fileId: input.transport.objectId,
+      fileObjectId: input.transport.objectId,
+      opaqueName: existing.opaqueName,
+    };
+  }
+  if (existing) {
+    throw new Error("The downloaded file object conflicts with protected local state.");
+  }
+  const opaqueName = `${input.transport.objectId}.lac`;
+  const destination = new File(encryptedFileDirectory(), opaqueName);
+  const wrappedKey = await wrapLocalFileKey(input.transport.objectId, input.encodedFileKey);
+  try {
+    encryptedFileDirectory().create({ idempotent: true, intermediates: true });
+    destination.create({ overwrite: false });
+    destination.write(input.ciphertext);
+    await database.runAsync(
+      `insert into local_encrypted_files (
+         file_id, opaque_name, aad, ciphertext_bytes, created_at, wrapped_key,
+         file_object_id, aad_version, content_nonce, auth_tag, ciphertext_sha256,
+         transport_ready
+       ) values (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, 1)`,
+      input.transport.objectId,
+      opaqueName,
+      aad,
+      input.ciphertext.length,
+      new Date().toISOString(),
+      wrappedKey,
+      input.transport.objectId,
+      input.contentNonce,
+      input.authTag,
+      input.ciphertextSha256,
+    );
+  } catch (error) {
+    if (destination.exists) {
+      destination.delete();
+    }
+    throw error;
+  }
+  return {
+    aad,
+    authTag: input.authTag,
+    ciphertextBytes: input.ciphertext.length,
+    ciphertextSha256: input.ciphertextSha256,
+    contentNonce: input.contentNonce,
+    fileId: input.transport.objectId,
+    fileObjectId: input.transport.objectId,
+    opaqueName,
+  };
 }
 
 export async function openEncryptedLocalFilePreview(
@@ -673,6 +950,41 @@ async function wrongDatabaseKeyIsRejected(): Promise<boolean> {
 
 function encryptedFileDirectory(): Directory {
   return new Directory(Paths.document, encryptedFileDirectoryName);
+}
+
+function requireEncryptedCiphertext(opaqueName: string): File {
+  const file = new File(encryptedFileDirectory(), opaqueName);
+  if (!file.exists || file.size <= 0) {
+    throw new Error("The encrypted local-file ciphertext is unavailable.");
+  }
+  return file;
+}
+
+function canonicalTransportAad(context: FileTransportContext): string {
+  return JSON.stringify({
+    aadSchemaVersion: 1,
+    format: context.format,
+    householdId: context.householdId,
+    objectId: context.objectId,
+    purpose: "capture-original",
+    protocol: "littlearc-file",
+  });
+}
+
+async function digestHex(bytes: Uint8Array): Promise<string> {
+  const input = new Uint8Array(bytes.length);
+  input.set(bytes);
+  return bytesToHex(
+    new Uint8Array(await Crypto.digest(Crypto.CryptoDigestAlgorithm.SHA256, input)),
+  );
+}
+
+function encodeBase64(bytes: Uint8Array): string {
+  let value = "";
+  for (const byte of bytes) {
+    value += String.fromCharCode(byte);
+  }
+  return btoa(value);
 }
 
 function localPreviewDirectory(): Directory {
