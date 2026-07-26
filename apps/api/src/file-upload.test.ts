@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type {
+  FilePreviewGrantPersistence,
   FileUploadPersistence,
   InternalFileObject,
   InternalUploadSession,
@@ -178,6 +179,53 @@ describe("VLT-04 encrypted upload service", () => {
 
     expect(begin).toHaveBeenCalledOnce();
     expect(abortMultipart).toHaveBeenCalledOnce();
+  });
+
+  it("issues a five-minute ciphertext-only encrypted preview grant and clears its key", async () => {
+    const storage = createMemoryEncryptedObjectStorage();
+    vi.spyOn(storage, "signDownload").mockResolvedValue("https://storage.invalid/synthetic");
+    const derivativeId = "019f8000-0000-7000-8000-000000000007" as UuidV7;
+    const fileKey = Buffer.alloc(32, 7);
+    const previewPersistence = {
+      read: vi.fn(async () => ({
+        aadVersion: 1 as const,
+        authTag: Buffer.alloc(16, 1),
+        ciphertextBytes: 20,
+        ciphertextSha256: "a".repeat(64),
+        contentNonce: Buffer.alloc(12, 2),
+        derivativeId,
+        fileKey,
+        policyVersion: 1 as const,
+        sourceFileObjectId: fileObjectId,
+        storageKey: `derivatives/${derivativeId}/${requestId}.lac`,
+      })),
+    } as FilePreviewGrantPersistence;
+    const service = createFileUploadService({
+      enabled: true,
+      persistence: {} as FileUploadPersistence,
+      previewPersistence,
+      storage,
+    });
+
+    const grant = await service.preview({
+      deviceId,
+      fileObjectId,
+      identityUserId: "consumer",
+      requestId,
+    });
+
+    expect(grant).toMatchObject({
+      aadVersion: 1,
+      ciphertextBytes: 20,
+      declaredMime: "image/jpeg",
+      derivativeId,
+      fileObjectId,
+      method: "GET",
+      previewPolicyVersion: 1,
+    });
+    expect(grant).not.toHaveProperty("plaintext");
+    expect(grant.url).toBe("https://storage.invalid/synthetic");
+    expect(fileKey).toEqual(Buffer.alloc(32));
   });
 });
 

@@ -4,13 +4,24 @@ const keyBytes = 32;
 const nonceBytes = 12;
 const tagBytes = 16;
 
-export type FileEncryptionContext = {
+export type OriginalFileEncryptionContext = {
   readonly aadSchemaVersion: 1;
   readonly format: "application/pdf" | "image/heic" | "image/jpeg" | "image/png";
   readonly householdId: string;
   readonly objectId: string;
   readonly purpose: "capture-original";
 };
+
+export type PreviewFileEncryptionContext = {
+  readonly aadSchemaVersion: 1;
+  readonly derivativeId: string;
+  readonly format: "image/jpeg";
+  readonly previewPolicyVersion: 1;
+  readonly purpose: "validation-preview";
+  readonly sourceObjectId: string;
+};
+
+export type FileEncryptionContext = OriginalFileEncryptionContext | PreviewFileEncryptionContext;
 
 export type WrappedFileKey = {
   readonly keyVersion: number;
@@ -35,6 +46,17 @@ export type FileKeyCrypto = {
 export function canonicalFileAad(context: FileEncryptionContext): string {
   if (context.aadSchemaVersion !== 1) {
     throw new Error("File AAD schema version is unsupported.");
+  }
+  if (context.purpose === "validation-preview") {
+    return JSON.stringify({
+      aadSchemaVersion: context.aadSchemaVersion,
+      derivativeId: context.derivativeId,
+      format: context.format,
+      previewPolicyVersion: context.previewPolicyVersion,
+      purpose: context.purpose,
+      protocol: "littlearc-file",
+      sourceObjectId: context.sourceObjectId,
+    });
   }
   return JSON.stringify({
     aadSchemaVersion: context.aadSchemaVersion,

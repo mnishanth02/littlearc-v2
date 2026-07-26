@@ -1,7 +1,7 @@
 # Testing Strategy
 
 > **Status:** Active
-> **Last updated:** 2026-07-25
+> **Last updated:** 2026-07-26
 > **Owner:** Engineering
 > **Applies to:** Root workspace and application/package changes
 
@@ -12,7 +12,7 @@
 | Static policy | Toolchain, boundaries, generated drift, environment, Railway, semantic styles | `pnpm check:workspace` |
 | Unit | Pure domain, configuration, observability, token, and tooling behavior | `pnpm test:unit` |
 | Contract | OpenAPI/client/API and database integration contracts | `pnpm test:contract` |
-| Provider integration | Aiven PostgreSQL tenant isolation and work-package lifecycle behavior | `pnpm test:database:rls`, package database commands |
+| Provider integration | Aiven PostgreSQL tenant isolation, work-package lifecycle behavior, local ClamAV adapter behavior, bounded HEIC decoding, and encrypted preview derivation | `pnpm test:database:rls`, `pnpm test:integration:clamav`, `pnpm test:integration:heic`, `pnpm test:integration:file-preview`, package database commands |
 | Compile/build | Cross-package types and deployable artifacts | `pnpm typecheck`, `pnpm build` |
 | Native | Expo Doctor, clean prebuild, platform build/export, physical device | Package commands plus recorded device evidence |
 | Reproducibility | Source-only frozen install and full validation | `./tooling/validate-clean-checkout.sh` |
@@ -26,8 +26,14 @@
 - Run the Aiven RLS command separately from `pnpm validate`; it requires the
   ignored local credential and creates and removes a temporary test database.
 - File-validation changes also run `pnpm test:database:file-validation`.
-  Scanner protocol tests do not replace the private Railway ClamAV
-  benign/detected/readiness probe; record these as separate evidence layers.
+- Encrypted-preview changes also run `pnpm test:database:file-preview` and
+  `pnpm test:integration:file-preview`.
+  Run `pnpm test:integration:clamav` when Homebrew ClamAV is available.
+  Run `pnpm test:integration:heic` when libvips and `heif-enc` are available.
+  Unit protocol tests, local real-ClamAV integration, and the private Railway
+  ClamAV benign/detected/readiness probe are separate evidence layers. Local
+  HEIC integration uses two independent synthetic encoders; Railway predeploy
+  separately proves the exact pinned worker image and codec stack.
 - Generated files must be reproducible and unedited; drift checks compare them
   with their source.
 - Use synthetic, non-sensitive fixtures and leakage canaries.

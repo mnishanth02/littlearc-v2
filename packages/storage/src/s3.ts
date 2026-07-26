@@ -8,6 +8,7 @@ import {
   GetObjectCommand,
   HeadObjectCommand,
   ListPartsCommand,
+  PutObjectCommand,
   S3Client,
   UploadPartCommand,
 } from "@aws-sdk/client-s3";
@@ -155,6 +156,31 @@ export function createS3EncryptedObjectStorage(
         }),
         { expiresIn: input.expiresInSeconds },
       );
+    },
+    async writeEncryptedObject(input) {
+      assertOpaqueObjectKey(input.objectKey);
+      const { createReadStream } = await import("node:fs");
+      await client.send(
+        new PutObjectCommand({
+          Body: createReadStream(input.path),
+          Bucket: bucket,
+          ContentType: "application/octet-stream",
+          Key: input.objectKey,
+        }),
+      );
+      const response = await client.send(
+        new GetObjectCommand({ Bucket: bucket, Key: input.objectKey }),
+      );
+      if (!response.Body) {
+        throw new Error("Encrypted object response had no body.");
+      }
+      const hash = createHash("sha256");
+      let bytes = 0;
+      for await (const chunk of response.Body.transformToWebStream()) {
+        bytes += chunk.byteLength;
+        hash.update(chunk);
+      }
+      return { bytes, sha256: hash.digest("hex") };
     },
   };
 }

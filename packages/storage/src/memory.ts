@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { Readable } from "node:stream";
 import {
   assertOpaqueObjectKey,
@@ -109,6 +110,15 @@ export function createMemoryEncryptedObjectStorage(): MemoryEncryptedObjectStora
     async signUploadPart(input) {
       requireUpload(uploads, input.providerUploadId, input.objectKey);
       return `memory://upload/${input.providerUploadId}/${input.partNumber}?ttl=${input.expiresInSeconds}`;
+    },
+    async writeEncryptedObject(input) {
+      assertOpaqueObjectKey(input.objectKey);
+      const bytes = await readFile(input.path);
+      objects.set(input.objectKey, bytes);
+      return {
+        bytes: bytes.length,
+        sha256: createHash("sha256").update(bytes).digest("hex"),
+      };
     },
   };
 }

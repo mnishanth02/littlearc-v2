@@ -6,6 +6,7 @@ export * from "./consent-events.js";
 export * from "./devices.js";
 export * from "./emergency-card-versions.js";
 export * from "./emergency-cards.js";
+export * from "./file-derivatives.js";
 export * from "./file-objects.js";
 export * from "./household-keys.js";
 export * from "./household-memberships.js";

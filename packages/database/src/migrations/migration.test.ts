@@ -44,6 +44,11 @@ const generatedFileValidationSql = readFileSync(
   join("migrations", fileValidation.filename),
   "utf8",
 );
+const filePreviews = databaseMigrations()[7];
+if (!filePreviews) {
+  throw new Error("Expected the VLT-05-F3 file-preview migration to be registered.");
+}
+const generatedFilePreviewsSql = readFileSync(join("migrations", filePreviews.filename), "utf8");
 
 describe("database migration foundation", () => {
   it("keeps the generated migration artifact in sync with the reviewed source", () => {
@@ -144,6 +149,25 @@ describe("VLT-05 file validation migration", () => {
       "validation_safe_error_code = 'validation_retry_exhausted'",
     );
     expect(fileValidation.sql).not.toContain("child_id uuid");
+  });
+});
+
+describe("VLT-05-F3 encrypted preview migration", () => {
+  it("keeps the reviewed source and generated artifact synchronized", () => {
+    expect(generatedFilePreviewsSql).toBe(`${filePreviews.sql}\n`);
+  });
+
+  it("uses an independent cleanup-gated least-authority derivative lifecycle", () => {
+    expect(filePreviews.sql).toContain("create table littlearc.file_derivatives");
+    expect(filePreviews.sql).toContain("result_pending_cleanup");
+    expect(filePreviews.sql).toContain("commit_file_preview_result");
+    expect(filePreviews.sql).toContain("read_file_preview_grant");
+    expect(filePreviews.sql).toContain(
+      "revoke all on littlearc.file_derivatives from littlearc_worker",
+    );
+    expect(filePreviews.sql).toContain("grant execute on function littlearc.claim_file_preview");
+    expect(filePreviews.sql).not.toContain("filename");
+    expect(filePreviews.sql).not.toContain("child_id");
   });
 });
 

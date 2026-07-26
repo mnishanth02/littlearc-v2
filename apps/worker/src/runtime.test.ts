@@ -20,7 +20,7 @@ describe("worker skeleton", () => {
 
   it("fails closed for previews and production validation", () => {
     expect(() => loadWorkerConfig({ APP_ENV: "local", FILE_PREVIEWS_ENABLED: "true" })).toThrow(
-      "not authorized",
+      "requires FILE_VALIDATION_ENABLED",
     );
     expect(() =>
       loadWorkerConfig({
@@ -34,6 +34,30 @@ describe("worker skeleton", () => {
         FILE_VALIDATION_STAGING_PROBE: "true",
       }),
     ).toThrow("authorized only in staging");
+  });
+
+  it("accepts preview processing only with the complete authorized validation boundary", () => {
+    const config = loadWorkerConfig({
+      APP_ENV: "staging",
+      CLAMD_HOST: "clamav.internal",
+      CLAMD_SIGNATURE_MIN_VERSION: "1",
+      CLAMD_SIGNATURE_OBSERVED_AT: "2026-07-26T00:00:00.000Z",
+      DATABASE_URL: "postgresql://runtime:secret@database.internal:5432/littlearc",
+      FILE_PREVIEWS_ENABLED: "true",
+      FILE_VALIDATION_ENABLED: "true",
+      KEY_WRAPPING_SECRET_V1: Buffer.alloc(32, 7).toString("base64url"),
+      PDFTOPPM_EXECUTABLE: "/reviewed/pdftoppm",
+      S3_ACCESS_KEY_ID: "synthetic-access-key",
+      S3_BUCKET_NAME: "synthetic-bucket",
+      S3_ENDPOINT: "https://storage.invalid",
+      S3_SECRET_ACCESS_KEY: "synthetic-secret-key",
+    });
+
+    expect(config.fileValidation).toMatchObject({
+      enabled: true,
+      pdftoppmExecutable: "/reviewed/pdftoppm",
+      previewsEnabled: true,
+    });
   });
 
   it("constrains every configured database session to the worker role", () => {

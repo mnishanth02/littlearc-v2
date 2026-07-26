@@ -22,7 +22,8 @@ export type FileValidationConfig =
       readonly concurrency: number;
       readonly enabled: true;
       readonly keyEncryptionKey: Buffer;
-      readonly previewsEnabled: false;
+      readonly pdftoppmExecutable: string;
+      readonly previewsEnabled: boolean;
       readonly qpdfExecutable: string;
       readonly sandboxExecutable?: string;
       readonly signatureMinimumVersion: number;
@@ -87,13 +88,13 @@ function parseFileValidation(
 ): FileValidationConfig {
   const enabled = parseBoolean("FILE_VALIDATION_ENABLED", environment.FILE_VALIDATION_ENABLED);
   const previewsEnabled = parseBoolean("FILE_PREVIEWS_ENABLED", environment.FILE_PREVIEWS_ENABLED);
-  if (previewsEnabled) {
-    throw new Error("FILE_PREVIEWS_ENABLED is not authorized for VLT-05.");
-  }
   if (!enabled) {
+    if (previewsEnabled) {
+      throw new Error("FILE_PREVIEWS_ENABLED requires FILE_VALIDATION_ENABLED.");
+    }
     return { enabled: false, previewsEnabled: false };
   }
-  if (appEnv === "production") {
+  if (appEnv === "production" && (enabled || previewsEnabled)) {
     throw new Error("Worker file validation is not authorized in production.");
   }
   if (!databaseUrl || !uploadStorage) {
@@ -118,7 +119,8 @@ function parseFileValidation(
     concurrency,
     enabled: true,
     keyEncryptionKey: key,
-    previewsEnabled: false,
+    pdftoppmExecutable: environment.PDFTOPPM_EXECUTABLE?.trim() || "/usr/bin/pdftoppm",
+    previewsEnabled,
     qpdfExecutable: environment.QPDF_EXECUTABLE?.trim() || "/usr/bin/qpdf",
     ...(environment.FILE_VALIDATION_SANDBOX_EXECUTABLE?.trim()
       ? { sandboxExecutable: environment.FILE_VALIDATION_SANDBOX_EXECUTABLE.trim() }

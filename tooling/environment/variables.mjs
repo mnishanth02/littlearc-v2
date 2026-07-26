@@ -62,7 +62,7 @@ export const environmentCatalog = {
     },
     EMAIL_PROVIDER_API_KEY: { classification: "secret", owner: "FND-07", secret: true },
     KEY_WRAPPING_SECRET_V1: { classification: "secret", owner: "FND-06", secret: true },
-    FILE_PREVIEWS_ENABLED: { classification: "public", owner: "VLT-05", secret: false },
+    FILE_PREVIEWS_ENABLED: { classification: "public", owner: "VLT-05-F3", secret: false },
     FILE_VALIDATION_CONCURRENCY: {
       classification: "public",
       owner: "VLT-05",
@@ -85,6 +85,11 @@ export const environmentCatalog = {
       secret: false,
     },
     PUSH_PROVIDER_CREDENTIALS: { classification: "secret", owner: "FND-07", secret: true },
+    PDFTOPPM_EXECUTABLE: {
+      classification: "sensitive",
+      owner: "VLT-05-F3",
+      secret: false,
+    },
     QPDF_EXECUTABLE: { classification: "sensitive", owner: "VLT-05", secret: false },
     S3_ACCESS_KEY_ID: { classification: "secret", owner: "FND-06", secret: true },
     S3_BUCKET_NAME: { classification: "sensitive", owner: "FND-06", secret: true },

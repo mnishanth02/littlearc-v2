@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { validateFileStructure } from "./structure.js";
 
 const roots: string[] = [];
+const heicDecoder = { decode: vi.fn(async () => undefined) };
 
 afterEach(async () => {
   await Promise.all(roots.splice(0).map((root) => rm(root, { force: true, recursive: true })));
@@ -25,6 +26,7 @@ describe("layered file structure validation", () => {
     await expect(
       validateFileStructure({
         declaredMime: "image/jpeg",
+        heicDecoder,
         path: jpegPath,
         pdfInspector,
       }),
@@ -32,6 +34,7 @@ describe("layered file structure validation", () => {
     await expect(
       validateFileStructure({
         declaredMime: "image/png",
+        heicDecoder,
         path: pngPath,
         pdfInspector,
       }),
@@ -51,6 +54,7 @@ describe("layered file structure validation", () => {
     await expect(
       validateFileStructure({
         declaredMime: "application/pdf",
+        heicDecoder,
         path: mismatchPath,
         pdfInspector,
       }),
@@ -58,6 +62,7 @@ describe("layered file structure validation", () => {
     await expect(
       validateFileStructure({
         declaredMime: "image/jpeg",
+        heicDecoder,
         path: truncatedPath,
         pdfInspector,
       }),
@@ -65,6 +70,7 @@ describe("layered file structure validation", () => {
     await expect(
       validateFileStructure({
         declaredMime: "image/jpeg",
+        heicDecoder,
         path: trailingPath,
         pdfInspector,
       }),
@@ -75,6 +81,7 @@ describe("layered file structure validation", () => {
     await expect(
       validateFileStructure({
         declaredMime: "image/jpeg",
+        heicDecoder,
         path: mismatchPath,
         pdfInspector,
         signal: controller.signal,
@@ -82,23 +89,25 @@ describe("layered file structure validation", () => {
     ).rejects.toMatchObject({ name: "AbortError" });
   });
 
-  it("fails closed for a structurally bounded HEIC container without an authorized decoder", async () => {
+  it("delegates a bounded still-image HEIC container to the authorized full decoder", async () => {
     const path = await fixture(
       "synthetic.heic",
       Buffer.from([
         0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63, 0x00, 0x00, 0x00,
         0x00, 0x6d, 0x69, 0x66, 0x31, 0x68, 0x65, 0x69, 0x63, 0x00, 0x00, 0x00, 0x08, 0x6d, 0x64,
-        0x61, 0x74,
+        0x61, 0x74, 0x00, 0x00, 0x00, 0x08, 0x6d, 0x65, 0x74, 0x61,
       ]),
     );
 
     await expect(
       validateFileStructure({
         declaredMime: "image/heic",
+        heicDecoder,
         path,
         pdfInspector: { inspect: vi.fn() },
       }),
-    ).rejects.toMatchObject({ code: "unsupported_format" });
+    ).resolves.toEqual({ detectedMime: "image/heic", pageCount: null });
+    expect(heicDecoder.decode).toHaveBeenCalledWith(path, undefined);
   });
 });
 

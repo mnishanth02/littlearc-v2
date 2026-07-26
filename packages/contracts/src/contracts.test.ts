@@ -7,6 +7,7 @@ import {
   cursorSchema,
   deviceEnrollmentRequestSchema,
   deviceEnrollmentResponseSchema,
+  filePreviewDownloadGrantSchema,
   openApiDocument,
   ownerOnboardingRequestSchema,
   problemDetailsSchema,
@@ -93,6 +94,30 @@ describe("LittleArc API contract", () => {
   it("exports generated mobile and staff client factories", () => {
     expect(createMobileApiClient({ baseUrl: "http://127.0.0.1:3000" })).toBeDefined();
     expect(createStaffApiClient({ baseUrl: "http://127.0.0.1:3000" })).toBeDefined();
+  });
+
+  it("defines a strict ciphertext-only validation preview grant", () => {
+    expect(
+      filePreviewDownloadGrantSchema.parse({
+        aadVersion: 1,
+        authTag: Buffer.alloc(16).toString("base64"),
+        ciphertextBytes: 1024,
+        ciphertextSha256: "a".repeat(64),
+        contentNonce: Buffer.alloc(12).toString("base64"),
+        declaredMime: "image/jpeg",
+        derivativeId: validUuidV7,
+        encodedFileKey: Buffer.alloc(32).toString("base64"),
+        expiresAt: validTimestamp,
+        fileObjectId: validUuidV7,
+        method: "GET",
+        previewPolicyVersion: 1,
+        url: "https://storage.invalid/ciphertext",
+      }),
+    ).toBeDefined();
+    expect(openApiDocument.paths).toHaveProperty("/v1/files/{fileObjectId}/preview");
+    expect(JSON.stringify(openApiDocument.paths["/v1/files/{fileObjectId}/preview"])).not.toContain(
+      "plaintext",
+    );
   });
 
   it("defines the bounded OFF-02 onboarding contract without verification decisions in responses", () => {

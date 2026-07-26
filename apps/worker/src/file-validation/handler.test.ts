@@ -19,6 +19,7 @@ const fileObjectId = "019f8000-0000-7000-8000-000000000001" as UuidV7;
 const sessionId = "019f8000-0000-7000-8000-000000000002" as UuidV7;
 const householdId = "019f8000-0000-7000-8000-000000000003" as UuidV7;
 const roots: string[] = [];
+const heicDecoder = { decode: vi.fn(async () => undefined) };
 
 afterEach(async () => {
   await Promise.all(roots.splice(0).map((root) => rm(root, { force: true, recursive: true })));
@@ -38,6 +39,7 @@ describe("file validation handler", () => {
     const handler = createFileValidationHandler({
       crypto: fixture.crypto,
       fileKeyCrypto: fixture.fileKeyCrypto,
+      heicDecoder,
       malwareScanner: createFakeMalwareScanner("clean"),
       pdfInspector: { inspect: vi.fn() },
       persistence: persistence(fixture.claim, { commit, propose }),
@@ -86,6 +88,7 @@ describe("file validation handler", () => {
     const handler = createFileValidationHandler({
       crypto: fixture.crypto,
       fileKeyCrypto: fixture.fileKeyCrypto,
+      heicDecoder,
       malwareScanner: createFakeMalwareScanner("clean"),
       pdfInspector: { inspect: vi.fn() },
       persistence: persistence(fixture.claim, { commit, propose }),
@@ -114,6 +117,7 @@ describe("file validation handler", () => {
     const handler = createFileValidationHandler({
       crypto: fixture.crypto,
       fileKeyCrypto: fixture.fileKeyCrypto,
+      heicDecoder,
       malwareScanner: createFakeMalwareScanner("detected"),
       pdfInspector: { inspect: vi.fn() },
       persistence: persistence(fixture.claim, { commit, propose }),
@@ -143,6 +147,7 @@ describe("file validation handler", () => {
     const handler = createFileValidationHandler({
       crypto: fixture.crypto,
       fileKeyCrypto: fixture.fileKeyCrypto,
+      heicDecoder,
       malwareScanner: createFakeMalwareScanner("clean"),
       pdfInspector: { inspect: vi.fn() },
       persistence: persistence(fixture.claim, {
@@ -177,6 +182,7 @@ describe("file validation handler", () => {
     const handler = createFileValidationHandler({
       crypto: fixture.crypto,
       fileKeyCrypto: fixture.fileKeyCrypto,
+      heicDecoder,
       malwareScanner: createFakeMalwareScanner("clean"),
       pdfInspector: { inspect: vi.fn() },
       persistence: persistence(fixture.claim, { commit, propose, retry }),

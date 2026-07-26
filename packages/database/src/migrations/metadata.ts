@@ -12,6 +12,10 @@ import {
 } from "./vlt-01-record-foundation.js";
 import { vlt04FileUploadMigration, vlt04FileUploadMigrationSql } from "./vlt-04-file-upload.js";
 import {
+  vlt05F3FilePreviewsMigration,
+  vlt05F3FilePreviewsMigrationSql,
+} from "./vlt-05-f3-file-previews.js";
+import {
   vlt05FileValidationMigration,
   vlt05FileValidationMigrationSql,
 } from "./vlt-05-file-validation.js";
@@ -35,6 +39,7 @@ export function databaseMigrations(): ReadonlyArray<DatabaseMigration> {
     migrationWithChecksum(vlt01RecordFoundationMigration, vlt01RecordFoundationMigrationSql),
     migrationWithChecksum(vlt04FileUploadMigration, vlt04FileUploadMigrationSql),
     migrationWithChecksum(vlt05FileValidationMigration, vlt05FileValidationMigrationSql),
+    migrationWithChecksum(vlt05F3FilePreviewsMigration, vlt05F3FilePreviewsMigrationSql),
   ];
 }
 

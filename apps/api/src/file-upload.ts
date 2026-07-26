@@ -1,4 +1,8 @@
-import type { FileUploadPersistence, InternalUploadSession } from "@littlearc/database";
+import type {
+  FilePreviewGrantPersistence,
+  FileUploadPersistence,
+  InternalUploadSession,
+} from "@littlearc/database";
 import type { UuidV7 } from "@littlearc/domain";
 import type { EncryptedObjectStorage } from "@littlearc/storage";
 import { multipartPartBytes } from "@littlearc/storage";
@@ -40,6 +44,7 @@ export type FileUploadService = ReturnType<typeof createFileUploadService>;
 export function createFileUploadService(options: {
   readonly enabled: boolean;
   readonly persistence: FileUploadPersistence;
+  readonly previewPersistence?: FilePreviewGrantPersistence;
   readonly storage: EncryptedObjectStorage;
 }) {
   return {
@@ -217,6 +222,43 @@ export function createFileUploadService(options: {
         throw new FileUploadServiceError("not_found", "The upload session was not found.");
       }
       return projectSession(session);
+    },
+    async preview(input: {
+      readonly deviceId: UuidV7;
+      readonly fileObjectId: UuidV7;
+      readonly identityUserId: string;
+      readonly requestId: UuidV7;
+    }) {
+      requireEnabled(options.enabled);
+      if (!options.previewPersistence) {
+        throw new FileUploadServiceError("unavailable", "Encrypted previews are unavailable.");
+      }
+      const result = await options.previewPersistence.read(input);
+      if (!result) {
+        throw new FileUploadServiceError("not_found", "The encrypted preview was not found.");
+      }
+      try {
+        return {
+          aadVersion: result.aadVersion,
+          authTag: result.authTag.toString("base64"),
+          ciphertextBytes: result.ciphertextBytes,
+          ciphertextSha256: result.ciphertextSha256,
+          contentNonce: result.contentNonce.toString("base64"),
+          declaredMime: "image/jpeg" as const,
+          derivativeId: result.derivativeId,
+          encodedFileKey: result.fileKey.toString("base64"),
+          expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+          fileObjectId: result.sourceFileObjectId,
+          method: "GET" as const,
+          previewPolicyVersion: result.policyVersion,
+          url: await options.storage.signDownload({
+            expiresInSeconds: 300,
+            objectKey: result.storageKey,
+          }),
+        };
+      } finally {
+        result.fileKey.fill(0);
+      }
     },
     async readStatus(input: { readonly fileObjectId: UuidV7; readonly identityUserId: string }) {
       requireEnabled(options.enabled);

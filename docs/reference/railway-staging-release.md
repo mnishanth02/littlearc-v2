@@ -62,8 +62,9 @@ evidence documents.
 10. For an authorized VLT-05 probe, set
     `FILE_VALIDATION_STAGING_PROBE=true` for one deployment, capture the safe
     pass line, reset it to false, and deploy the final steady worker.
-11. Verify worker lifecycle logs contain only allowlisted safe fields. Confirm
-    `FILE_PREVIEWS_ENABLED=false`.
+11. Verify worker lifecycle logs contain only allowlisted safe fields. For the
+    separately authorized F3 staging rollout, confirm
+    `FILE_PREVIEWS_ENABLED=true`; production and local defaults remain false.
 12. Deploy `littlearc-ops-web-staging`.
 13. Verify staff web `/health/live` and `/health/ready`.
 14. Record the source commit, migration version, Railway deployment URLs,

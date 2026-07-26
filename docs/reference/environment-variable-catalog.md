@@ -62,12 +62,13 @@
 | `S3_REGION` | Public | `VLT-04` | S3-compatible signing region, normally `auto` for Railway buckets |
 | `KEY_WRAPPING_SECRET_V1` | Secret | `FND-06` | Versioned initial key-wrapping secret |
 | `FILE_VALIDATION_ENABLED` | Public | `VLT-05` | Staging/local worker validation switch; production enablement is rejected |
-| `FILE_PREVIEWS_ENABLED` | Public | `VLT-05` | Independent preview authorization switch; must remain false |
+| `FILE_PREVIEWS_ENABLED` | Public | `VLT-05-F3` | Independent preview-processing switch; true only in authorized staging and rejected in production |
 | `FILE_VALIDATION_STAGING_PROBE` | Public | `VLT-05` | One-shot staging-only parser/scanner/cleanup startup probe; false in steady state |
 | `FILE_VALIDATION_CONCURRENCY` | Public | `VLT-05` | Bounded validation worker concurrency |
 | `FILE_VALIDATION_TMP_DIR` | Sensitive | `VLT-05` | Opaque private plaintext workspace root |
 | `FILE_VALIDATION_SANDBOX_EXECUTABLE` | Sensitive | `VLT-05` | No-new-privileges process sandbox executable |
 | `QPDF_EXECUTABLE` | Sensitive | `VLT-05` | Verified QPDF executable path |
+| `PDFTOPPM_EXECUTABLE` | Sensitive | `VLT-05-F3` | Exact standalone Poppler page-rasterizer path |
 | `CLAMD_HOST` | Sensitive | `VLT-05` | Private ClamAV service host |
 | `CLAMD_PORT` | Sensitive | `VLT-05` | Private ClamAV TCP port |
 | `CLAMD_SIGNATURE_MIN_VERSION` | Public | `VLT-05` | Minimum FreshClam-confirmed signature serial |

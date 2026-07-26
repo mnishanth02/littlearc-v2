@@ -32,6 +32,10 @@ export type EncryptedObjectStorage = {
     readonly providerUploadId: string;
   }) => Promise<ReadonlyArray<CompletedPart>>;
   readonly readObjectStream: (objectKey: string) => Promise<Readable>;
+  readonly writeEncryptedObject: (input: {
+    readonly objectKey: string;
+    readonly path: string;
+  }) => Promise<StoredObjectMetadata>;
   readonly signDownload: (input: {
     readonly expiresInSeconds: number;
     readonly objectKey: string;
@@ -45,8 +49,11 @@ export type EncryptedObjectStorage = {
 };
 
 export function assertOpaqueObjectKey(value: string): void {
-  if (!/^objects\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.lac$/.test(value)) {
-    throw new Error("Object storage key must use the opaque VLT-04 shape.");
+  if (
+    !/^objects\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.lac$/.test(value) &&
+    !/^derivatives\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.lac$/.test(value)
+  ) {
+    throw new Error("Object storage key must use an accepted opaque shape.");
   }
 }
 

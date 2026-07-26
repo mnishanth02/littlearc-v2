@@ -20,7 +20,12 @@ import {
 import type { EncryptedObjectStorage } from "@littlearc/storage";
 import type { MalwareScanner } from "../scanner/malware-scanner.js";
 import type { ValidationWorkspace } from "../workspace/workspace.js";
-import { FileValidationError, type PdfInspector, validateFileStructure } from "./structure.js";
+import {
+  FileValidationError,
+  type HeicStructureDecoder,
+  type PdfInspector,
+  validateFileStructure,
+} from "./structure.js";
 
 const validationPolicyVersion = 1;
 
@@ -32,6 +37,7 @@ export type ValidationWorkspaceManager = {
 export function createFileValidationHandler(options: {
   readonly crypto: StructuredPayloadCrypto;
   readonly fileKeyCrypto: FileKeyCrypto;
+  readonly heicDecoder: HeicStructureDecoder;
   readonly malwareScanner: MalwareScanner;
   readonly pdfInspector: PdfInspector;
   readonly persistence: FileValidationPersistence;
@@ -153,6 +159,7 @@ export function createFileValidationHandler(options: {
 
         const structure = await validateFileStructure({
           declaredMime: claim.declaredMime,
+          heicDecoder: options.heicDecoder,
           path: workspace.inputPath,
           pdfInspector: options.pdfInspector,
           signal: validationSignal,
@@ -238,7 +245,7 @@ export function createFileValidationHandler(options: {
   };
 }
 
-async function downloadVerifiedCiphertext(input: {
+export async function downloadVerifiedCiphertext(input: {
   readonly expectedBytes: number;
   readonly expectedSha256: string;
   readonly objectKey: string;

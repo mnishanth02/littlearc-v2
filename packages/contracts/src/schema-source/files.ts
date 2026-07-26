@@ -150,3 +150,25 @@ export const fileDownloadGrantSchema = z
     url: z.string().url(),
   })
   .strict();
+
+export const filePreviewDownloadGrantSchema = z
+  .object({
+    aadVersion: z.literal(1),
+    authTag: base64Schema,
+    ciphertextBytes: z
+      .number()
+      .int()
+      .positive()
+      .max(1024 * 1024),
+    ciphertextSha256: ciphertextSha256Schema,
+    contentNonce: base64Schema,
+    declaredMime: z.literal("image/jpeg"),
+    derivativeId: uuidV7Schema,
+    encodedFileKey: base64Schema,
+    expiresAt: utcTimestampSchema,
+    fileObjectId: uuidV7Schema,
+    method: z.literal("GET"),
+    previewPolicyVersion: z.literal(1),
+    url: z.string().url(),
+  })
+  .strict();

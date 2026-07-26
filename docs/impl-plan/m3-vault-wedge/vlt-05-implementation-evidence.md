@@ -2,7 +2,7 @@
 
 > **Status:** Complete within the recorded synthetic local-Aiven and Railway-staging boundaries
 > **Evidence date:** 2026-07-25
-> **Last updated:** 2026-07-25
+> **Last updated:** 2026-07-26
 > **Owner:** Engineering
 > **Milestone:** M3
 > **Plan:** [VLT-05 plan](./vlt-05-worker-side-file-validation-plan.md)
@@ -26,9 +26,11 @@ Operational logs and the household-authorized status response contain stable
 states/codes without filename, object key, document content, child data, or
 household identifier.
 
-`FILE_PREVIEWS_ENABLED=false`. No preview dependency, renderer, derivative
-table, derivative object, preview route, or preview plaintext was introduced.
-Production has no service instances and was not changed. Gate 2 remains open.
+The separately authorized `VLT-05-F3` follow-up later added and enabled in
+staging the encrypted-preview implementation recorded in
+[its evidence](./vlt-05-f3-implementation-evidence.md).
+`FILE_PREVIEWS_ENABLED=true` only in staging. Production has no service
+instances and was not changed. Gate 2 remains open.
 
 ## Implemented Boundary
 
@@ -42,10 +44,10 @@ Production has no service instances and was not changed. Gate 2 remains open.
 - Streaming storage read plus AES-256-GCM authenticated file decrypt with
   ciphertext size/SHA-256 recheck, AAD/tag verification before parsing, and
   transient-key clearing.
-- Complete bounded JPEG marker and PNG chunk/CRC/decompression validation.
-  HEIC/HEIF parses a bounded top-level ISO-BMFF envelope but deliberately
-  returns `unsupported_format` because no authorized bounded full decoder is
-  deployed.
+- Complete bounded JPEG marker, PNG chunk/CRC/decompression, and HEIC/HEIF
+  validation. HEIC/HEIF requires the expected bounded top-level ISO-BMFF
+  structure and a complete single-primary-image pixel decode in the isolated
+  worker subprocess.
 - Verified QPDF 12.3.2 Linux x64 artifact with an immutable checksum and
   no-shell `setpriv`/`prlimit` execution. Static, unencrypted PDFs only;
   encrypted, malformed, active, embedded, form/XFA, JavaScript, rich-media,
@@ -68,6 +70,7 @@ The following checks passed with Node.js 26.4.0 and pnpm 11.14.0:
 ```sh
 pnpm --filter @littlearc/worker test
 pnpm --filter @littlearc/worker typecheck
+pnpm test:integration:heic
 pnpm test:database:file-validation
 pnpm test:database:rls
 pnpm test:contract
@@ -89,7 +92,7 @@ Focused results:
 
 | Surface | Result |
 | --- | --- |
-| Worker | 6 files and 31 tests passed: configuration/role, queue handler, structure/PDF, scanner, cancellation, and workspace recovery |
+| Worker | 7 files and 38 tests passed: configuration/role, queue handler, JPEG/PNG/HEIC/PDF structure, scanner, cancellation, and workspace recovery |
 | API | 3 files and 24 tests passed, including safe file status and minimized dispatch |
 | Domain | 7 files and 34 tests passed, including validation transitions and limits |
 | Database | 3 files and 31 tests passed, including migration checksum/grants |
@@ -100,9 +103,57 @@ Focused results:
 | Gate 1 RLS regression | PostgreSQL 17.10 no-context, cross-household visibility/update/insert denial passed |
 
 The disposable Aiven suite uses generated identifiers and ciphertext metadata
-only. It creates and removes its database. Docker was unavailable locally, so
-no local ClamAV container result is claimed; scanner protocol and failure
-behavior are unit-tested, while the real scanner evidence is Railway staging.
+only. It creates and removes its database.
+
+## Local ClamAV Follow-Up
+
+The accepted local-provider follow-up passed on 26 July 2026 through
+`pnpm test:integration:clamav`:
+
+- official Homebrew ClamAV 1.5.3 was installed as a developer-machine tool;
+- a task-scoped configuration and freshly downloaded signature directory were
+  created under the platform temp root;
+- loopback-only clamd was started without enabling a persistent service;
+- the production `INSTREAM` adapter passed readiness, generated benign,
+  runtime-generated EICAR detection, client-side oversize, and stopped-daemon
+  unavailable mapping;
+- output contained only the generic pass summary; and
+- clamd stopped and the temporary configuration, signatures, and plaintext
+  workspace were removed.
+
+This closes local real-ClamAV adapter evidence independently from the already
+accepted private Railway staging evidence. Docker remains unnecessary for this
+check. See the
+[follow-up closure plan](./vlt-05-follow-up-closure-plan.md).
+
+## Bounded HEIC Follow-Up
+
+The separately authorized `VLT-05-F2` follow-up passed on 26 July 2026.
+
+- The worker image pins Node.js 26.4.0 by image digest, Sharp 0.34.5,
+  libvips 8.17.3 by source checksum, and the exact Debian 12 codec packages
+  libheif 1.15.1-1+deb12u1, libde265 1.0.11-1+deb12u2, and
+  x265 3.5-2+b1.
+- The minimal libvips build enables HEIF as its only external image format.
+  Sharp is rebuilt against that global libvips, and the image build verifies
+  the resulting capability before it can deploy.
+- Validation requires the expected bounded `ftyp`, `meta`, and `mdat`
+  top-level boxes, rejects AVIF, sequence brands, extra top-level boxes, and
+  trailing data, and then performs a complete raw-pixel decode. The decoded
+  result must be one HEVC-compressed primary image with an allowed depth,
+  channel count, dimensions, and pixel count.
+- Untrusted decoding runs without a shell under `setpriv --no-new-privs` and
+  `prlimit`, as the isolated UID 55105. It has a 30-second CPU and wall-clock
+  limit, 256 MiB old-space and 16 MiB semi-space Node.js limits, a 4 GiB
+  virtual-address ceiling, a 16 MiB output-file ceiling, and descriptor and
+  process limits of 64. Native concurrency and allocator arenas are bounded.
+- `pnpm test:integration:heic` independently generates synthetic HEIC images
+  with libvips and `heif-enc`, proves full decode, and proves safe rejection of
+  sequence, AVIF, truncated, and trailing-box cases plus cancellation and
+  temporary-workspace cleanup.
+- The custom staging image generates a synthetic 2-by-2 HEIC fixture using its
+  exact codec stack. The predeploy probe copies it into an opaque workspace,
+  executes the production sandboxed full decoder, and verifies cleanup.
 
 ## Railway Staging Evidence
 
@@ -116,23 +167,18 @@ Only `staging` was changed. Production remains empty and untouched.
   `13e3de7a-3881-4e4f-aede-93da3ac1c3ec` loaded signature serial `28072` only
   after FreshClam completed and reported the configured 27 MiB stream/file/scan
   bounds, recursion limit 8, and two scan threads.
-- Worker probe deployment `ce1d8a3d-562e-4b65-8085-dc95b8526b6d` printed:
-  `VLT-05 staging probe passed: bounded QPDF sandbox, fresh private scanner,
-  clean/detected matrix, previews off, and workspace cleanup.`
+- The bounded-HEIC worker deployment is
+  `6b455ef2-bef9-4dc6-8780-4ec064eb4455`; Railway reported image digest
+  `sha256:22c060686f451215e0427ca86088ef1e5048970e638786958ece2c1fd3ed116a`.
+  Its predeploy probe printed:
+  `VLT-05 staging probe passed: exact bounded HEIC decoder, full synthetic
+  decode, QPDF sandbox, fresh private scanner, clean/detected matrix, previews
+  off, and workspace cleanup.`
 - The probe generated its benign bytes and EICAR string at runtime, verified
   scanner readiness/current signature attestation, produced clean and detected
-  outcomes, executed the QPDF sandbox, removed its opaque workspace, and then
-  started the worker.
-- The final steady worker deployment is
-  `db84c331-0037-4e12-89a3-01e913ebca45`, after the probe switch was reset to
-  false. Startup and repeated safe heartbeat events confirm QPDF,
-  scanner readiness, database role assumption, queue grants, and runtime
-  health.
-
-The Railway CLI's interactive SSH probe command could not run because the
-account has no registered SSH key. No durable account credential was added.
-Instead, the documented staging-only startup probe switch was enabled for one
-deployment and reset to false for the final deployment.
+  outcomes, executed the exact HEIC and QPDF sandboxes, removed its opaque
+  workspace, and then started the worker. The steady service used approximately
+  136 MiB after startup, with an observed maximum of approximately 142 MiB.
 
 ## Security And Privacy Evidence
 
@@ -165,15 +211,15 @@ This evidence does not:
 - close Gate 2 or authorize `VLT-06+`;
 - authorize real data, production, pilot distribution, or a production
   malware-scanner/retention/incident policy;
-- enable previews, OCR, extraction, record linkage, search, or automatic
-  rendering of rejected originals;
+- authorize preview processing, a mobile preview consumer, OCR, extraction,
+  record linkage, search, or automatic rendering of rejected originals;
 - prove a full authenticated mobile-upload-to-staging-worker lifecycle; staging
   proves the deployed parser/scanner/cleanup/runtime boundary while disposable
   Aiven proves the full database lifecycle separately;
-- claim successful HEIC decode: HEIC remains fail-closed until a reviewed
-  resource-bounded decoder is authorized and deployed;
-- prove local real-ClamAV integration, physical Android/iOS, two-device,
-  low-end Android, or full assistive-technology behavior; or
+- claim support for HEIC variants outside the exact accepted single-primary
+  image policy or treat HEIC as an authorized `VLT-06` OCR source;
+- prove physical Android/iOS, two-device, low-end Android, or full
+  assistive-technology behavior; or
 - accept signed/form PDFs, content disarm/reconstruction, or novel-malware
   detection guarantees.
 

@@ -12,6 +12,8 @@ import {
 import type { DeviceEnrollmentPersistenceError } from "@littlearc/database";
 import {
   createDatabaseConnection,
+  createFilePreviewGrantPersistence,
+  createFilePreviewPersistence,
   createFileUploadPersistence,
   createSyncCursorCodec,
   createSyncPersistence,
@@ -50,6 +52,7 @@ const migrationPaths = [
   "../../../packages/database/migrations/0005_vlt_01_record_foundation.sql",
   "../../../packages/database/migrations/0006_vlt_04_file_upload.sql",
   "../../../packages/database/migrations/0007_vlt_05_file_validation.sql",
+  "../../../packages/database/migrations/0008_vlt_05_f3_file_previews.sql",
 ].map((path) => fileURLToPath(new URL(path, import.meta.url)));
 const execFileAsync = promisify(execFile);
 const repositoryRoot = fileURLToPath(new URL("../../..", import.meta.url));
@@ -562,6 +565,12 @@ async function runFileUploadAutomated(
     firstUser: input.firstUser,
     secondUser: input.secondUser,
   });
+  await verifyFilePreviewPersistence(database, client, crypto, persistence, storage, {
+    deviceId: input.deviceId,
+    fileObjectId,
+    firstUser: input.firstUser,
+    secondUser: input.secondUser,
+  });
 
   await client.query(
     "update littlearc.devices set enrollment_status = 'revoked', revoked_at = now() where id = $1",
@@ -820,6 +829,278 @@ async function verifyFileValidationPersistence(
   console.log("VLT-05 PostgreSQL dispatch, least-authority claim, and safe status passed.");
 }
 
+async function verifyFilePreviewPersistence(
+  database: ReturnType<typeof createDatabaseConnection>["database"],
+  client: Client,
+  crypto: StructuredPayloadCrypto,
+  filePersistence: ReturnType<typeof createFileUploadPersistence>,
+  storage: ReturnType<typeof createMemoryEncryptedObjectStorage>,
+  input: {
+    readonly deviceId: UuidV7;
+    readonly fileObjectId: UuidV7;
+    readonly firstUser: string;
+    readonly secondUser: string;
+  },
+): Promise<void> {
+  await client.query(
+    `update littlearc.file_objects
+       set validation_state = 'ready', malware_state = 'clean',
+           detected_mime = 'image/jpeg', validation_safe_error_code = null,
+           preview_state = 'not_authorized', deleted_at = null
+     where id = $1`,
+    [input.fileObjectId],
+  );
+  const derivativeId = nextId();
+  const duplicateId = nextId();
+  const attemptId = nextId();
+  const previewPersistence = createFilePreviewPersistence(database);
+
+  await client.query("begin");
+  try {
+    await client.query("set local role littlearc_worker");
+    const eligible = await client.query<{ readonly sourceId: string }>(
+      `select source_file_object_id::text "sourceId"
+         from littlearc.list_eligible_file_preview_sources(20)`,
+    );
+    assert(
+      eligible.rows.some((row) => row.sourceId === input.fileObjectId),
+      "VLT-05-F3 ready/clean source was not eligible.",
+    );
+    const ensured = await client.query<{ readonly derivativeId: string }>(
+      `select littlearc.ensure_file_preview_candidate($1, $2)::text "derivativeId"`,
+      [input.fileObjectId, derivativeId],
+    );
+    const duplicate = await client.query<{ readonly derivativeId: string }>(
+      `select littlearc.ensure_file_preview_candidate($1, $2)::text "derivativeId"`,
+      [input.fileObjectId, duplicateId],
+    );
+    assert(
+      ensured.rows[0]?.derivativeId === derivativeId &&
+        duplicate.rows[0]?.derivativeId === derivativeId,
+      "VLT-05-F3 duplicate candidate creation did not converge.",
+    );
+    await client.query("savepoint direct_derivative_read");
+    let directReadCode: string | undefined;
+    try {
+      await client.query("select id from littlearc.file_derivatives where id = $1", [derivativeId]);
+    } catch (error) {
+      directReadCode = persistenceCode(error);
+      await client.query("rollback to savepoint direct_derivative_read");
+    }
+    assert(directReadCode === "42501", "Worker direct derivative reads were not denied.");
+    const dispatch = await client.query<{
+      readonly derivativeId: string;
+      readonly eventId: string;
+    }>(
+      `select event_id::text "eventId", derivative_id::text "derivativeId"
+         from littlearc.claim_file_preview_outbox(20)`,
+    );
+    assert(
+      dispatch.rows.some((row) => row.derivativeId === derivativeId),
+      "VLT-05-F3 minimized preview dispatch was not claimable.",
+    );
+    const claimedDispatch = dispatch.rows.find((row) => row.derivativeId === derivativeId);
+    assert(claimedDispatch, "VLT-05-F3 preview dispatch claim disappeared.");
+    await client.query("select littlearc.finish_file_preview_outbox($1, true)", [
+      claimedDispatch.eventId,
+    ]);
+    const claim = await client.query<Record<string, unknown>>(
+      "select * from littlearc.claim_file_preview($1, $2, 900)",
+      [derivativeId, attemptId],
+    );
+    assert(claim.rowCount === 1, "VLT-05-F3 derivative lease was not acquired.");
+    const claimKeys = Object.keys(claim.rows[0] ?? {}).join(",");
+    for (const prohibited of ["child", "filename", "record", "membership"]) {
+      assert(!claimKeys.includes(prohibited), `VLT-05-F3 claim exposed ${prohibited}.`);
+    }
+    const premature = await client.query<{ readonly committed: boolean }>(
+      "select littlearc.commit_file_preview_result($1, $2) committed",
+      [derivativeId, attemptId],
+    );
+    assert(!premature.rows[0]?.committed, "VLT-05-F3 bypassed cleanup-gated proposal.");
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  }
+
+  const householdKeyRow = await client.query<WrappedHouseholdKey>(
+    `select key_version as "keyVersion", wrap_nonce as "wrapNonce",
+       wrapped_key as "wrappedKey", wrapping_key_version as "wrappingKeyVersion"
+     from littlearc.household_keys
+     where household_id = (
+       select household_id from littlearc.file_objects where id = $1
+     ) and status = 'active'
+     order by key_version desc limit 1`,
+    [input.fileObjectId],
+  );
+  const wrappedHouseholdKey = householdKeyRow.rows[0];
+  assert(wrappedHouseholdKey, "VLT-05-F3 household key was unavailable.");
+  const householdKey = crypto.unwrapHouseholdKey(wrappedHouseholdKey);
+  const derivativeKey = randomBytes(32);
+  const fileKeyCrypto = createFileKeyCrypto({ currentKeyVersion: 1 });
+  const context = {
+    aadSchemaVersion: 1,
+    derivativeId,
+    format: "image/jpeg",
+    previewPolicyVersion: 1,
+    purpose: "validation-preview",
+    sourceObjectId: input.fileObjectId,
+  } as const;
+  const wrappedDerivativeKey = fileKeyCrypto.wrap(derivativeKey, householdKey, context);
+  householdKey.fill(0);
+  const ciphertext = randomBytes(256);
+  const digest = createHash("sha256").update(ciphertext).digest("hex");
+  const objectKey = `derivatives/${derivativeId}/${attemptId}.lac`;
+  const { providerUploadId } = await storage.initiateMultipart(objectKey);
+  const part = await storage.putPart({
+    bytes: ciphertext,
+    objectKey,
+    partNumber: 1,
+    providerUploadId,
+  });
+  await storage.completeMultipart({ objectKey, parts: [part], providerUploadId });
+
+  const proposed = await previewPersistence.propose(derivativeId, attemptId, {
+    authTag: randomBytes(16),
+    ciphertextBytes: ciphertext.length,
+    ciphertextSha256: digest,
+    contentNonce: randomBytes(12),
+    keyVersion: wrappedDerivativeKey.keyVersion,
+    pixelHeight: 600,
+    pixelWidth: 800,
+    storageKey: objectKey,
+    wrappedFileKey: wrappedDerivativeKey.wrappedKey,
+    wrapNonce: wrappedDerivativeKey.wrapNonce,
+  });
+  assert(proposed, "VLT-05-F3 encrypted derivative proposal was not persisted.");
+  const preCleanup = await client.query<{ readonly state: string }>(
+    "select state from littlearc.file_derivatives where id = $1",
+    [derivativeId],
+  );
+  assert(
+    preCleanup.rows[0]?.state === "result_pending_cleanup",
+    "VLT-05-F3 proposal skipped the cleanup gate.",
+  );
+  assert(
+    await previewPersistence.commit(derivativeId, attemptId),
+    "VLT-05-F3 cleanup-gated commit failed.",
+  );
+
+  const previewGrantPersistence = createFilePreviewGrantPersistence({
+    crypto,
+    database,
+    fileKeyCrypto,
+  });
+  const service = createFileUploadService({
+    enabled: true,
+    persistence: filePersistence,
+    previewPersistence: previewGrantPersistence,
+    storage,
+  });
+  const grant = await service.preview({
+    deviceId: input.deviceId,
+    fileObjectId: input.fileObjectId,
+    identityUserId: input.firstUser,
+    requestId: nextId(),
+  });
+  assert(
+    grant.derivativeId === derivativeId &&
+      grant.previewPolicyVersion === 1 &&
+      grant.ciphertextSha256 === digest &&
+      grant.encodedFileKey === derivativeKey.toString("base64") &&
+      !JSON.stringify(grant).includes("plaintext"),
+    "VLT-05-F3 encrypted preview grant was incomplete.",
+  );
+  let crossHouseholdCode: string | undefined;
+  try {
+    await service.preview({
+      deviceId: input.deviceId,
+      fileObjectId: input.fileObjectId,
+      identityUserId: input.secondUser,
+      requestId: nextId(),
+    });
+  } catch (error) {
+    crossHouseholdCode = persistenceCode(error);
+  }
+  assert(
+    crossHouseholdCode === "device_required" || crossHouseholdCode === "not_found",
+    "Cross-household VLT-05-F3 grant did not fail closed.",
+  );
+  await client.query("update littlearc.file_objects set deleted_at = now() where id = $1", [
+    input.fileObjectId,
+  ]);
+  let deletedCode: string | undefined;
+  try {
+    await service.preview({
+      deviceId: input.deviceId,
+      fileObjectId: input.fileObjectId,
+      identityUserId: input.firstUser,
+      requestId: nextId(),
+    });
+  } catch (error) {
+    deletedCode = persistenceCode(error);
+  }
+  assert(deletedCode === "not_found", "Deleted source retained preview grant authority.");
+  await client.query(
+    `update littlearc.file_objects
+       set deleted_at = null, validation_state = 'ready', preview_state = 'ready'
+     where id = $1`,
+    [input.fileObjectId],
+  );
+
+  const retryAttemptId = nextId();
+  await client.query(
+    `update littlearc.file_derivatives
+       set state = 'queued', attempt_id = null, lease_expires_at = null,
+           storage_key = null, ciphertext_bytes = null, ciphertext_sha256 = null,
+           wrapped_file_key = null, wrap_nonce = null, content_nonce = null,
+           auth_tag = null, key_version = null, detected_mime = null,
+           pixel_width = null, pixel_height = null, completed_at = null
+     where id = $1`,
+    [derivativeId],
+  );
+  assert(
+    await previewPersistence.claim(derivativeId, retryAttemptId, 900),
+    "VLT-05-F3 retry claim was not acquired.",
+  );
+  assert(
+    await previewPersistence.retry(derivativeId, retryAttemptId, "scanner_unavailable"),
+    "VLT-05-F3 retryable failure did not requeue.",
+  );
+  assert(
+    await previewPersistence.failExhausted(derivativeId),
+    "VLT-05-F3 retry exhaustion did not become terminal.",
+  );
+  const original = await client.query<{
+    readonly previewState: string;
+    readonly validationState: string;
+  }>(
+    `select validation_state as "validationState", preview_state as "previewState"
+       from littlearc.file_objects where id = $1`,
+    [input.fileObjectId],
+  );
+  assert(
+    original.rows[0]?.validationState === "ready" && original.rows[0]?.previewState === "failed",
+    "VLT-05-F3 preview failure changed original readiness.",
+  );
+  const operational = JSON.stringify(
+    await client.query(
+      `select kind, policy_version, state, attempt_count, safe_error_code
+         from littlearc.file_derivatives where id = $1`,
+      [derivativeId],
+    ),
+  );
+  for (const canary of ["filename", "Synthetic Child", "plaintext", "PREVIEW_CANARY"]) {
+    assert(!operational.includes(canary), "VLT-05-F3 operational state leaked a canary.");
+  }
+  derivativeKey.fill(0);
+  await storage.deleteObject(objectKey);
+  console.log(
+    "VLT-05-F3 PostgreSQL candidate, minimized dispatch, lease, cleanup gate, grant, RLS/BOLA, deletion, retry exhaustion, and original-readiness isolation passed.",
+  );
+}
+
 async function prepareAndVerifyFileValidationQueue(
   client: Client,
   databaseUrl: string,
@@ -840,16 +1121,16 @@ async function prepareAndVerifyFileValidationQueue(
   );
   assert(schema.rows[0]?.version === 37, "Reviewed pg-boss schema version 37 was not prepared.");
   const queues = await client.query<{ readonly name: string }>(
-    "select name from pgboss.queue where name in ('file-validation-v1', 'file-validation-dead-v1') order by name",
+    "select name from pgboss.queue where name in ('file-validation-v1', 'file-validation-dead-v1', 'file-preview-v1', 'file-preview-dead-v1') order by name",
   );
-  assert(queues.rowCount === 2, "Required VLT-05 queues were not prepared.");
+  assert(queues.rowCount === 4, "Required VLT-05 validation and preview queues were not prepared.");
   await client.query("begin");
   try {
     await client.query("set local role littlearc_worker");
     const runtimeRead = await client.query(
-      "select name from pgboss.queue where name in ('file-validation-v1', 'file-validation-dead-v1')",
+      "select name from pgboss.queue where name in ('file-validation-v1', 'file-validation-dead-v1', 'file-preview-v1', 'file-preview-dead-v1')",
     );
-    assert(runtimeRead.rowCount === 2, "Worker runtime could not read prepared queues.");
+    assert(runtimeRead.rowCount === 4, "Worker runtime could not read prepared queues.");
     await client.query("savepoint schema_create");
     let createCode: string | undefined;
     try {
@@ -1890,7 +2171,7 @@ async function serveDevice(
     },
   };
   const server = await createApiServer(
-    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: String(deviceApiPort) }),
     undefined,
     undefined,
     {
@@ -1902,8 +2183,8 @@ async function serveDevice(
       },
     },
   );
-  await server.listen({ host: "127.0.0.1", port: 3000 });
-  console.log("OFF-02 synthetic device API listening on 127.0.0.1:3000.");
+  await server.listen({ host: "127.0.0.1", port: deviceApiPort });
+  console.log(`OFF-02 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
   return async () => server.close();
 }
 
@@ -1937,7 +2218,7 @@ async function serveOff03Device(
     },
   };
   const server = await createApiServer(
-    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: String(deviceApiPort) }),
     undefined,
     undefined,
     undefined,
@@ -1950,8 +2231,8 @@ async function serveOff03Device(
       },
     },
   );
-  await server.listen({ host: "127.0.0.1", port: 3000 });
-  console.log("OFF-03 synthetic device API listening on 127.0.0.1:3000.");
+  await server.listen({ host: "127.0.0.1", port: deviceApiPort });
+  console.log(`OFF-03 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
   return async () => server.close();
 }
 
@@ -1997,7 +2278,7 @@ async function serveOff04Device(
     },
   };
   const server = await createApiServer(
-    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: String(deviceApiPort) }),
     undefined,
     undefined,
     undefined,
@@ -2136,8 +2417,8 @@ async function serveOff04Device(
     return evidence.rows[0];
   });
 
-  await server.listen({ host: "127.0.0.1", port: 3000 });
-  console.log("OFF-04 synthetic device API listening on 127.0.0.1:3000.");
+  await server.listen({ host: "127.0.0.1", port: deviceApiPort });
+  console.log(`OFF-04 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
   return async () => server.close();
 }
 
@@ -2154,7 +2435,7 @@ async function serveOff05Device(
   const getSessionIdentity = async (headers: Headers) =>
     headers.get("x-littlearc-synthetic-session") === "off05-device-validation" ? { userId } : null;
   const server = await createApiServer(
-    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: String(deviceApiPort) }),
     undefined,
     undefined,
     undefined,
@@ -2257,8 +2538,8 @@ async function serveOff05Device(
     return result.rows[0];
   });
 
-  await server.listen({ host: "127.0.0.1", port: 3000 });
-  console.log("OFF-05 synthetic device API listening on 127.0.0.1:3000.");
+  await server.listen({ host: "127.0.0.1", port: deviceApiPort });
+  console.log(`OFF-05 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
   return async () => server.close();
 }
 
@@ -2582,7 +2863,7 @@ async function serveOff06Device(
   const getSessionIdentity = async (headers: Headers) =>
     headers.get("x-littlearc-synthetic-session") === "off06-device-validation" ? { userId } : null;
   const server = await createApiServer(
-    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: "3000" }),
+    loadApiConfig({ APP_ENV: "local", HOST: "127.0.0.1", PORT: String(deviceApiPort) }),
     undefined,
     undefined,
     { command: onboardingCommand, getSessionIdentity },
@@ -2645,8 +2926,8 @@ async function serveOff06Device(
     return { ...evidence, status: "passed" };
   });
 
-  await server.listen({ host: "127.0.0.1", port: 3000 });
-  console.log("OFF-06 synthetic device API listening on 127.0.0.1:3000.");
+  await server.listen({ host: "127.0.0.1", port: deviceApiPort });
+  console.log(`OFF-06 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
   return async () => server.close();
 }
 

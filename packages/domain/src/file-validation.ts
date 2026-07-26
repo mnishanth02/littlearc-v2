@@ -24,6 +24,47 @@ export const filePreviewStates = [
 
 export type FilePreviewState = (typeof filePreviewStates)[number];
 
+export const fileDerivativeStates = [
+  "pending",
+  "queued",
+  "rendering",
+  "result_pending_cleanup",
+  "ready",
+  "failed",
+] as const;
+
+export type FileDerivativeState = (typeof fileDerivativeStates)[number];
+
+export const filePreviewSafeErrorCodes = [
+  "renderer_unavailable",
+  "render_failed",
+  "resource_limit_exceeded",
+  "output_too_large",
+  "output_invalid",
+  "scanner_unavailable",
+  "encryption_failed",
+  "storage_integrity_mismatch",
+  "plaintext_cleanup_retry",
+  "preview_retry_exhausted",
+] as const;
+
+export type FilePreviewSafeErrorCode = (typeof filePreviewSafeErrorCodes)[number];
+
+export const filePreviewPolicy = {
+  aadVersion: 1,
+  declaredMime: "image/jpeg",
+  kind: "validation_preview",
+  maxCiphertextBytes: 1024 * 1024,
+  maxDimension: 1600,
+  maxPlaintextBytes: 1024 * 1024,
+  policyVersion: 1,
+  renderAttempts: [
+    { maxDimension: 1600, quality: 82 },
+    { maxDimension: 1280, quality: 76 },
+    { maxDimension: 960, quality: 70 },
+  ],
+} as const;
+
 export const fileValidationSafeErrorCodes = [
   "type_mismatch",
   "unsupported_format",

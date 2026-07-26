@@ -14,6 +14,7 @@ import {
   emergencyCardPutRequestSchema,
   fileDownloadGrantSchema,
   fileObjectProjectionSchema,
+  filePreviewDownloadGrantSchema,
   fileProcessingStatusSchema,
   householdIdentifierSchema,
   idempotencyKeySchema,
@@ -91,6 +92,7 @@ registry.register("ReconcileUploadPartsRequest", reconcileUploadPartsRequestSche
 registry.register("CompleteUploadRequest", completeUploadRequestSchema);
 registry.register("FileObjectProjection", fileObjectProjectionSchema);
 registry.register("FileDownloadGrant", fileDownloadGrantSchema);
+registry.register("FilePreviewDownloadGrant", filePreviewDownloadGrantSchema);
 registry.register("FileProcessingStatus", fileProcessingStatusSchema);
 
 registry.registerPath({
@@ -271,6 +273,32 @@ registry.registerPath({
     },
     404: {
       description: "File object not found",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/files/{fileObjectId}/preview",
+  tags: ["files"],
+  summary: "Authorize an encrypted validation preview to an active enrolled device",
+  security: [{ consumerSession: [] }],
+  request: {
+    headers: z.object({ "x-littlearc-device-id": uuidV7Schema }),
+    params: z.object({ fileObjectId: uuidV7Schema }),
+  },
+  responses: {
+    200: {
+      description: "Short-lived encrypted preview download and transient derivative key",
+      content: { "application/json": { schema: filePreviewDownloadGrantSchema } },
+    },
+    403: {
+      description: "Active enrolled device required",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+    404: {
+      description: "Ready encrypted preview not found",
       content: { "application/problem+json": { schema: problemDetailsSchema } },
     },
   },

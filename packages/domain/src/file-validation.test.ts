@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   canTransitionFileValidation,
+  filePreviewPolicy,
+  filePreviewSafeErrorCodes,
   fileValidationSafeErrorCodes,
   fileValidationStates,
   isTerminalFileValidationState,
@@ -30,5 +32,23 @@ describe("file validation policy", () => {
     expect(fileValidationSafeErrorCodes).toContain("malware_detected");
     expect(fileValidationSafeErrorCodes).not.toContain("filename");
     expect(new Set(fileValidationSafeErrorCodes).size).toBe(fileValidationSafeErrorCodes.length);
+  });
+
+  it("keeps preview output deterministic and independently bounded", () => {
+    expect(filePreviewPolicy).toMatchObject({
+      aadVersion: 1,
+      declaredMime: "image/jpeg",
+      kind: "validation_preview",
+      maxCiphertextBytes: 1024 * 1024,
+      maxDimension: 1600,
+      maxPlaintextBytes: 1024 * 1024,
+      policyVersion: 1,
+    });
+    expect(filePreviewPolicy.renderAttempts).toEqual([
+      { maxDimension: 1600, quality: 82 },
+      { maxDimension: 1280, quality: 76 },
+      { maxDimension: 960, quality: 70 },
+    ]);
+    expect(filePreviewSafeErrorCodes).not.toContain("filename");
   });
 });

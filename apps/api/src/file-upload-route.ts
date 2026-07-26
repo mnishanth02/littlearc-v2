@@ -1,6 +1,7 @@
 import {
   completeUploadRequestSchema,
   createUploadSessionRequestSchema,
+  filePreviewDownloadGrantSchema,
   fileProcessingStatusSchema,
   reconcileUploadPartsRequestSchema,
   uploadSessionSchema,
@@ -183,6 +184,29 @@ export function registerFileUploadRoutes(
           await dependencies.service.readStatus({
             fileObjectId: parseUuidV7(parameters.data.fileObjectId, "fileObjectId"),
             identityUserId,
+          }),
+        ),
+      );
+    } catch (error) {
+      throw mapFileError(error);
+    }
+  });
+
+  server.get("/v1/files/:fileObjectId/preview", async (request, reply) => {
+    const identityUserId = await requireIdentity(request.headers, dependencies);
+    const parameters = downloadParametersSchema.safeParse(request.params);
+    const deviceId = uuidV7Schema.safeParse(request.headers["x-littlearc-device-id"]);
+    if (!parameters.success || !deviceId.success) {
+      throw httpError(400, "The encrypted preview request is invalid.");
+    }
+    try {
+      return reply.header("cache-control", "no-store, private").send(
+        filePreviewDownloadGrantSchema.parse(
+          await dependencies.service.preview({
+            deviceId: parseUuidV7(deviceId.data, "deviceId"),
+            fileObjectId: parseUuidV7(parameters.data.fileObjectId, "fileObjectId"),
+            identityUserId,
+            requestId: parseUuidV7(request.id, "requestId"),
           }),
         ),
       );

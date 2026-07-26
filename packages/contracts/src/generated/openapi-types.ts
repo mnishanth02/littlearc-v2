@@ -780,6 +780,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/files/{fileObjectId}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Authorize an encrypted validation preview to an active enrolled device */
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description UUIDv7 identifier */
+                    "x-littlearc-device-id": string;
+                };
+                path: {
+                    /** @description UUIDv7 identifier */
+                    fileObjectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Short-lived encrypted preview download and transient derivative key */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            aadVersion: 1;
+                            authTag: string;
+                            ciphertextBytes: number;
+                            ciphertextSha256: string;
+                            contentNonce: string;
+                            /** @enum {string} */
+                            declaredMime: "image/jpeg";
+                            /** @description UUIDv7 identifier */
+                            derivativeId: string;
+                            encodedFileKey: string;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {string} */
+                            method: "GET";
+                            /** @enum {number} */
+                            previewPolicyVersion: 1;
+                            /** Format: uri */
+                            url: string;
+                        };
+                    };
+                };
+                /** @description Active enrolled device required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Ready encrypted preview not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/records/{recordId}": {
         parameters: {
             query?: never;
@@ -4127,7 +4247,7 @@ export interface components {
             /** @description UUIDv7 identifier */
             actorId: string;
             /** @enum {string} */
-            action: "household_created" | "child_created" | "child_updated" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "emergency_card_created" | "emergency_card_updated" | "file_upload_created" | "file_upload_completed" | "file_upload_cancelled" | "file_download_authorized" | "staff_action_recorded";
+            action: "household_created" | "child_created" | "child_updated" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "emergency_card_created" | "emergency_card_updated" | "file_upload_created" | "file_upload_completed" | "file_upload_cancelled" | "file_download_authorized" | "file_preview_download_authorized" | "staff_action_recorded";
             targetType: string;
             /** @description UUIDv7 identifier */
             targetId: string;
@@ -6751,6 +6871,29 @@ export interface components {
             fileObjectId: string;
             /** @enum {string} */
             method: "GET";
+            /** Format: uri */
+            url: string;
+        };
+        FilePreviewDownloadGrant: {
+            /** @enum {number} */
+            aadVersion: 1;
+            authTag: string;
+            ciphertextBytes: number;
+            ciphertextSha256: string;
+            contentNonce: string;
+            /** @enum {string} */
+            declaredMime: "image/jpeg";
+            /** @description UUIDv7 identifier */
+            derivativeId: string;
+            encodedFileKey: string;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            expiresAt: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {string} */
+            method: "GET";
+            /** @enum {number} */
+            previewPolicyVersion: 1;
             /** Format: uri */
             url: string;
         };

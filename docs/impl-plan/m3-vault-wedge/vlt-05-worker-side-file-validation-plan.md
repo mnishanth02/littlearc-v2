@@ -3,9 +3,10 @@
 > **Status:** Accepted and implemented within the linked synthetic local-Aiven
 > and Railway-staging evidence boundary
 > **Plan state:** Founder-reviewed and separately authorized on 2026-07-25;
+> bounded HEIC follow-up separately authorized and completed on 2026-07-26;
 > previews, production, real data, Gate 2 closure, and VLT-06+ remain unauthorized
 > **Created:** 2026-07-25
-> **Last updated:** 2026-07-25
+> **Last updated:** 2026-07-26
 > **Owner:** Engineering
 > **Milestone:** M3
 > **Dashboard:** [IMPLEMENTATION_STATUS.md](../../IMPLEMENTATION_STATUS.md)
@@ -1669,10 +1670,10 @@ VLT-05 may be marked complete only when all authorized applicable criteria pass:
    accepted or any parser runs.
 7. Detected MIME comes from bytes, matches the canonical declared type, and is
    never accepted on signature alone.
-8. JPEG and PNG validators consume the complete allowed structure and enforce
-   bounded limits. HEIC/HEIF parses a bounded ISO-BMFF envelope and fails
-   closed as unsupported until a reviewed deployed decoder proves complete
-   bounded image decode.
+8. JPEG, PNG, and HEIC/HEIF validators consume the complete allowed structure
+   and enforce bounded limits. HEIC/HEIF additionally proves a complete
+   single-primary-image pixel decode through the accepted exact pinned worker
+   image and sandbox.
 9. PDF validation is bounded by size, pages, objects, nesting, output, memory,
    CPU, wall time, and concurrency.
 10. Encrypted/password-protected, active, external-action, embedded-file, form/
@@ -1798,13 +1799,22 @@ Completed manual/externally coordinated work:
 - migration-credential execution for `pg-boss` schema and `0007`;
 - staging variable/service configuration without recording secret values;
 - staging deploy and terminal health inspection; and
-- synthetic benign/EICAR, QPDF sandbox, and complete-cleanup probe.
+- synthetic benign/EICAR, QPDF sandbox, and complete-cleanup probe; and
+- local Homebrew ClamAV 1.5.3 production-adapter integration covering
+  readiness, clean, detected, bounded, unavailable, and cleanup behavior;
+- separately authorized bounded HEIC decode; and
+- separately authorized encrypted-preview implementation and staging-only
+  enablement.
 
 Still deferred:
 
-- preview enablement;
+- authenticated mobile-to-staging-worker lifecycle pending an organization-owned
+  synthetic identity or separately reviewed ephemeral harness;
 - future production provider/capacity/incident/retention approval; and
 - future UI/OCR/record-linking packages.
+
+Owners, triggers, execution boundaries, and closure evidence are recorded in
+the [VLT-05 follow-up closure plan](./vlt-05-follow-up-closure-plan.md).
 
 Deferred and not acceptance evidence unless separately authorized:
 
@@ -1929,8 +1939,12 @@ staging synthetic probe described in Sections 30 and 31.
 ### Known Risks/Blockers
 
 - Gate 2 blocks automatic progression to `VLT-06+`.
-- Preview authorization remains deferred.
-- HEIC remains fail-closed until a reviewed bounded decoder is deployed.
+- Preview authorization remains deferred to the first `VLT-08` remote Vault
+  consumer unless separately moved earlier.
+- HEIC support is limited to the accepted exact pinned worker image and
+  single-primary-image policy; it does not authorize `VLT-06` OCR.
+- Full mobile-to-staging evidence remains blocked on a safe synthetic staging
+  identity boundary; no durable authentication bypass is allowed.
 - ClamAV signature attestation must be refreshed before its 72-hour expiry.
 - Static-PDF policy may reject signed/form PDFs.
 - Production scanner, retention, incident, provider, and real-data gates remain

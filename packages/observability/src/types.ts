@@ -19,6 +19,12 @@ export const logCodes = {
   workerFileValidationCleanupFailed: "worker.file_validation.cleanup_failed",
   workerFileValidationScavenged: "worker.file_validation.scavenged",
   workerFileValidationDispatchFailed: "worker.file_validation.dispatch_failed",
+  workerFilePreviewCompleted: "worker.file_preview.completed",
+  workerFilePreviewRetrying: "worker.file_preview.retrying",
+  workerFilePreviewFailed: "worker.file_preview.failed",
+  workerFilePreviewCleanupFailed: "worker.file_preview.cleanup_failed",
+  workerFilePreviewScavenged: "worker.file_preview.scavenged",
+  workerFilePreviewDispatchFailed: "worker.file_preview.dispatch_failed",
 } as const;
 
 export type LogCode = (typeof logCodes)[keyof typeof logCodes];
@@ -60,6 +66,25 @@ export type LogContextMap = {
     readonly outcome: "scavenged";
   };
   readonly [logCodes.workerFileValidationDispatchFailed]: {
+    readonly outcome: "dispatch_failed";
+  };
+  readonly [logCodes.workerFilePreviewCompleted]: {
+    readonly durationMs: number;
+    readonly outcome: "failed" | "ready";
+  };
+  readonly [logCodes.workerFilePreviewRetrying]: {
+    readonly outcome: "retrying";
+  };
+  readonly [logCodes.workerFilePreviewFailed]: {
+    readonly outcome: "failed";
+  };
+  readonly [logCodes.workerFilePreviewCleanupFailed]: {
+    readonly outcome: "cleanup_failed";
+  };
+  readonly [logCodes.workerFilePreviewScavenged]: {
+    readonly outcome: "scavenged";
+  };
+  readonly [logCodes.workerFilePreviewDispatchFailed]: {
     readonly outcome: "dispatch_failed";
   };
 };

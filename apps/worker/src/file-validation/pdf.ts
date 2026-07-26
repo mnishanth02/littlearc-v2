@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { open } from "node:fs/promises";
 import { promisify } from "node:util";
 import { fileValidationLimits } from "@littlearc/domain";
+import type { ParserPermit } from "./parser-permit.js";
 import { FileValidationError, type PdfInspector } from "./structure.js";
 
 const execFileAsync = promisify(execFile);
@@ -36,6 +37,7 @@ const embeddedTokens = new Set([
 
 export function createQpdfInspector(options: {
   readonly executable: string;
+  readonly parserPermit?: ParserPermit;
   readonly sandboxExecutable?: string;
 }): PdfInspector {
   const run = async (arguments_: ReadonlyArray<string>, signal?: AbortSignal): Promise<string> => {
@@ -55,14 +57,18 @@ export function createQpdfInspector(options: {
         ]
       : [...arguments_];
     try {
-      const result = await execFileAsync(executable, args, {
-        encoding: "utf8",
-        env: { LANG: "C", PATH: "/usr/bin:/bin" },
-        maxBuffer: fileValidationLimits.maxPdfJsonBytes,
-        signal,
-        timeout: fileValidationLimits.parserTimeoutMs,
-        windowsHide: true,
-      });
+      const execute = () =>
+        execFileAsync(executable, args, {
+          encoding: "utf8",
+          env: { LANG: "C", PATH: "/usr/bin:/bin" },
+          maxBuffer: fileValidationLimits.maxPdfJsonBytes,
+          signal,
+          timeout: fileValidationLimits.parserTimeoutMs,
+          windowsHide: true,
+        });
+      const result = options.parserPermit
+        ? await options.parserPermit.run(execute, signal)
+        : await execute();
       return result.stdout;
     } catch {
       throw new FileValidationError("malformed_structure");

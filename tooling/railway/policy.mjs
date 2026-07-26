@@ -33,6 +33,8 @@ const requiredWatchRoots = {
   "ops-web.railway.json": ["/apps/ops-web/**", "/packages/contracts/**"],
   "worker.railway.json": [
     "/apps/worker/**",
+    "/infra/railway/staging/worker/**",
+    "/infra/railway/staging/worker-image-dependencies.json",
     "/packages/crypto/**",
     "/packages/database/**",
     "/packages/domain/**",
@@ -71,6 +73,7 @@ export function validateRailwayStagingSkeleton(repositoryRoot) {
 
     violations.push(...validateServiceConfig(configName, readJson(configPath)));
   }
+  violations.push(...validateWorkerImageBoundary(repositoryRoot));
 
   return violations;
 }
@@ -177,6 +180,8 @@ function validateManifestService(service) {
 function validateServiceConfig(configName, config) {
   const violations = [];
   const isClamav = configName === "clamav.railway.json";
+  const isWorker = configName === "worker.railway.json";
+  const isDockerService = isClamav || isWorker;
 
   if (config.$schema !== "https://railway.com/railway.schema.json") {
     violations.push(`${configName}: missing Railway schema URL`);
@@ -184,18 +189,17 @@ function validateServiceConfig(configName, config) {
   if (config.environments?.production) {
     violations.push(`${configName}: must not define production environment overrides`);
   }
-  if (config.build?.builder !== (isClamav ? "DOCKERFILE" : "RAILPACK")) {
+  if (config.build?.builder !== (isDockerService ? "DOCKERFILE" : "RAILPACK")) {
     violations.push(
-      `${configName}: build.builder must be ${isClamav ? "DOCKERFILE" : "RAILPACK"}`,
+      `${configName}: build.builder must be ${isDockerService ? "DOCKERFILE" : "RAILPACK"}`,
     );
   }
   if (
-    !isClamav &&
-    typeof config.build?.buildCommand !== "string" ||
-    (!isClamav &&
+    (!isDockerService && typeof config.build?.buildCommand !== "string") ||
+    (!isDockerService &&
       (!config.build.buildCommand.startsWith("pnpm --filter ") &&
         !config.build.buildCommand.includes("pnpm --filter "))) ||
-    (!isClamav && !config.build.buildCommand.includes("... build"))
+    (!isDockerService && !config.build.buildCommand.includes("... build"))
   ) {
     violations.push(
       `${configName}: build.buildCommand must use a dependency-inclusive pnpm workspace filter`,
@@ -216,7 +220,7 @@ function validateServiceConfig(configName, config) {
   }
 
   if (
-    !isClamav &&
+    !isDockerService &&
     (typeof config.deploy?.startCommand !== "string" ||
       !config.deploy.startCommand.startsWith("pnpm --filter "))
   ) {
@@ -233,6 +237,98 @@ function validateServiceConfig(configName, config) {
 
   if (config.deploy?.restartPolicyType !== "ALWAYS") {
     violations.push(`${configName}: deploy.restartPolicyType must be ALWAYS`);
+  }
+
+  return violations;
+}
+
+function validateWorkerImageBoundary(repositoryRoot) {
+  const violations = [];
+  const stagingRoot = join(repositoryRoot, "infra/railway/staging");
+  const config = readJson(join(stagingRoot, "worker.railway.json"));
+  const dependencyPath = join(stagingRoot, "worker-image-dependencies.json");
+  const dockerfilePath = join(stagingRoot, "worker/Dockerfile");
+
+  if (config.build?.dockerfilePath !== "infra/railway/staging/worker/Dockerfile") {
+    violations.push("worker.railway.json: worker Dockerfile path must remain exact");
+  }
+  if (config.deploy?.preDeployCommand !== "node apps/worker/dist/staging-probe.js") {
+    violations.push("worker.railway.json: worker must run the exact staging predeploy probe");
+  }
+  if (config.deploy?.startCommand !== "node apps/worker/dist/index.js") {
+    violations.push("worker.railway.json: worker must run the built entry point directly");
+  }
+  if (!existsSync(dependencyPath)) {
+    violations.push("worker-image-dependencies.json: missing exact worker image dependency manifest");
+    return violations;
+  }
+  if (!existsSync(dockerfilePath)) {
+    violations.push("worker/Dockerfile: missing reviewed worker image");
+    return violations;
+  }
+
+  const dependencies = readJson(dependencyPath);
+  const expected = {
+    baseImage: {
+      digest: "sha256:ec82d089a8ae2cf02628da7b34ea57dc357b24db724d557fe2d240e6beb659c1",
+      reference: "node:26.4.0-bookworm-slim",
+    },
+    decoder: {
+      libde265: "1.0.11-1+deb12u2",
+      libheif: "1.15.1-1+deb12u1",
+      libvips: "8.17.3",
+      sharp: "0.34.5",
+      x265: "3.5-2+b1",
+    },
+    renderer: {
+      jpeg: "1:2.1.5-2",
+      png: "1.6.39-2+deb12u5",
+      popplerUtils: "22.12.0-2+deb12u2",
+    },
+    licenses: {
+      jpeg:
+        "https://metadata.ftp-master.debian.org/changelogs/main/libj/libjpeg-turbo/libjpeg-turbo_2.1.5-2_copyright",
+      png:
+        "https://metadata.ftp-master.debian.org/changelogs/main/libp/libpng1.6/libpng1.6_1.6.39-2+deb12u5_copyright",
+      poppler:
+        "https://metadata.ftp-master.debian.org/changelogs/main/p/poppler/poppler_22.12.0-2+deb12u2_copyright",
+    },
+    policy: {
+      acceptedCompression: "hevc",
+      acceptedFrames: 1,
+      previewsEnabled: true,
+      previewPolicyVersion: 1,
+    },
+  };
+  if (JSON.stringify(dependencies) !== JSON.stringify(expected)) {
+    violations.push("worker-image-dependencies.json: exact reviewed dependency policy drifted");
+  }
+
+  const dockerfile = readFileSync(dockerfilePath, "utf8");
+  const requiredPins = [
+    `${expected.baseImage.reference}@${expected.baseImage.digest}`,
+    `LIBVIPS_VERSION=${expected.decoder.libvips}`,
+    `LIBVIPS_SHA256=41e9a1439cd57dcc6d4435a085e2cfe181d9da1962fa84a484f09e8b536e4b77`,
+    `LIBDE265_VERSION=${expected.decoder.libde265}`,
+    `LIBHEIF_VERSION=${expected.decoder.libheif}`,
+    `LIBX265_VERSION=${expected.decoder.x265}`,
+    `LIBJPEG_VERSION=${expected.renderer.jpeg}`,
+    `LIBPNG_VERSION=${expected.renderer.png}`,
+    `POPPLER_VERSION=${expected.renderer.popplerUtils}`,
+    "libde265-dev=${LIBDE265_VERSION}",
+    "libheif-dev=${LIBHEIF_VERSION}",
+    "libx265-dev=${LIBX265_VERSION}",
+    "libjpeg62-turbo-dev=${LIBJPEG_VERSION}",
+    "libpng-dev=${LIBPNG_VERSION}",
+    "poppler-utils=${POPPLER_VERSION}",
+    "-Djpeg=enabled",
+    "-Dpng=enabled",
+    "-Dpoppler=disabled",
+  ];
+  for (const pin of requiredPins) {
+    if (!dockerfile.includes(pin)) {
+      violations.push(`worker/Dockerfile: missing reviewed pin ${pin}`);
+    }
   }
 
   return violations;

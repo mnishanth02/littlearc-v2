@@ -827,8 +827,9 @@ correct the MVP's core child records.
 > safe status, disposable Aiven proof, and Railway staging probe/deploy are
 > complete within the
 > [recorded evidence](./m3-vault-wedge/vlt-05-implementation-evidence.md).
-> HEIC and previews remain fail-closed, production is untouched, Gate 2 remains
-> open, and VLT-06+ is not authorized.
+> The separately authorized bounded HEIC follow-up is also complete. Previews
+> remain disabled, production is untouched, Gate 2 remains open, and VLT-06+
+> is not authorized.
 
 - Recheck magic-byte MIME and file structure.
 - Bound PDF parsing and reject active/executable content.

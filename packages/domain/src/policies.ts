@@ -89,6 +89,7 @@ export const auditActions = [
   "file_upload_completed",
   "file_upload_cancelled",
   "file_download_authorized",
+  "file_preview_download_authorized",
   "staff_action_recorded",
 ] as const;
 export type AuditAction = (typeof auditActions)[number];

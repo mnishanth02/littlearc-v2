@@ -365,6 +365,7 @@ export const openApiDocument = {
               "file_upload_completed",
               "file_upload_cancelled",
               "file_download_authorized",
+              "file_preview_download_authorized",
               "staff_action_recorded"
             ]
           },
@@ -12288,6 +12289,91 @@ export const openApiDocument = {
         ],
         "additionalProperties": false
       },
+      "FilePreviewDownloadGrant": {
+        "type": "object",
+        "properties": {
+          "aadVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "authTag": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "ciphertextBytes": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 1048576
+          },
+          "ciphertextSha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "contentNonce": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "declaredMime": {
+            "type": "string",
+            "enum": [
+              "image/jpeg"
+            ]
+          },
+          "derivativeId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "encodedFileKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+          },
+          "expiresAt": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+            "description": "Normalized UTC ISO 8601 timestamp"
+          },
+          "fileObjectId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET"
+            ]
+          },
+          "previewPolicyVersion": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "aadVersion",
+          "authTag",
+          "ciphertextBytes",
+          "ciphertextSha256",
+          "contentNonce",
+          "declaredMime",
+          "derivativeId",
+          "encodedFileKey",
+          "expiresAt",
+          "fileObjectId",
+          "method",
+          "previewPolicyVersion",
+          "url"
+        ],
+        "additionalProperties": false
+      },
       "FileProcessingStatus": {
         "type": "object",
         "properties": {
@@ -14364,6 +14450,329 @@ export const openApiDocument = {
           },
           "404": {
             "description": "File object not found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/{fileObjectId}/preview": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Authorize an encrypted validation preview to an active enrolled device",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "fileObjectId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "x-littlearc-device-id",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Short-lived encrypted preview download and transient derivative key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "aadVersion": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "authTag": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    },
+                    "ciphertextBytes": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 1048576
+                    },
+                    "ciphertextSha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "contentNonce": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    },
+                    "declaredMime": {
+                      "type": "string",
+                      "enum": [
+                        "image/jpeg"
+                      ]
+                    },
+                    "derivativeId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "encodedFileKey": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "fileObjectId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "method": {
+                      "type": "string",
+                      "enum": [
+                        "GET"
+                      ]
+                    },
+                    "previewPolicyVersion": {
+                      "type": "number",
+                      "enum": [
+                        1
+                      ]
+                    },
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "required": [
+                    "aadVersion",
+                    "authTag",
+                    "ciphertextBytes",
+                    "ciphertextSha256",
+                    "contentNonce",
+                    "declaredMime",
+                    "derivativeId",
+                    "encodedFileKey",
+                    "expiresAt",
+                    "fileObjectId",
+                    "method",
+                    "previewPolicyVersion",
+                    "url"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Active enrolled device required",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ready encrypted preview not found",
             "content": {
               "application/problem+json": {
                 "schema": {

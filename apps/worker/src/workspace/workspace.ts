@@ -10,6 +10,9 @@ export type ValidationWorkspace = {
   readonly inputPartPath: string;
   readonly inputPath: string;
   readonly path: string;
+  readonly previewCiphertextPartPath: string;
+  readonly previewPlaintextPartPath: string;
+  readonly renderIntermediatePath: string;
 };
 
 const attemptPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -38,6 +41,9 @@ export function createWorkspaceManager(rootInput: string) {
         inputPartPath: join(path, "input.part"),
         inputPath: join(path, "input.bin"),
         path,
+        previewCiphertextPartPath: join(path, "preview-ciphertext.part"),
+        previewPlaintextPartPath: join(path, "preview-plaintext.part"),
+        renderIntermediatePath: join(path, "render-intermediate.bin"),
       };
     },
     async cleanup(attemptId: UuidV7): Promise<void> {

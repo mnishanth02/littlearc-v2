@@ -1,7 +1,7 @@
 # M2 Offline Trust Slice
 
 > **Status:** Active planning index
-> **Last updated:** 2026-07-23
+> **Last updated:** 2026-07-26
 > **Owner:** Engineering
 
 M2 delivers secure enrollment and an offline emergency-card walking skeleton.
@@ -11,6 +11,7 @@ stable plans and their validation evidence.
 
 ## Plans
 
+- [Gate 2 Offline Trust Closure Plan](./gate-2-offline-trust-closure-plan.md)
 - [`OFF-01` Consumer authentication and session lifecycle](./off-01-consumer-authentication-and-session-lifecycle-plan.md)
 - [`OFF-01` implementation evidence](./off-01-implementation-evidence.md)
 - [`OFF-02` Household, parent, child, consent, and audit](./off-02-household-parent-child-consent-and-audit-plan.md)

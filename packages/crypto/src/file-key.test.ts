@@ -30,4 +30,19 @@ describe("file key crypto", () => {
       crypto.unwrap(wrapped, householdKey, { ...context, objectId: context.householdId }),
     ).toThrow();
   });
+
+  it("uses derivative-specific AAD without household identifiers", () => {
+    const preview = canonicalFileAad({
+      aadSchemaVersion: 1,
+      derivativeId: "019d3157-2000-7000-8000-000000000003",
+      format: "image/jpeg",
+      previewPolicyVersion: 1,
+      purpose: "validation-preview",
+      sourceObjectId: context.objectId,
+    });
+    expect(preview).toBe(
+      '{"aadSchemaVersion":1,"derivativeId":"019d3157-2000-7000-8000-000000000003","format":"image/jpeg","previewPolicyVersion":1,"purpose":"validation-preview","protocol":"littlearc-file","sourceObjectId":"019d3157-2000-7000-8000-000000000002"}',
+    );
+    expect(preview).not.toContain("householdId");
+  });
 });

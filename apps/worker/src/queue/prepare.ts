@@ -1,5 +1,10 @@
 import { PgBoss } from "pg-boss";
 import {
+  filePreviewDeadLetterQueueName,
+  filePreviewQueueDefinition,
+  filePreviewQueueName,
+} from "./file-preview-queue.js";
+import {
   fileValidationDeadLetterQueueName,
   fileValidationQueueDefinition,
   fileValidationQueueName,
@@ -29,6 +34,14 @@ try {
     retryLimit: 0,
   });
   await boss.createQueue(fileValidationQueueName, fileValidationQueueDefinition);
+  await boss.createQueue(filePreviewDeadLetterQueueName, {
+    deleteAfterSeconds: filePreviewQueueDefinition.deleteAfterSeconds,
+    expireInSeconds: filePreviewQueueDefinition.expireInSeconds,
+    policy: "standard",
+    retentionSeconds: 14 * 24 * 60 * 60,
+    retryLimit: 0,
+  });
+  await boss.createQueue(filePreviewQueueName, filePreviewQueueDefinition);
   await boss.getDb().executeSql(`
     revoke create on schema pgboss from public, littlearc_worker;
     grant usage on schema pgboss to littlearc_worker;
@@ -39,7 +52,7 @@ try {
   if ((await boss.schemaVersion()) !== 37 || !(await boss.detectSchemaDrift()).ok) {
     throw new Error("Prepared pg-boss schema does not match reviewed version 37.");
   }
-  console.log("Prepared pg-boss schema version 37 and VLT-05 queues.");
+  console.log("Prepared pg-boss schema version 37 and VLT-05 validation/preview queues.");
 } finally {
   await boss.stop({ graceful: true, timeout: 30_000 });
 }

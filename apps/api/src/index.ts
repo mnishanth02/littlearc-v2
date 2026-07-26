@@ -2,6 +2,7 @@ import { createConsumerAuth, createResendOtpDelivery } from "@littlearc/auth";
 import { createFileKeyCrypto, createStructuredPayloadCrypto } from "@littlearc/crypto";
 import {
   createDatabaseConnection,
+  createFilePreviewGrantPersistence,
   createFileUploadPersistence,
   createSyncCursorCodec,
   createSyncPersistence,
@@ -101,6 +102,11 @@ const files =
         service: createFileUploadService({
           enabled: config.uploadsEnabled,
           persistence: createFileUploadPersistence({
+            crypto: structuredPayloadCrypto,
+            database: databaseConnection.database,
+            fileKeyCrypto: createFileKeyCrypto({ currentKeyVersion: 1 }),
+          }),
+          previewPersistence: createFilePreviewGrantPersistence({
             crypto: structuredPayloadCrypto,
             database: databaseConnection.database,
             fileKeyCrypto: createFileKeyCrypto({ currentKeyVersion: 1 }),

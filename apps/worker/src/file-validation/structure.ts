@@ -14,6 +14,10 @@ export type PdfInspector = {
   readonly inspect: (path: string, signal?: AbortSignal) => Promise<{ readonly pageCount: number }>;
 };
 
+export type HeicStructureDecoder = {
+  readonly decode: (path: string, signal?: AbortSignal) => Promise<void>;
+};
+
 export class FileValidationError extends Error {
   readonly code: FileValidationSafeErrorCode;
   readonly retryable: boolean;
@@ -28,6 +32,7 @@ export class FileValidationError extends Error {
 
 export async function validateFileStructure(input: {
   readonly declaredMime: AcceptedMime;
+  readonly heicDecoder: HeicStructureDecoder;
   readonly path: string;
   readonly pdfInspector: PdfInspector;
   readonly signal?: AbortSignal;
@@ -55,11 +60,11 @@ export async function validateFileStructure(input: {
     return { detectedMime, pageCount: null };
   }
   if (detectedMime === "image/jpeg") {
-    await validateJpeg(input.path, input.signal);
+    await validateJpegStructure(input.path, input.signal);
     return { detectedMime, pageCount: null };
   }
   if (detectedMime === "image/heic") {
-    await validateHeif(input.path, input.signal);
+    await validateHeif(input.path, input.heicDecoder, input.signal);
     return { detectedMime, pageCount: null };
   }
   const pdf = await input.pdfInspector.inspect(input.path, input.signal);
@@ -182,7 +187,11 @@ async function validatePng(path: string, signal?: AbortSignal): Promise<void> {
   }
 }
 
-async function validateJpeg(path: string, signal?: AbortSignal): Promise<void> {
+export async function validateJpegStructure(
+  path: string,
+  signal?: AbortSignal,
+  canonicalPreview = false,
+): Promise<void> {
   const handle = await open(path, "r");
   try {
     const size = (await handle.stat()).size;
@@ -232,11 +241,14 @@ async function validateJpeg(path: string, signal?: AbortSignal): Promise<void> {
       }
       const length = segmentLength(bytes, offset, size);
       if (isStartOfFrame(marker)) {
-        if (sawFrame || length < 8) {
+        if (sawFrame || length < 8 || (canonicalPreview && marker !== 0xc0)) {
           throw new FileValidationError("malformed_structure");
         }
         assertImageBounds(bytes.readUInt16BE(offset + 3), bytes.readUInt16BE(offset + 5));
         sawFrame = true;
+      }
+      if (canonicalPreview && (marker === 0xfe || (marker >= 0xe1 && marker <= 0xef))) {
+        throw new FileValidationError("malformed_structure");
       }
       offset += length;
     }
@@ -248,12 +260,18 @@ async function validateJpeg(path: string, signal?: AbortSignal): Promise<void> {
   }
 }
 
-async function validateHeif(path: string, signal?: AbortSignal): Promise<void> {
+async function validateHeif(
+  path: string,
+  decoder: HeicStructureDecoder,
+  signal?: AbortSignal,
+): Promise<void> {
   const handle = await open(path, "r");
   try {
     const size = (await handle.stat()).size;
     let offset = 0;
     let sawFtyp = false;
+    let sawMeta = false;
+    let sawMediaData = false;
     let acceptedBrand = false;
     while (offset < size) {
       signal?.throwIfAborted();
@@ -290,19 +308,28 @@ async function validateHeif(path: string, signal?: AbortSignal): Promise<void> {
         }
         acceptedBrand = observed.some((brand) => ["heic", "heix", "mif1"].includes(brand));
         sawFtyp = true;
+      } else if (type === "meta") {
+        if (sawMeta) {
+          throw new FileValidationError("malformed_structure");
+        }
+        sawMeta = true;
+      } else if (type === "mdat") {
+        if (sawMediaData) {
+          throw new FileValidationError("unsupported_format");
+        }
+        sawMediaData = true;
+      } else {
+        throw new FileValidationError("unsupported_format");
       }
       offset += boxSize;
     }
-    if (!sawFtyp || !acceptedBrand || offset !== size) {
+    if (!sawFtyp || !sawMeta || !sawMediaData || !acceptedBrand || offset !== size) {
       throw new FileValidationError("malformed_structure");
     }
-    // A valid ISO-BMFF envelope is not proof that the HEVC image item decodes
-    // safely. VLT-05 keeps HEIC fail-closed until a separately reviewed,
-    // resource-bounded decoder is present in the deployed worker image.
-    throw new FileValidationError("unsupported_format");
   } finally {
     await handle.close();
   }
+  await decoder.decode(path, signal);
 }
 
 function segmentLength(bytes: Buffer, offset: number, size: number): number {

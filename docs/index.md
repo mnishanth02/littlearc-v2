@@ -1,7 +1,7 @@
 # LittleArc Repository Knowledge Index
 
 > **Status:** Active context index
-> **Last updated:** 2026-07-25
+> **Last updated:** 2026-07-26
 > **Owner:** Engineering
 
 ---
@@ -31,12 +31,13 @@
 
 | Work | Status source | Detailed plan or evidence |
 | --- | --- | --- |
+| Gate 2 offline-trust closure | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [accepted closure plan](./impl-plan/m2-offline-trust/gate-2-offline-trust-closure-plan.md) |
 | iOS Simulator cross-milestone parity validation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/ios-simulator-parity-validation-plan.md), [evidence](./impl-plan/ios-simulator-parity-validation-evidence.md) |
 | `VLT-01` record model, versions, provenance, and Timeline projection | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md), [evidence](./impl-plan/m3-vault-wedge/vlt-01-implementation-evidence.md) |
 | `VLT-02` manual record creation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m3-vault-wedge/vlt-02-manual-record-creation-plan.md), [evidence](./impl-plan/m3-vault-wedge/vlt-02-implementation-evidence.md) |
 | `VLT-03` capture and import adapters | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m3-vault-wedge/vlt-03-capture-and-import-adapters-plan.md), [research](./impl-plan/m3-vault-wedge/vlt-03-capture-and-import-adapters-research.md), [evidence](./impl-plan/m3-vault-wedge/vlt-03-implementation-evidence.md) |
 | `VLT-04` file encryption and resumable upload | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m3-vault-wedge/vlt-04-file-encryption-and-resumable-upload-plan.md), [research](./impl-plan/m3-vault-wedge/vlt-04-file-encryption-and-resumable-upload-research.md), [evidence](./impl-plan/m3-vault-wedge/vlt-04-implementation-evidence.md) |
-| `VLT-05` worker-side file validation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m3-vault-wedge/vlt-05-worker-side-file-validation-plan.md), [evidence](./impl-plan/m3-vault-wedge/vlt-05-implementation-evidence.md), [ADR](./adr/0016-worker-file-validation-and-plaintext-cleanup-boundary.md) |
+| `VLT-05` worker-side file validation | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m3-vault-wedge/vlt-05-worker-side-file-validation-plan.md), [follow-up closure plan](./impl-plan/m3-vault-wedge/vlt-05-follow-up-closure-plan.md), [F3 preview plan](./impl-plan/m3-vault-wedge/vlt-05-f3-encrypted-server-previews-plan.md), [core/F1/F2 evidence](./impl-plan/m3-vault-wedge/vlt-05-implementation-evidence.md), [F3 evidence](./impl-plan/m3-vault-wedge/vlt-05-f3-implementation-evidence.md), [ADR](./adr/0016-worker-file-validation-and-plaintext-cleanup-boundary.md) |
 | M1 foundation queue | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [impl-plan/roadmap.md](./impl-plan/roadmap.md) |
 | `FND-01` monorepo and toolchain | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-01-monorepo-and-toolchain-plan.md), [evidence](./impl-plan/m1-foundation/fnd-01-implementation-evidence.md) |
 | `FND-02` CI and supply-chain baseline | [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) | [plan](./impl-plan/m1-foundation/fnd-02-ci-and-supply-chain-plan.md), [evidence](./impl-plan/m1-foundation/fnd-02-implementation-evidence.md) |

@@ -1,4 +1,7 @@
 import { createHash } from "node:crypto";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createMemoryEncryptedObjectStorage } from "./memory.js";
 
@@ -40,5 +43,27 @@ describe("encrypted object storage", () => {
     const { providerUploadId } = await storage.initiateMultipart(objectKey);
     await storage.abortMultipart({ objectKey, providerUploadId });
     await expect(storage.listParts({ objectKey, providerUploadId })).rejects.toThrow("not found");
+  });
+
+  it("writes, verifies, downloads, and deletes an opaque encrypted derivative", async () => {
+    const storage = createMemoryEncryptedObjectStorage();
+    const directory = await mkdtemp(join(tmpdir(), "littlearc-storage-test-"));
+    const path = join(directory, "ciphertext.part");
+    const derivativeKey =
+      "derivatives/019d3157-2000-7000-8000-000000000003/019d3157-2000-7000-8000-000000000004.lac";
+    try {
+      await writeFile(path, "synthetic-ciphertext", { mode: 0o600 });
+      expect(await storage.writeEncryptedObject({ objectKey: derivativeKey, path })).toEqual({
+        bytes: 20,
+        sha256: createHash("sha256").update("synthetic-ciphertext").digest("hex"),
+      });
+      expect(await storage.hashObject(derivativeKey)).toEqual(
+        await storage.writeEncryptedObject({ objectKey: derivativeKey, path }),
+      );
+      await storage.deleteObject(derivativeKey);
+      await expect(storage.headObject(derivativeKey)).rejects.toThrow("not found");
+    } finally {
+      await rm(directory, { force: true, recursive: true });
+    }
   });
 });
