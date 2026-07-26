@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { parse } from "yaml";
 
 const immutableAction = /^[^./][^@]*@[0-9a-f]{40}$/;
@@ -27,7 +28,7 @@ function permissionErrors(permissions, location, allowSecurityEventsWrite = fals
 
 export function validateWorkflowDocument(workflow, fileName) {
   const errors = [];
-  const isCodeQlWorkflow = /(^|[/\\])codeql\.ya?ml$/.test(fileName);
+  const isCodeQlWorkflow = resolve(fileName) === resolve(".github/workflows/codeql.yml");
   errors.push(
     ...permissionErrors(
       workflow.permissions,

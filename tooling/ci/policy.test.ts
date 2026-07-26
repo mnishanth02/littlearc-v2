@@ -32,6 +32,9 @@ describe("workflow policy", () => {
     expect(validateWorkflowDocument(workflow, ".github/workflows/unsafe.yml")).toEqual(
       expect.arrayContaining([expect.stringContaining("security-events: write")]),
     );
+    expect(validateWorkflowDocument(workflow, "other/codeql.yml")).toEqual(
+      expect.arrayContaining([expect.stringContaining("security-events: write")]),
+    );
   });
 
   it("rejects mutable action references and persisted credentials", () => {
