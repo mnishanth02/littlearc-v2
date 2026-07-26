@@ -2323,92 +2323,103 @@ async function serveOff04Device(
     console.log("OFF-04 simulated remote writer applied revision 3.");
     return result;
   });
-  server.post("/v1/validation/off04/tombstone", async (request, reply) => {
-    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
-      return reply.status(401).send({ error: "authentication_required" });
-    }
-    const tombstoneId = nextId();
-    await client.query("begin");
-    try {
-      await client.query(
-        `update littlearc.children
+  server.post(
+    "/v1/validation/off04/tombstone",
+    { config: { rateLimit: { max: 120, timeWindow: 60_000 } } },
+    async (request, reply) => {
+      if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+        return reply.status(401).send({ error: "authentication_required" });
+      }
+      const tombstoneId = nextId();
+      await client.query("begin");
+      try {
+        await client.query(
+          `update littlearc.children
          set deleted_at = now(), revision = revision + 1, updated_at = now()
          where id = $1 and household_id = $2`,
-        [onboarding.childId, onboarding.householdId],
-      );
-      await client.query(
-        `insert into littlearc.audit_events (
+          [onboarding.childId, onboarding.householdId],
+        );
+        await client.query(
+          `insert into littlearc.audit_events (
           id, household_id, actor_id, actor_role, action, target_type,
           target_id, request_id, result, metadata
         ) values ($1, $2, $3, 'owner', 'child_updated', 'child', $4, $1, 'success',
           '{"validation":"synthetic_tombstone","revision":4}'::jsonb)`,
-        [tombstoneId, onboarding.householdId, onboarding.membershipId, onboarding.childId],
-      );
-      await client.query(
-        `insert into littlearc.change_events (
+          [tombstoneId, onboarding.householdId, onboarding.membershipId, onboarding.childId],
+        );
+        await client.query(
+          `insert into littlearc.change_events (
           household_id, entity_type, entity_id, operation, revision, actor_id, mutation_id
         ) values ($1, 'child', $2, 'delete', 4, $3, $4)`,
-        [onboarding.householdId, onboarding.childId, onboarding.membershipId, tombstoneId],
-      );
-      await client.query(
-        `insert into littlearc.outbox_events (
+          [onboarding.householdId, onboarding.childId, onboarding.membershipId, tombstoneId],
+        );
+        await client.query(
+          `insert into littlearc.outbox_events (
           id, household_id, event_type, aggregate_type, aggregate_id, payload
         ) values ($1, $2, 'synthetic_child_tombstoned', 'child', $3,
           '{"schemaVersion":1,"revision":4}'::jsonb)`,
-        [tombstoneId, onboarding.householdId, onboarding.childId],
-      );
-      await client.query("commit");
-    } catch (error) {
-      await client.query("rollback");
-      throw error;
-    }
-    console.log("OFF-04 synthetic tombstone committed atomically.");
-    return { revision: 4, status: "tombstoned" };
-  });
-  server.post("/v1/validation/off04/expire-cursor", async (request, reply) => {
-    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
-      return reply.status(401).send({ error: "authentication_required" });
-    }
-    await client.query("delete from littlearc.change_events where household_id = $1", [
-      onboarding.householdId,
-    ]);
-    await client.query(
-      `insert into littlearc.change_events (
+          [tombstoneId, onboarding.householdId, onboarding.childId],
+        );
+        await client.query("commit");
+      } catch (error) {
+        await client.query("rollback");
+        throw error;
+      }
+      console.log("OFF-04 synthetic tombstone committed atomically.");
+      return { revision: 4, status: "tombstoned" };
+    },
+  );
+  server.post(
+    "/v1/validation/off04/expire-cursor",
+    { config: { rateLimit: { max: 120, timeWindow: 60_000 } } },
+    async (request, reply) => {
+      if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+        return reply.status(401).send({ error: "authentication_required" });
+      }
+      await client.query("delete from littlearc.change_events where household_id = $1", [
+        onboarding.householdId,
+      ]);
+      await client.query(
+        `insert into littlearc.change_events (
         household_id, entity_type, entity_id, operation, revision, actor_id, mutation_id, payload
       ) values
         ($1, 'consent', $2, 'upsert', 1, $3, $4, '{"state":"granted"}'::jsonb),
         ($1, 'consent', $2, 'upsert', 2, $3, $5, '{"state":"granted"}'::jsonb),
         ($1, 'consent', $2, 'upsert', 3, $3, $6, '{"state":"granted"}'::jsonb)`,
-      [
-        onboarding.householdId,
-        onboarding.childId,
-        onboarding.membershipId,
-        nextId(),
-        nextId(),
-        nextId(),
-      ],
-    );
-    await client.query(
-      `delete from littlearc.change_events
+        [
+          onboarding.householdId,
+          onboarding.childId,
+          onboarding.membershipId,
+          nextId(),
+          nextId(),
+          nextId(),
+        ],
+      );
+      await client.query(
+        `delete from littlearc.change_events
        where sequence = (
          select min(sequence) from littlearc.change_events where household_id = $1
        )`,
-      [onboarding.householdId],
-    );
-    console.log("OFF-04 retained sequence floor advanced for cursor-reset proof.");
-    return { status: "cursor_expired" };
-  });
-  server.get("/v1/validation/off04/evidence", async (request, reply) => {
-    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
-      return reply.status(401).send({ error: "authentication_required" });
-    }
-    const evidence = await client.query<{
-      readonly audit: string;
-      readonly changes: string;
-      readonly outbox: string;
-      readonly revision: number;
-    }>(
-      `select
+        [onboarding.householdId],
+      );
+      console.log("OFF-04 retained sequence floor advanced for cursor-reset proof.");
+      return { status: "cursor_expired" };
+    },
+  );
+  server.get(
+    "/v1/validation/off04/evidence",
+    { config: { rateLimit: { max: 120, timeWindow: 60_000 } } },
+    async (request, reply) => {
+      if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+        return reply.status(401).send({ error: "authentication_required" });
+      }
+      const evidence = await client.query<{
+        readonly audit: string;
+        readonly changes: string;
+        readonly outbox: string;
+        readonly revision: number;
+      }>(
+        `select
         (select count(*)::text from littlearc.audit_events
           where household_id = $1 and action = 'child_updated') audit,
         (select count(*)::text from littlearc.change_events where household_id = $1) changes,
@@ -2416,10 +2427,11 @@ async function serveOff04Device(
           where household_id = $1 and event_type in
             ('child_profile_updated', 'synthetic_child_tombstoned')) outbox,
         (select revision from littlearc.children where id = $2) revision`,
-      [onboarding.householdId, onboarding.childId],
-    );
-    return evidence.rows[0];
-  });
+        [onboarding.householdId, onboarding.childId],
+      );
+      return evidence.rows[0];
+    },
+  );
 
   await server.listen({ host: "127.0.0.1", port: deviceApiPort });
   console.log(`OFF-04 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
@@ -2517,18 +2529,21 @@ async function serveOff05Device(
     console.log("OFF-05 simulated remote writer applied emergency-card revision 2.");
     return result;
   });
-  server.get("/v1/validation/off05/evidence", async (request, reply) => {
-    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
-      return reply.status(401).send({ error: "authentication_required" });
-    }
-    const result = await client.query<{
-      readonly audit: string;
-      readonly changes: string;
-      readonly outbox: string;
-      readonly revision: number;
-      readonly versions: string;
-    }>(
-      `select
+  server.get(
+    "/v1/validation/off05/evidence",
+    { config: { rateLimit: { max: 120, timeWindow: 60_000 } } },
+    async (request, reply) => {
+      if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+        return reply.status(401).send({ error: "authentication_required" });
+      }
+      const result = await client.query<{
+        readonly audit: string;
+        readonly changes: string;
+        readonly outbox: string;
+        readonly revision: number;
+        readonly versions: string;
+      }>(
+        `select
         (select count(*)::text from littlearc.emergency_card_versions
           where emergency_card_id = $1) versions,
         (select count(*)::text from littlearc.audit_events
@@ -2538,10 +2553,11 @@ async function serveOff05Device(
         (select count(*)::text from littlearc.outbox_events
           where aggregate_id = $1 and aggregate_type = 'emergency_card') outbox,
         (select revision from littlearc.emergency_cards where id = $1) revision`,
-      [cardId],
-    );
-    return result.rows[0];
-  });
+        [cardId],
+      );
+      return result.rows[0];
+    },
+  );
 
   await server.listen({ host: "127.0.0.1", port: deviceApiPort });
   console.log(`OFF-05 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
@@ -2653,19 +2669,22 @@ async function serveVlt01Device(
     console.log("VLT-01 simulated remote writer applied record revision 3.");
     return result;
   });
-  server.get("/v1/validation/vlt01/evidence", async (request, reply) => {
-    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
-      return reply.status(401).send({ error: "authentication_required" });
-    }
-    const result = await client.query<{
-      readonly activeTimeline: string;
-      readonly audit: string;
-      readonly recordChanges: string;
-      readonly revision: number;
-      readonly timelineChanges: string;
-      readonly versions: string;
-    }>(
-      `select
+  server.get(
+    "/v1/validation/vlt01/evidence",
+    { config: { rateLimit: { max: 120, timeWindow: 60_000 } } },
+    async (request, reply) => {
+      if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+        return reply.status(401).send({ error: "authentication_required" });
+      }
+      const result = await client.query<{
+        readonly activeTimeline: string;
+        readonly audit: string;
+        readonly recordChanges: string;
+        readonly revision: number;
+        readonly timelineChanges: string;
+        readonly versions: string;
+      }>(
+        `select
         (select count(*)::text from littlearc.record_versions
           where record_id = $1) versions,
         (select count(*)::text from littlearc.audit_events
@@ -2682,10 +2701,11 @@ async function serveVlt01Device(
             and projection_state = 'active'
             and deleted_at is null) "activeTimeline",
         (select revision from littlearc.records where id = $1) revision`,
-      [recordId],
-    );
-    return result.rows[0];
-  });
+        [recordId],
+      );
+      return result.rows[0];
+    },
+  );
 
   await server.listen({ host: "127.0.0.1", port: deviceApiPort });
   console.log(`VLT-01 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
@@ -2832,17 +2852,20 @@ async function serveVlt04Device(
     tamperNextDownload = true;
     return { ready: true };
   });
-  server.get("/v1/validation/vlt04/evidence", async (request, reply) => {
-    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
-      return reply.status(401).send({ error: "authentication_required" });
-    }
-    const result = await client.query<{
-      readonly completed: string;
-      readonly created: string;
-      readonly downloaded: string;
-      readonly files: string;
-    }>(
-      `select
+  server.get(
+    "/v1/validation/vlt04/evidence",
+    { config: { rateLimit: { max: 120, timeWindow: 60_000 } } },
+    async (request, reply) => {
+      if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+        return reply.status(401).send({ error: "authentication_required" });
+      }
+      const result = await client.query<{
+        readonly completed: string;
+        readonly created: string;
+        readonly downloaded: string;
+        readonly files: string;
+      }>(
+        `select
          (select count(*)::text from littlearc.file_objects) files,
          (select count(*)::text from littlearc.audit_events
            where action = 'file_upload_created') created,
@@ -2850,9 +2873,10 @@ async function serveVlt04Device(
            where action = 'file_upload_completed') completed,
          (select count(*)::text from littlearc.audit_events
            where action = 'file_download_authorized') downloaded`,
-    );
-    return result.rows[0];
-  });
+      );
+      return result.rows[0];
+    },
+  );
 
   await server.listen({ host: "127.0.0.1", port: deviceApiPort });
   console.log(`VLT-04 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
@@ -2886,19 +2910,22 @@ async function serveOff06Device(
     return { ready: true };
   });
 
-  server.get("/v1/validation/off06/evidence", async (request, reply) => {
-    if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
-      return reply.status(401).send({ error: "authentication_required" });
-    }
-    const result = await client.query<{
-      readonly cards: string;
-      readonly children: string;
-      readonly consents: string;
-      readonly devices: string;
-      readonly households: string;
-      readonly versions: string;
-    }>(
-      `with owner_household as (
+  server.get(
+    "/v1/validation/off06/evidence",
+    { config: { rateLimit: { max: 120, timeWindow: 60_000 } } },
+    async (request, reply) => {
+      if (!(await getSessionIdentity(new Headers(request.headers as Record<string, string>)))) {
+        return reply.status(401).send({ error: "authentication_required" });
+      }
+      const result = await client.query<{
+        readonly cards: string;
+        readonly children: string;
+        readonly consents: string;
+        readonly devices: string;
+        readonly households: string;
+        readonly versions: string;
+      }>(
+        `with owner_household as (
          select household_id
          from littlearc.household_memberships
          where user_id = $1 and role = 'owner' and status = 'active'
@@ -2918,21 +2945,22 @@ async function serveOff06Device(
              and status = 'active') cards,
          (select count(*)::text from littlearc.emergency_card_versions
            where household_id = (select household_id from owner_household)) versions`,
-      [userId],
-    );
-    const evidence = result.rows[0];
-    assert(evidence, "OFF-06 evidence counts were unavailable.");
-    const passed =
-      evidence.households === "1" &&
-      evidence.children === "1" &&
-      evidence.consents === "2" &&
-      evidence.devices === "1" &&
-      evidence.cards === "1" &&
-      evidence.versions === "1";
-    assert(passed, "OFF-06 composed server evidence was incomplete.");
-    console.log("OFF-06 device HTTP/database composition passed.");
-    return { ...evidence, status: "passed" };
-  });
+        [userId],
+      );
+      const evidence = result.rows[0];
+      assert(evidence, "OFF-06 evidence counts were unavailable.");
+      const passed =
+        evidence.households === "1" &&
+        evidence.children === "1" &&
+        evidence.consents === "2" &&
+        evidence.devices === "1" &&
+        evidence.cards === "1" &&
+        evidence.versions === "1";
+      assert(passed, "OFF-06 composed server evidence was incomplete.");
+      console.log("OFF-06 device HTTP/database composition passed.");
+      return { ...evidence, status: "passed" };
+    },
+  );
 
   await server.listen({ host: "127.0.0.1", port: deviceApiPort });
   console.log(`OFF-06 synthetic device API listening on 127.0.0.1:${deviceApiPort}.`);
