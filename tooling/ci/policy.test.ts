@@ -22,6 +22,16 @@ describe("workflow policy", () => {
     expect(validateWorkflowDocument(safeWorkflow, "safe.yml")).toEqual([]);
   });
 
+  it("allows security-event uploads only from the CodeQL workflow", () => {
+    const workflow = structuredClone(safeWorkflow);
+    workflow.permissions["security-events"] = "write";
+
+    expect(validateWorkflowDocument(workflow, ".github/workflows/codeql.yml")).toEqual([]);
+    expect(validateWorkflowDocument(workflow, ".github/workflows/unsafe.yml")).toEqual(
+      expect.arrayContaining([expect.stringContaining("security-events: write")]),
+    );
+  });
+
   it("rejects mutable action references and persisted credentials", () => {
     const workflow = structuredClone(safeWorkflow);
     workflow.jobs.quality.steps[0] = {

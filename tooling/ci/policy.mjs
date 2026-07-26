@@ -3,13 +3,17 @@ import { parse } from "yaml";
 
 const immutableAction = /^[^./][^@]*@[0-9a-f]{40}$/;
 
-function permissionErrors(permissions, location) {
+function permissionErrors(permissions, location, allowSecurityEventsWrite = false) {
   if (!permissions || typeof permissions !== "object" || Array.isArray(permissions)) {
     return [location + " must declare an explicit permissions map."];
   }
 
   return Object.entries(permissions)
-    .filter(([scope, access]) => scope !== "contents" || access !== "read")
+    .filter(
+      ([scope, access]) =>
+        (scope !== "contents" || access !== "read") &&
+        (!allowSecurityEventsWrite || scope !== "security-events" || access !== "write"),
+    )
     .map(
       ([scope, access]) =>
         location +
@@ -23,7 +27,14 @@ function permissionErrors(permissions, location) {
 
 export function validateWorkflowDocument(workflow, fileName) {
   const errors = [];
-  errors.push(...permissionErrors(workflow.permissions, fileName + " top-level permissions"));
+  const isCodeQlWorkflow = /(^|[/\\])codeql\.ya?ml$/.test(fileName);
+  errors.push(
+    ...permissionErrors(
+      workflow.permissions,
+      fileName + " top-level permissions",
+      isCodeQlWorkflow,
+    ),
+  );
 
   if (workflow.on?.pull_request_target !== undefined) {
     errors.push(fileName + " must not use pull_request_target.");
@@ -40,7 +51,7 @@ export function validateWorkflowDocument(workflow, fileName) {
     }
 
     if (job.permissions) {
-      errors.push(...permissionErrors(job.permissions, location + " permissions"));
+      errors.push(...permissionErrors(job.permissions, location + " permissions", isCodeQlWorkflow));
     }
 
     if (job.environment !== undefined) {
