@@ -1,5 +1,5 @@
 import type { Revision, UuidV7 } from "@littlearc/domain";
-import { integer, jsonb, timestamp, uuid } from "drizzle-orm/pg-core";
+import { customType, integer, jsonb, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export type JsonObject = Record<string, unknown>;
 
@@ -20,3 +20,9 @@ export const deletedAtColumn = () =>
   });
 
 export const jsonObjectColumn = (name: string) => jsonb(name).$type<JsonObject>();
+
+export const byteaColumn = customType<{ data: Buffer }>({
+  dataType() {
+    return "bytea";
+  },
+});

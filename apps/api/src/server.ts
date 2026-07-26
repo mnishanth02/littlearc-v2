@@ -1,5 +1,6 @@
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import type { ConsumerAuth } from "@littlearc/auth";
 import { contractMetadata, openApiDocument } from "@littlearc/contracts";
 import {
   databaseFoundationReadiness,
@@ -12,8 +13,22 @@ import {
   type SafeLogger,
 } from "@littlearc/observability";
 import Fastify, { type FastifyInstance } from "fastify";
+import { registerConsumerAuthRoute } from "./auth-route.js";
 import type { ApiConfig } from "./config.js";
+import {
+  type DeviceEnrollmentRouteDependencies,
+  registerDeviceEnrollmentRoute,
+} from "./device-enrollment-route.js";
+import { registerEmergencyCardRoutes } from "./emergency-card-route.js";
+import { type FileUploadRouteDependencies, registerFileUploadRoutes } from "./file-upload-route.js";
+import { nextId } from "./owner-onboarding.js";
+import {
+  type OwnerOnboardingRouteDependencies,
+  registerOwnerOnboardingRoute,
+} from "./owner-onboarding-route.js";
 import { registerProblemDetails } from "./problem.js";
+import { registerRecordRoutes } from "./record-route.js";
+import { registerSyncRoutes, type SyncRouteDependencies } from "./sync-route.js";
 
 export type HealthResponse = {
   readonly status: "ok";
@@ -23,7 +38,7 @@ export type HealthResponse = {
 };
 
 export type ReadinessResponse = {
-  readonly ready: true;
+  readonly ready: boolean;
   readonly service: "api";
   readonly appEnv: ApiConfig["appEnv"];
   readonly databaseFoundation: typeof databaseFoundationReadiness;
@@ -41,9 +56,14 @@ export async function createApiServer(
     service: "api",
     version: "0.0.0",
   }),
+  consumerAuth?: Pick<ConsumerAuth, "handler">,
+  ownerOnboarding?: OwnerOnboardingRouteDependencies,
+  deviceEnrollment?: DeviceEnrollmentRouteDependencies,
+  sync?: SyncRouteDependencies,
+  files?: FileUploadRouteDependencies,
 ): Promise<FastifyInstance> {
   const server = Fastify({
-    genReqId: () => crypto.randomUUID(),
+    genReqId: () => nextId(),
     logger: false,
   });
   const requestStartTimes = new WeakMap<object, number>();
@@ -75,6 +95,24 @@ export async function createApiServer(
     origin: [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/],
   });
 
+  if (consumerAuth && config.consumerAuth) {
+    registerConsumerAuthRoute(server, consumerAuth, config.consumerAuth.baseUrl);
+  }
+  if (ownerOnboarding) {
+    registerOwnerOnboardingRoute(server, ownerOnboarding);
+  }
+  if (deviceEnrollment) {
+    registerDeviceEnrollmentRoute(server, deviceEnrollment);
+  }
+  if (sync) {
+    registerSyncRoutes(server, sync);
+    registerEmergencyCardRoutes(server, sync);
+    registerRecordRoutes(server, sync);
+  }
+  if (files) {
+    registerFileUploadRoutes(server, files);
+  }
+
   server.get("/v1", async () => contractMetadata);
 
   server.get("/v1/openapi.json", async () => openApiDocument);
@@ -99,35 +137,35 @@ export async function createApiServer(
     }),
   );
 
-  server.get(
-    "/ready",
-    async (): Promise<ReadinessResponse> => ({
-      ready: true,
-      service: "api",
-      appEnv: config.appEnv,
-      databaseFoundation: databaseFoundationReadiness,
-      checks: [
-        { name: "auth", status: "deferred", owner: "OFF-01" },
-        ...databaseReadinessChecks,
-        { name: "object-storage", status: "deferred", owner: "FND-06" },
-      ],
-    }),
-  );
+  const readiness = (): ReadinessResponse => ({
+    ready: !config.uploadsEnabled || Boolean(files),
+    service: "api",
+    appEnv: config.appEnv,
+    databaseFoundation: databaseFoundationReadiness,
+    checks: [
+      {
+        name: "auth",
+        status: consumerAuth ? "foundation-ready" : "deferred",
+        owner: "OFF-01",
+      },
+      ...databaseReadinessChecks,
+      {
+        name: "object-storage",
+        status: files ? "foundation-ready" : "deferred",
+        owner: files ? "VLT-04" : "FND-06",
+      },
+    ],
+  });
 
-  server.get(
-    "/health/ready",
-    async (): Promise<ReadinessResponse> => ({
-      ready: true,
-      service: "api",
-      appEnv: config.appEnv,
-      databaseFoundation: databaseFoundationReadiness,
-      checks: [
-        { name: "auth", status: "deferred", owner: "OFF-01" },
-        ...databaseReadinessChecks,
-        { name: "object-storage", status: "deferred", owner: "FND-06" },
-      ],
-    }),
-  );
+  for (const path of ["/ready", "/health/ready"]) {
+    server.get(path, async (_request, reply): Promise<ReadinessResponse> => {
+      const response = readiness();
+      if (!response.ready) {
+        reply.status(503);
+      }
+      return response;
+    });
+  }
 
   registerProblemDetails(server);
 

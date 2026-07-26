@@ -12,7 +12,7 @@ import { littlearcSchema } from "./schema.js";
 export const households = littlearcSchema.table("households", {
   id: uuidV7Column("id").primaryKey(),
   status: text("status").notNull().default("active"),
-  defaultCountryCode: text("default_country_code").notNull().default("US"),
+  defaultCountryCode: text("default_country_code").notNull(),
   accessPolicy: text("access_policy").notNull().default("owner-managed"),
   createdBy: uuidV7Column("created_by").notNull(),
   updatedBy: uuidV7Column("updated_by").notNull(),

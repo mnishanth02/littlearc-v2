@@ -61,13 +61,85 @@ export default function LandingScreen() {
         </View>
 
         <View style={styles.actions}>
+          <Button
+            label="Open emergency card"
+            onPress={() => router.push("/emergency")}
+            testID="open-emergency-card"
+          />
+          <Button
+            label="Open manual records"
+            onPress={() => router.push("/records")}
+            testID="open-manual-records"
+          />
           <Button label="Open runtime status" onPress={() => router.push("/status")} />
           {__DEV__ ? (
-            <Button
-              label="Open design-system gallery"
-              onPress={() => router.push("/design-system")}
-              variant="secondary"
-            />
+            <>
+              <Button
+                label="Start OFF-06 synthetic onboarding"
+                onPress={() => router.push("/onboarding")}
+                testID="open-off06-onboarding"
+                variant="secondary"
+              />
+              <Button
+                label="Open OFF-01 device validation"
+                onPress={() => router.push("/off-01-validation")}
+                testID="open-off01-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open OFF-02 synthetic onboarding"
+                onPress={() => router.push("/off-02-validation")}
+                testID="open-off02-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open OFF-03 local-security validation"
+                onPress={() => router.push("/off-03-validation")}
+                testID="open-off03-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open OFF-04 repository validation"
+                onPress={() => router.push("/off-04-validation")}
+                testID="open-off04-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open OFF-05 emergency-card validation"
+                onPress={() => router.push("/off-05-validation")}
+                testID="open-off05-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open VLT-01 record validation"
+                onPress={() => router.push("/vlt-01-validation")}
+                testID="open-vlt01-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open VLT-02 manual-record validation"
+                onPress={() => router.push("/vlt-02-validation")}
+                testID="open-vlt02-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open VLT-03 capture validation"
+                onPress={() => router.push("/vlt-03-validation")}
+                testID="open-vlt03-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open VLT-04 encrypted-upload validation"
+                onPress={() => router.push("/vlt-04-validation")}
+                testID="open-vlt04-validation"
+                variant="secondary"
+              />
+              <Button
+                label="Open design-system gallery"
+                onPress={() => router.push("/design-system")}
+                variant="secondary"
+              />
+            </>
           ) : null}
         </View>
       </View>

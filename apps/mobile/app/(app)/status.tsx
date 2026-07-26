@@ -9,7 +9,8 @@ const runtimeChecks = [
   { label: "Expo Router groups", status: "Configured" },
   { label: "SQLCipher plugin", status: "Configured" },
   { label: "Scanner and OCR modules", status: "Configured" },
-  { label: "Physical-device acceptance", status: "Deferred" },
+  { label: "Gate 1 Android physical device", status: "Accepted" },
+  { label: "Broader pre-pilot device matrix", status: "Deferred" },
 ] as const;
 
 export default function RuntimeStatusScreen() {

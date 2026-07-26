@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 
-const expectedNode = "24.18.0";
+const expectedNode = "26.4.0";
 const expectedPnpm = "11.14.0";
 const observedNode = process.versions.node;
 const observedPnpm = execFileSync("pnpm", ["--version"], {

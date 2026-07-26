@@ -95,6 +95,56 @@ function buildRecord<Code extends LogCode>(
   if (code === logCodes.workerStopped) {
     return { ...base, outcome: "stopped" };
   }
+  if (code === logCodes.workerUploadCleanupFailed) {
+    return { ...base, outcome: "failed" };
+  }
+  if (code === logCodes.workerFileValidationCompleted) {
+    const validationContext =
+      context as LogContextMap[typeof logCodes.workerFileValidationCompleted];
+    return {
+      ...base,
+      durationMs: normalizeDuration(validationContext.durationMs),
+      outcome: validationContext.outcome,
+    };
+  }
+  if (code === logCodes.workerFileValidationRetrying) {
+    return { ...base, outcome: "retrying" };
+  }
+  if (code === logCodes.workerFileValidationFailed) {
+    return { ...base, outcome: "failed" };
+  }
+  if (code === logCodes.workerFileValidationCleanupFailed) {
+    return { ...base, outcome: "cleanup_failed" };
+  }
+  if (code === logCodes.workerFileValidationScavenged) {
+    return { ...base, outcome: "scavenged" };
+  }
+  if (code === logCodes.workerFileValidationDispatchFailed) {
+    return { ...base, outcome: "dispatch_failed" };
+  }
+  if (code === logCodes.workerFilePreviewCompleted) {
+    const previewContext = context as LogContextMap[typeof logCodes.workerFilePreviewCompleted];
+    return {
+      ...base,
+      durationMs: normalizeDuration(previewContext.durationMs),
+      outcome: previewContext.outcome,
+    };
+  }
+  if (code === logCodes.workerFilePreviewRetrying) {
+    return { ...base, outcome: "retrying" };
+  }
+  if (code === logCodes.workerFilePreviewFailed) {
+    return { ...base, outcome: "failed" };
+  }
+  if (code === logCodes.workerFilePreviewCleanupFailed) {
+    return { ...base, outcome: "cleanup_failed" };
+  }
+  if (code === logCodes.workerFilePreviewScavenged) {
+    return { ...base, outcome: "scavenged" };
+  }
+  if (code === logCodes.workerFilePreviewDispatchFailed) {
+    return { ...base, outcome: "dispatch_failed" };
+  }
 
   return assertNever(code);
 }

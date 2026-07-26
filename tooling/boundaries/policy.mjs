@@ -13,6 +13,7 @@ export const expectedWorkspaces = new Map([
   ["packages/design-tokens", "@littlearc/design-tokens"],
   ["packages/domain", "@littlearc/domain"],
   ["packages/observability", "@littlearc/observability"],
+  ["packages/storage", "@littlearc/storage"],
   ["packages/test-kit", "@littlearc/test-kit"],
 ]);
 

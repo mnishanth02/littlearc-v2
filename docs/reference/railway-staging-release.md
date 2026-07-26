@@ -1,7 +1,7 @@
 # Railway Staging Release
 
 > **Status:** FND-06 staging runbook
-> **Last updated:** 2026-07-19
+> **Last updated:** 2026-07-25
 > **Owner:** Engineering
 > **Related work:** [`FND-06`](../impl-plan/m1-foundation/fnd-06-railway-environment-skeleton-plan.md)
 
@@ -27,6 +27,7 @@ project:
 | --- | --- | --- |
 | `littlearc-api-staging` | Web service | `/infra/railway/staging/api.railway.json` |
 | `littlearc-worker-staging` | Worker service | `/infra/railway/staging/worker.railway.json` |
+| `littlearc-clamav-staging` | Private scanner service | `/infra/railway/staging/clamav.railway.json` |
 | `littlearc-ops-web-staging` | Web service | `/infra/railway/staging/ops-web.railway.json` |
 | `Postgres` | PostgreSQL | Railway managed resource |
 | `littlearc-documents-staging` | Bucket | Railway bucket |
@@ -55,12 +56,18 @@ evidence documents.
 5. Run the FND-05 migration explicitly against staging PostgreSQL.
 6. Deploy `littlearc-api-staging`.
 7. Verify API `/health/live`, `/health/ready`, `/v1`, and `/v1/openapi.json`.
-8. Deploy `littlearc-worker-staging`.
-9. Verify worker lifecycle logs contain only code, environment, migration
-   version, queue mode, and policy metadata.
-10. Deploy `littlearc-ops-web-staging`.
-11. Verify staff web `/health/live` and `/health/ready`.
-12. Record the source commit, migration version, Railway deployment URLs,
+8. For VLT-05, deploy `littlearc-clamav-staging` privately and verify FreshClam
+   completes before clamd loads the minimum recorded signature serial.
+9. Deploy `littlearc-worker-staging`.
+10. For an authorized VLT-05 probe, set
+    `FILE_VALIDATION_STAGING_PROBE=true` for one deployment, capture the safe
+    pass line, reset it to false, and deploy the final steady worker.
+11. Verify worker lifecycle logs contain only allowlisted safe fields. For the
+    separately authorized F3 staging rollout, confirm
+    `FILE_PREVIEWS_ENABLED=true`; production and local defaults remain false.
+12. Deploy `littlearc-ops-web-staging`.
+13. Verify staff web `/health/live` and `/health/ready`.
+14. Record the source commit, migration version, Railway deployment URLs,
    validation commands, and any deferred checks in the FND-06 evidence doc.
 
 ## Current Staging URLs

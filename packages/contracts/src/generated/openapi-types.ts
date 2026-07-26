@@ -4,6 +4,3891 @@
  */
 
 export interface paths {
+    "/v1/files/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create an authorized encrypted multipart upload session */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Client-generated UUIDv7 idempotency key */
+                    "idempotency-key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** @enum {number} */
+                        aadVersion: 1;
+                        authTag: string;
+                        /** @description UUIDv7 identifier */
+                        captureAssetId: string;
+                        /** @description UUIDv7 identifier */
+                        childId: string;
+                        ciphertextBytes: number;
+                        ciphertextSha256: string;
+                        contentNonce: string;
+                        /** @enum {string} */
+                        declaredMime: "image/jpeg" | "image/png" | "image/heic" | "application/pdf";
+                        /** @description UUIDv7 identifier */
+                        deviceId: string;
+                        encodedFileKey: string;
+                        /** @description UUIDv7 identifier */
+                        fileObjectId: string;
+                        /** @description UUIDv7 identifier */
+                        uploadSessionId: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Idempotent upload session replayed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {number} */
+                            partBytes: 5242880;
+                            parts: {
+                                etag: string;
+                                partNumber: number;
+                                size: number;
+                            }[];
+                            safeErrorCode: string | null;
+                            /** @description UUIDv7 identifier */
+                            sessionId: string;
+                            /** @enum {string} */
+                            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+                        };
+                    };
+                };
+                /** @description Encrypted upload session created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {number} */
+                            partBytes: 5242880;
+                            parts: {
+                                etag: string;
+                                partNumber: number;
+                                size: number;
+                            }[];
+                            safeErrorCode: string | null;
+                            /** @description UUIDv7 identifier */
+                            sessionId: string;
+                            /** @enum {string} */
+                            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+                        };
+                    };
+                };
+                /** @description Upload request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Active enrollment and record capability required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Encrypted uploads are disabled or unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/{fileObjectId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read privacy-safe worker processing state */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    fileObjectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Current authorized file-processing state */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {string} */
+                            previewState: "not_authorized" | "pending" | "processing" | "ready" | "failed";
+                            /** @enum {string|null} */
+                            safeErrorCode: "type_mismatch" | "unsupported_format" | "malformed_structure" | "resource_limit_exceeded" | "ciphertext_integrity_mismatch" | "authenticated_decryption_failed" | "pdf_encrypted" | "pdf_active_content" | "pdf_embedded_content" | "malware_detected" | "scanner_unavailable" | "scanner_signatures_stale" | "plaintext_cleanup_retry" | "validation_retry_exhausted" | null;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @enum {string} */
+                            validationState: "pending" | "queued" | "validating" | "result_pending_cleanup" | "ready" | "rejected" | "failed";
+                        };
+                    };
+                };
+                /** @description File object not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/uploads/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read safe resumable upload state */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Current authorized upload state */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {number} */
+                            partBytes: 5242880;
+                            parts: {
+                                etag: string;
+                                partNumber: number;
+                                size: number;
+                            }[];
+                            safeErrorCode: string | null;
+                            /** @description UUIDv7 identifier */
+                            sessionId: string;
+                            /** @enum {string} */
+                            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+                        };
+                    };
+                };
+                /** @description Upload session not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Cancel an encrypted multipart upload while preserving the device source */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Upload cancelled or already cancelled */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Completed upload cannot be cancelled */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/uploads/{sessionId}/parts/{partNumber}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue a short-lived signed ciphertext part URL */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    partNumber: number;
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Short-lived signed part URL */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @enum {string} */
+                            method: "PUT";
+                            partNumber: number;
+                            /** Format: uri */
+                            url: string;
+                        };
+                    };
+                };
+                /** @description Upload session is not retryable */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/uploads/{sessionId}/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reconcile client and provider multipart facts */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        parts: {
+                            etag: string;
+                            partNumber: number;
+                            size: number;
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Reconciled upload state */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {number} */
+                            partBytes: 5242880;
+                            parts: {
+                                etag: string;
+                                partNumber: number;
+                                size: number;
+                            }[];
+                            safeErrorCode: string | null;
+                            /** @description UUIDv7 identifier */
+                            sessionId: string;
+                            /** @enum {string} */
+                            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/uploads/{sessionId}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete and verify encrypted multipart upload */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Client-generated UUIDv7 idempotency key */
+                    "idempotency-key": string;
+                };
+                path: {
+                    /** @description UUIDv7 identifier */
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        parts: {
+                            etag: string;
+                            partNumber: number;
+                            size: number;
+                        }[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Uploaded ciphertext integrity accepted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            ciphertextBytes: number;
+                            ciphertextSha256: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {string} */
+                            uploadState: "uploaded";
+                            /** @enum {string} */
+                            validationState: "pending" | "queued" | "validating" | "result_pending_cleanup" | "ready" | "rejected" | "failed";
+                        };
+                    };
+                };
+                /** @description Multipart or integrity state conflicts */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/{fileObjectId}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Authorize encrypted download to an active enrolled device */
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description UUIDv7 identifier */
+                    "x-littlearc-device-id": string;
+                };
+                path: {
+                    /** @description UUIDv7 identifier */
+                    fileObjectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Short-lived ciphertext download and transient file key */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            aadVersion: 1;
+                            authTag: string;
+                            ciphertextBytes: number;
+                            ciphertextSha256: string;
+                            contentNonce: string;
+                            /** @enum {string} */
+                            declaredMime: "image/jpeg" | "image/png" | "image/heic" | "application/pdf";
+                            encodedFileKey: string;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {string} */
+                            method: "GET";
+                            /** Format: uri */
+                            url: string;
+                        };
+                    };
+                };
+                /** @description Active enrolled device required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description File object not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/files/{fileObjectId}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Authorize an encrypted validation preview to an active enrolled device */
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description UUIDv7 identifier */
+                    "x-littlearc-device-id": string;
+                };
+                path: {
+                    /** @description UUIDv7 identifier */
+                    fileObjectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Short-lived encrypted preview download and transient derivative key */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {number} */
+                            aadVersion: 1;
+                            authTag: string;
+                            ciphertextBytes: number;
+                            ciphertextSha256: string;
+                            contentNonce: string;
+                            /** @enum {string} */
+                            declaredMime: "image/jpeg";
+                            /** @description UUIDv7 identifier */
+                            derivativeId: string;
+                            encodedFileKey: string;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            expiresAt: string;
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {string} */
+                            method: "GET";
+                            /** @enum {number} */
+                            previewPolicyVersion: 1;
+                            /** Format: uri */
+                            url: string;
+                        };
+                    };
+                };
+                /** @description Active enrolled device required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Ready encrypted preview not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/records/{recordId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the current authorized record projection */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    recordId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Current record projection */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            accessScope: "selectedHealthRecords" | "identityDocuments";
+                            /** @enum {string} */
+                            category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            /** @enum {string} */
+                            confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                            content: {
+                                details: {
+                                    documentKind: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    /** @enum {string} */
+                                    schema: "document.v1";
+                                } | {
+                                    batchLot: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    dateMeaning: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        /** @enum {string} */
+                                        value: "due" | "given";
+                                    };
+                                    /** @enum {string} */
+                                    schema: "vaccination.v1";
+                                    vaccineName: string;
+                                } | {
+                                    followUpDate: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        /** Format: date */
+                                        value: string;
+                                    };
+                                    reasonForVisit: string;
+                                    /** @enum {string} */
+                                    schema: "doctor_visit.v1";
+                                    tags: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                } | {
+                                    duration: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    endDate: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        /** Format: date */
+                                        value: string;
+                                    };
+                                    medicines: string;
+                                    /** @enum {string} */
+                                    schema: "prescription.v1";
+                                    writtenSchedule: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                };
+                                notes: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    value: string;
+                                };
+                                providerFacility: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    value: string;
+                                };
+                                /** @enum {number} */
+                                schemaVersion: 1;
+                                title: string;
+                            };
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            eventAt: string | null;
+                            provenance: {
+                                /** @enum {string} */
+                                sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                                trustedIssuer: boolean;
+                            };
+                            /** @description UUIDv7 identifier */
+                            recordId: string;
+                            /** @description Mutable entity revision */
+                            revision: number;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @description Mutable entity revision */
+                            version: number;
+                            /** @description UUIDv7 identifier */
+                            versionId: string;
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Record capability required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Record not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/records/{recordId}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read immutable authorized record version history */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    recordId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Immutable record version page */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            items: {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                confirmedAt: string | null;
+                                /** @enum {string} */
+                                confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                                content: {
+                                    details: {
+                                        documentKind: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        /** @enum {string} */
+                                        schema: "document.v1";
+                                    } | {
+                                        batchLot: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        dateMeaning: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** @enum {string} */
+                                            value: "due" | "given";
+                                        };
+                                        /** @enum {string} */
+                                        schema: "vaccination.v1";
+                                        vaccineName: string;
+                                    } | {
+                                        followUpDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        reasonForVisit: string;
+                                        /** @enum {string} */
+                                        schema: "doctor_visit.v1";
+                                        tags: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    } | {
+                                        duration: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        endDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        medicines: string;
+                                        /** @enum {string} */
+                                        schema: "prescription.v1";
+                                        writtenSchedule: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    };
+                                    notes: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    providerFacility: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    /** @enum {number} */
+                                    schemaVersion: 1;
+                                    title: string;
+                                };
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                createdAt: string;
+                                provenance: {
+                                    /** @enum {string} */
+                                    sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                                    trustedIssuer: boolean;
+                                };
+                                /** @description UUIDv7 identifier */
+                                recordId: string;
+                                /** @description UUIDv7 identifier */
+                                supersedesVersionId: string | null;
+                                /** @description Mutable entity revision */
+                                version: number;
+                                /** @description UUIDv7 identifier */
+                                versionId: string;
+                            }[];
+                            /** @description Opaque pagination or synchronization cursor */
+                            nextCursor: string | null;
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Record capability required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Record not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/emergency-cards/{cardId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the current authorized emergency-card version */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Current confirmed emergency-card projection */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            accessMode: "standard";
+                            /** @description UUIDv7 identifier */
+                            cardId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            content: {
+                                allergies: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                bloodGroup: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    value: string;
+                                };
+                                criticalNotes: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                /** Format: date */
+                                dateOfBirth: string;
+                                guardianContacts: {
+                                    name: string;
+                                    phone: string;
+                                    relationship: string;
+                                }[];
+                                pediatrician: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    name: string;
+                                    phone: string;
+                                };
+                                preferredName: string;
+                                urgentMedications: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                            };
+                            /** @description Mutable entity revision */
+                            revision: number;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @description Mutable entity revision */
+                            version: number;
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Emergency-card capability required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Emergency card not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        /** Create or append an immutable emergency-card version */
+        put: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Client-generated UUIDv7 idempotency key */
+                    "idempotency-key": string;
+                };
+                path: {
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** @description Mutable entity revision */
+                        baseRevision: number | null;
+                        /** @description UUIDv7 identifier */
+                        childId: string;
+                        content: {
+                            allergies: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "noneConfirmed";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                values: string[];
+                            };
+                            bloodGroup: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            criticalNotes: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "noneConfirmed";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                values: string[];
+                            };
+                            /** Format: date */
+                            dateOfBirth: string;
+                            guardianContacts: {
+                                name: string;
+                                phone: string;
+                                relationship: string;
+                            }[];
+                            pediatrician: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                name: string;
+                                phone: string;
+                            };
+                            preferredName: string;
+                            urgentMedications: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "noneConfirmed";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                values: string[];
+                            };
+                        };
+                        /** @description UUIDv7 identifier */
+                        mutationId: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Emergency-card version updated or replayed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            accessMode: "standard";
+                            /** @description UUIDv7 identifier */
+                            cardId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            content: {
+                                allergies: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                bloodGroup: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    value: string;
+                                };
+                                criticalNotes: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                /** Format: date */
+                                dateOfBirth: string;
+                                guardianContacts: {
+                                    name: string;
+                                    phone: string;
+                                    relationship: string;
+                                }[];
+                                pediatrician: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    name: string;
+                                    phone: string;
+                                };
+                                preferredName: string;
+                                urgentMedications: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                            };
+                            /** @description Mutable entity revision */
+                            revision: number;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @description Mutable entity revision */
+                            version: number;
+                        };
+                    };
+                };
+                /** @description Emergency card and first immutable version created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {string} */
+                            accessMode: "standard";
+                            /** @description UUIDv7 identifier */
+                            cardId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            content: {
+                                allergies: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                bloodGroup: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    value: string;
+                                };
+                                criticalNotes: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                                /** Format: date */
+                                dateOfBirth: string;
+                                guardianContacts: {
+                                    name: string;
+                                    phone: string;
+                                    relationship: string;
+                                }[];
+                                pediatrician: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    name: string;
+                                    phone: string;
+                                };
+                                preferredName: string;
+                                urgentMedications: {
+                                    /** @enum {string} */
+                                    state: "notProvided";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "noneConfirmed";
+                                } | {
+                                    /** @enum {string} */
+                                    state: "confirmed";
+                                    values: string[];
+                                };
+                            };
+                            /** @description Mutable entity revision */
+                            revision: number;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @description Mutable entity revision */
+                            version: number;
+                        };
+                    };
+                };
+                /** @description Emergency-card request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Emergency-card edit capability required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Stale revision or idempotency conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pull ordered household changes or request reconciliation */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ordered changes or a typed reset requirement */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            changes: ({
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                entity: {
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    preferredName: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                };
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "child";
+                                /** @enum {string} */
+                                operation: "upsert";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "child";
+                                /** @enum {string} */
+                                operation: "delete";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                entity: {
+                                    /** @enum {string} */
+                                    accessMode: "standard";
+                                    /** @description UUIDv7 identifier */
+                                    cardId: string;
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    content: {
+                                        allergies: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        bloodGroup: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        criticalNotes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        /** Format: date */
+                                        dateOfBirth: string;
+                                        guardianContacts: {
+                                            name: string;
+                                            phone: string;
+                                            relationship: string;
+                                        }[];
+                                        pediatrician: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            name: string;
+                                            phone: string;
+                                        };
+                                        preferredName: string;
+                                        urgentMedications: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                    };
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
+                                };
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "emergencyCard";
+                                /** @enum {string} */
+                                operation: "upsert";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "emergencyCard";
+                                /** @enum {string} */
+                                operation: "delete";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                entity: {
+                                    /** @enum {string} */
+                                    accessScope: "selectedHealthRecords" | "identityDocuments";
+                                    /** @enum {string} */
+                                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** @enum {string} */
+                                    confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                                    content: {
+                                        details: {
+                                            documentKind: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            /** @enum {string} */
+                                            schema: "document.v1";
+                                        } | {
+                                            batchLot: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            dateMeaning: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** @enum {string} */
+                                                value: "due" | "given";
+                                            };
+                                            /** @enum {string} */
+                                            schema: "vaccination.v1";
+                                            vaccineName: string;
+                                        } | {
+                                            followUpDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            reasonForVisit: string;
+                                            /** @enum {string} */
+                                            schema: "doctor_visit.v1";
+                                            tags: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        } | {
+                                            duration: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            endDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            medicines: string;
+                                            /** @enum {string} */
+                                            schema: "prescription.v1";
+                                            writtenSchedule: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        };
+                                        notes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        providerFacility: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        /** @enum {number} */
+                                        schemaVersion: 1;
+                                        title: string;
+                                    };
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    eventAt: string | null;
+                                    provenance: {
+                                        /** @enum {string} */
+                                        sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                                        trustedIssuer: boolean;
+                                    };
+                                    /** @description UUIDv7 identifier */
+                                    recordId: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
+                                    /** @description UUIDv7 identifier */
+                                    versionId: string;
+                                };
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "record";
+                                /** @enum {string} */
+                                operation: "upsert";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "record";
+                                /** @enum {string} */
+                                operation: "delete";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                entity: {
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    content: {
+                                        /** @enum {string} */
+                                        category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                                        /** @enum {string} */
+                                        dateAuthority: "recordEventAt" | "confirmedAtFallback";
+                                        title: string;
+                                    };
+                                    /** @description UUIDv7 identifier */
+                                    entryId: string;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    eventAt: string;
+                                    /** @description UUIDv7 identifier */
+                                    recordId: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description UUIDv7 identifier */
+                                    sourceVersionId: string;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                };
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "timelineEntry";
+                                /** @enum {string} */
+                                operation: "upsert";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            } | {
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                changedAt: string;
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @enum {string} */
+                                entityType: "timelineEntry";
+                                /** @enum {string} */
+                                operation: "delete";
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                sequence: number;
+                            })[];
+                            hasMore: boolean;
+                            /** @enum {string} */
+                            kind: "changes";
+                            /** @description Opaque pagination or synchronization cursor */
+                            nextCursor: string;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            serverTime: string;
+                        } | {
+                            /** @enum {string} */
+                            kind: "resetRequired";
+                            /** @enum {string} */
+                            reason: "initialSync" | "cursorExpired";
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            serverTime: string;
+                        };
+                    };
+                };
+                /** @description Cursor or page request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Active household membership required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sync/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read a captured paginated household snapshot */
+        get: {
+            parameters: {
+                query?: {
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Captured child repository snapshot page */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description Opaque pagination or synchronization cursor */
+                            capturedCursor: string;
+                            hasMore: boolean;
+                            items: ({
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                /** Format: date */
+                                dateOfBirth: string;
+                                preferredName: string;
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                updatedAt: string;
+                            } | {
+                                /** @enum {string} */
+                                accessMode: "standard";
+                                /** @description UUIDv7 identifier */
+                                cardId: string;
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                content: {
+                                    allergies: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                    bloodGroup: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    criticalNotes: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    guardianContacts: {
+                                        name: string;
+                                        phone: string;
+                                        relationship: string;
+                                    }[];
+                                    pediatrician: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        name: string;
+                                        phone: string;
+                                    };
+                                    preferredName: string;
+                                    urgentMedications: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                };
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                updatedAt: string;
+                                /** @description Mutable entity revision */
+                                version: number;
+                            } | {
+                                /** @enum {string} */
+                                accessScope: "selectedHealthRecords" | "identityDocuments";
+                                /** @enum {string} */
+                                category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                /** @enum {string} */
+                                confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                                content: {
+                                    details: {
+                                        documentKind: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        /** @enum {string} */
+                                        schema: "document.v1";
+                                    } | {
+                                        batchLot: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        dateMeaning: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** @enum {string} */
+                                            value: "due" | "given";
+                                        };
+                                        /** @enum {string} */
+                                        schema: "vaccination.v1";
+                                        vaccineName: string;
+                                    } | {
+                                        followUpDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        reasonForVisit: string;
+                                        /** @enum {string} */
+                                        schema: "doctor_visit.v1";
+                                        tags: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    } | {
+                                        duration: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        endDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        medicines: string;
+                                        /** @enum {string} */
+                                        schema: "prescription.v1";
+                                        writtenSchedule: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    };
+                                    notes: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    providerFacility: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    /** @enum {number} */
+                                    schemaVersion: 1;
+                                    title: string;
+                                };
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                eventAt: string | null;
+                                provenance: {
+                                    /** @enum {string} */
+                                    sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                                    trustedIssuer: boolean;
+                                };
+                                /** @description UUIDv7 identifier */
+                                recordId: string;
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                updatedAt: string;
+                                /** @description Mutable entity revision */
+                                version: number;
+                                /** @description UUIDv7 identifier */
+                                versionId: string;
+                            } | {
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                content: {
+                                    /** @enum {string} */
+                                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                                    /** @enum {string} */
+                                    dateAuthority: "recordEventAt" | "confirmedAtFallback";
+                                    title: string;
+                                };
+                                /** @description UUIDv7 identifier */
+                                entryId: string;
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                eventAt: string;
+                                /** @description UUIDv7 identifier */
+                                recordId: string;
+                                /** @description Mutable entity revision */
+                                revision: number;
+                                /** @description UUIDv7 identifier */
+                                sourceVersionId: string;
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                updatedAt: string;
+                            })[];
+                            /** @description Opaque pagination or synchronization cursor */
+                            nextSnapshotCursor: string | null;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            serverTime: string;
+                        };
+                    };
+                };
+                /** @description Snapshot cursor or page request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/sync/mutations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Push ordered idempotent local mutations */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        mutations: ({
+                            /** @description Mutable entity revision */
+                            baseRevision: number;
+                            /** @description UUIDv7 identifier */
+                            entityId: string;
+                            /** @enum {string} */
+                            entityType: "child";
+                            /** @description UUIDv7 identifier */
+                            idempotencyKey: string;
+                            localDependencyIds: string[];
+                            /** @description UUIDv7 identifier */
+                            mutationId: string;
+                            /** @enum {string} */
+                            operation: "update";
+                            payload: {
+                                /** Format: date */
+                                dateOfBirth: string;
+                                preferredName: string;
+                            };
+                        } | {
+                            /** @description Mutable entity revision */
+                            baseRevision: number | null;
+                            /** @description UUIDv7 identifier */
+                            entityId: string;
+                            /** @enum {string} */
+                            entityType: "emergencyCard";
+                            /** @description UUIDv7 identifier */
+                            idempotencyKey: string;
+                            localDependencyIds: string[];
+                            /** @description UUIDv7 identifier */
+                            mutationId: string;
+                            /** @enum {string} */
+                            operation: "create" | "update";
+                            payload: {
+                                /** @enum {string} */
+                                accessMode: "standard";
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                content: {
+                                    allergies: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                    bloodGroup: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    criticalNotes: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    guardianContacts: {
+                                        name: string;
+                                        phone: string;
+                                        relationship: string;
+                                    }[];
+                                    pediatrician: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        name: string;
+                                        phone: string;
+                                    };
+                                    preferredName: string;
+                                    urgentMedications: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "noneConfirmed";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        values: string[];
+                                    };
+                                };
+                            };
+                        } | {
+                            baseRevision: null;
+                            /** @description UUIDv7 identifier */
+                            entityId: string;
+                            /** @enum {string} */
+                            entityType: "record";
+                            /** @description UUIDv7 identifier */
+                            idempotencyKey: string;
+                            localDependencyIds: string[];
+                            /** @description UUIDv7 identifier */
+                            mutationId: string;
+                            /** @enum {string} */
+                            operation: "create";
+                            payload: {
+                                /** @enum {string} */
+                                category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                content: {
+                                    details: {
+                                        documentKind: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        /** @enum {string} */
+                                        schema: "document.v1";
+                                    } | {
+                                        batchLot: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        dateMeaning: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** @enum {string} */
+                                            value: "due" | "given";
+                                        };
+                                        /** @enum {string} */
+                                        schema: "vaccination.v1";
+                                        vaccineName: string;
+                                    } | {
+                                        followUpDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        reasonForVisit: string;
+                                        /** @enum {string} */
+                                        schema: "doctor_visit.v1";
+                                        tags: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    } | {
+                                        duration: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        endDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        medicines: string;
+                                        /** @enum {string} */
+                                        schema: "prescription.v1";
+                                        writtenSchedule: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    };
+                                    notes: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    providerFacility: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    /** @enum {number} */
+                                    schemaVersion: 1;
+                                    title: string;
+                                };
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                eventAt: string | null;
+                                /** @enum {string} */
+                                sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                            };
+                        } | {
+                            /** @description Mutable entity revision */
+                            baseRevision: number;
+                            /** @description UUIDv7 identifier */
+                            entityId: string;
+                            /** @enum {string} */
+                            entityType: "record";
+                            /** @description UUIDv7 identifier */
+                            idempotencyKey: string;
+                            localDependencyIds: string[];
+                            /** @description UUIDv7 identifier */
+                            mutationId: string;
+                            /** @enum {string} */
+                            operation: "update";
+                            payload: {
+                                /** @enum {string} */
+                                category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                                /** @description UUIDv7 identifier */
+                                childId: string;
+                                content: {
+                                    details: {
+                                        documentKind: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        /** @enum {string} */
+                                        schema: "document.v1";
+                                    } | {
+                                        batchLot: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        dateMeaning: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** @enum {string} */
+                                            value: "due" | "given";
+                                        };
+                                        /** @enum {string} */
+                                        schema: "vaccination.v1";
+                                        vaccineName: string;
+                                    } | {
+                                        followUpDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        reasonForVisit: string;
+                                        /** @enum {string} */
+                                        schema: "doctor_visit.v1";
+                                        tags: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    } | {
+                                        duration: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        endDate: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            /** Format: date */
+                                            value: string;
+                                        };
+                                        medicines: string;
+                                        /** @enum {string} */
+                                        schema: "prescription.v1";
+                                        writtenSchedule: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                    };
+                                    notes: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    providerFacility: {
+                                        /** @enum {string} */
+                                        state: "notProvided";
+                                    } | {
+                                        /** @enum {string} */
+                                        state: "confirmed";
+                                        value: string;
+                                    };
+                                    /** @enum {number} */
+                                    schemaVersion: 1;
+                                    title: string;
+                                };
+                                /** @description Normalized UTC ISO 8601 timestamp */
+                                eventAt: string | null;
+                                /** @enum {string} */
+                                sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                            };
+                        } | {
+                            /** @description Mutable entity revision */
+                            baseRevision: number;
+                            /** @description UUIDv7 identifier */
+                            entityId: string;
+                            /** @enum {string} */
+                            entityType: "record";
+                            /** @description UUIDv7 identifier */
+                            idempotencyKey: string;
+                            localDependencyIds: string[];
+                            /** @description UUIDv7 identifier */
+                            mutationId: string;
+                            /** @enum {string} */
+                            operation: "delete";
+                        })[];
+                    };
+                };
+            };
+            responses: {
+                /** @description Independent mutation outcomes */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            results: ({
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @description UUIDv7 identifier */
+                                mutationId: string;
+                                entity: {
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    preferredName: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                } | {
+                                    /** @enum {string} */
+                                    accessMode: "standard";
+                                    /** @description UUIDv7 identifier */
+                                    cardId: string;
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    content: {
+                                        allergies: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        bloodGroup: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        criticalNotes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        /** Format: date */
+                                        dateOfBirth: string;
+                                        guardianContacts: {
+                                            name: string;
+                                            phone: string;
+                                            relationship: string;
+                                        }[];
+                                        pediatrician: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            name: string;
+                                            phone: string;
+                                        };
+                                        preferredName: string;
+                                        urgentMedications: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                    };
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
+                                } | {
+                                    /** @enum {string} */
+                                    accessScope: "selectedHealthRecords" | "identityDocuments";
+                                    /** @enum {string} */
+                                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** @enum {string} */
+                                    confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                                    content: {
+                                        details: {
+                                            documentKind: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            /** @enum {string} */
+                                            schema: "document.v1";
+                                        } | {
+                                            batchLot: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            dateMeaning: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** @enum {string} */
+                                                value: "due" | "given";
+                                            };
+                                            /** @enum {string} */
+                                            schema: "vaccination.v1";
+                                            vaccineName: string;
+                                        } | {
+                                            followUpDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            reasonForVisit: string;
+                                            /** @enum {string} */
+                                            schema: "doctor_visit.v1";
+                                            tags: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        } | {
+                                            duration: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            endDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            medicines: string;
+                                            /** @enum {string} */
+                                            schema: "prescription.v1";
+                                            writtenSchedule: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        };
+                                        notes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        providerFacility: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        /** @enum {number} */
+                                        schemaVersion: 1;
+                                        title: string;
+                                    };
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    eventAt: string | null;
+                                    provenance: {
+                                        /** @enum {string} */
+                                        sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                                        trustedIssuer: boolean;
+                                    };
+                                    /** @description UUIDv7 identifier */
+                                    recordId: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
+                                    /** @description UUIDv7 identifier */
+                                    versionId: string;
+                                };
+                                /** @enum {string} */
+                                status: "applied" | "duplicate";
+                            } | {
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @description UUIDv7 identifier */
+                                mutationId: string;
+                                current: {
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** Format: date */
+                                    dateOfBirth: string;
+                                    preferredName: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                } | {
+                                    /** @enum {string} */
+                                    accessMode: "standard";
+                                    /** @description UUIDv7 identifier */
+                                    cardId: string;
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    content: {
+                                        allergies: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        bloodGroup: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        criticalNotes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                        /** Format: date */
+                                        dateOfBirth: string;
+                                        guardianContacts: {
+                                            name: string;
+                                            phone: string;
+                                            relationship: string;
+                                        }[];
+                                        pediatrician: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            name: string;
+                                            phone: string;
+                                        };
+                                        preferredName: string;
+                                        urgentMedications: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "noneConfirmed";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            values: string[];
+                                        };
+                                    };
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
+                                } | {
+                                    /** @enum {string} */
+                                    accessScope: "selectedHealthRecords" | "identityDocuments";
+                                    /** @enum {string} */
+                                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                                    /** @description UUIDv7 identifier */
+                                    childId: string;
+                                    /** @enum {string} */
+                                    confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                                    content: {
+                                        details: {
+                                            documentKind: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            /** @enum {string} */
+                                            schema: "document.v1";
+                                        } | {
+                                            batchLot: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            dateMeaning: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** @enum {string} */
+                                                value: "due" | "given";
+                                            };
+                                            /** @enum {string} */
+                                            schema: "vaccination.v1";
+                                            vaccineName: string;
+                                        } | {
+                                            followUpDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            reasonForVisit: string;
+                                            /** @enum {string} */
+                                            schema: "doctor_visit.v1";
+                                            tags: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        } | {
+                                            duration: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                            endDate: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                /** Format: date */
+                                                value: string;
+                                            };
+                                            medicines: string;
+                                            /** @enum {string} */
+                                            schema: "prescription.v1";
+                                            writtenSchedule: {
+                                                /** @enum {string} */
+                                                state: "notProvided";
+                                            } | {
+                                                /** @enum {string} */
+                                                state: "confirmed";
+                                                value: string;
+                                            };
+                                        };
+                                        notes: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        providerFacility: {
+                                            /** @enum {string} */
+                                            state: "notProvided";
+                                        } | {
+                                            /** @enum {string} */
+                                            state: "confirmed";
+                                            value: string;
+                                        };
+                                        /** @enum {number} */
+                                        schemaVersion: 1;
+                                        title: string;
+                                    };
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    eventAt: string | null;
+                                    provenance: {
+                                        /** @enum {string} */
+                                        sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                                        trustedIssuer: boolean;
+                                    };
+                                    /** @description UUIDv7 identifier */
+                                    recordId: string;
+                                    /** @description Mutable entity revision */
+                                    revision: number;
+                                    /** @description Normalized UTC ISO 8601 timestamp */
+                                    updatedAt: string;
+                                    /** @description Mutable entity revision */
+                                    version: number;
+                                    /** @description UUIDv7 identifier */
+                                    versionId: string;
+                                };
+                                /** @enum {string} */
+                                reason: "staleCriticalRevision";
+                                /** @enum {string} */
+                                status: "conflict";
+                            } | {
+                                /** @description UUIDv7 identifier */
+                                entityId: string;
+                                /** @description UUIDv7 identifier */
+                                mutationId: string;
+                                /** @enum {string} */
+                                reason: "authorizationDenied" | "dependencyFailed" | "dependencyMissing" | "idempotencyMismatch" | "tombstoneWins" | "unsupportedMutation" | "validationFailed";
+                                /** @enum {string} */
+                                status: "rejected";
+                            })[];
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            serverTime: string;
+                        };
+                    };
+                };
+                /** @description Mutation batch is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/devices/enrollment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enroll the current authenticated installation */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        appVersion: string;
+                        /** @description UUIDv7 identifier */
+                        deviceId: string;
+                        localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+                        /** @enum {string} */
+                        platform: "android" | "ios";
+                    };
+                };
+            };
+            responses: {
+                /** @description Active device enrollment replayed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            deviceId: string;
+                            /** @enum {string} */
+                            enrollmentStatus: "active";
+                            /** @description UUIDv7 identifier */
+                            householdId: string;
+                            localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+                            replayed: boolean;
+                        };
+                    };
+                };
+                /** @description Device installation enrolled */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            deviceId: string;
+                            /** @enum {string} */
+                            enrollmentStatus: "active";
+                            /** @description UUIDv7 identifier */
+                            householdId: string;
+                            localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+                            replayed: boolean;
+                        };
+                    };
+                };
+                /** @description Enrollment request is invalid */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Active household membership required */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Device identifier is unavailable or revoked */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1": {
         parameters: {
             query?: never;
@@ -48,6 +3933,187 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/households/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create the first synthetic owner household and child atomically */
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description Client-generated UUIDv7 idempotency key */
+                    "idempotency-key": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        adultVerificationAssertion: string;
+                        child: {
+                            /** Format: date */
+                            dateOfBirth: string;
+                            preferredName: string;
+                        };
+                        /** @enum {string} */
+                        childDataConsentVersion: "child-data-processing-v1";
+                        countryCode: string;
+                        parent: {
+                            displayName: string;
+                            relationship: string;
+                        };
+                        /** @enum {string} */
+                        parentNoticeVersion: "parent-notice-v1";
+                        timeZone: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Exact idempotent replay */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            childDataConsentId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            /** @description UUIDv7 identifier */
+                            householdId: string;
+                            /** @description UUIDv7 identifier */
+                            membershipId: string;
+                            /** @description UUIDv7 identifier */
+                            parentNoticeConsentId: string;
+                            /** @description UUIDv7 identifier */
+                            parentProfileId: string;
+                            replayed: boolean;
+                        };
+                    };
+                };
+                /** @description Household onboarding aggregate created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            childDataConsentId: string;
+                            /** @description UUIDv7 identifier */
+                            childId: string;
+                            /** @description UUIDv7 identifier */
+                            householdId: string;
+                            /** @description UUIDv7 identifier */
+                            membershipId: string;
+                            /** @description UUIDv7 identifier */
+                            parentNoticeConsentId: string;
+                            /** @description UUIDv7 identifier */
+                            parentProfileId: string;
+                            replayed: boolean;
+                        };
+                    };
+                };
+                /** @description Request or policy validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Consumer session required */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+                /** @description Idempotency replay or existing-household conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -181,7 +4247,7 @@ export interface components {
             /** @description UUIDv7 identifier */
             actorId: string;
             /** @enum {string} */
-            action: "household_created" | "child_created" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "staff_action_recorded";
+            action: "household_created" | "child_created" | "child_updated" | "consent_recorded" | "record_created" | "record_updated" | "record_deleted" | "membership_changed" | "device_enrolled" | "emergency_card_created" | "emergency_card_updated" | "file_upload_created" | "file_upload_completed" | "file_upload_cancelled" | "file_download_authorized" | "file_preview_download_authorized" | "staff_action_recorded";
             targetType: string;
             /** @description UUIDv7 identifier */
             targetId: string;
@@ -212,17 +4278,14 @@ export interface components {
             sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
             /** @enum {string} */
             confirmationState: "draft" | "suggested" | "confirmed" | "archived";
-            accessPolicy: {
-                /** @enum {string} */
-                role: "owner" | "caregiver" | "staff";
-                capabilities: ("viewEmergencyCard" | "viewSelectedHealthRecords" | "viewIdentityDocuments" | "addRecords" | "editConfirmedRecords" | "manageTasks" | "inviteMembers" | "exportHousehold" | "deleteHousehold" | "manageEntitlement" | "viewWorkflowStatus")[];
-            };
+            /** @enum {string} */
+            accessScope: "selectedHealthRecords" | "identityDocuments";
         };
         SyncMutation: {
             /** @description UUIDv7 identifier */
             mutationId: string;
             /** @enum {string} */
-            entityType: "child" | "consent" | "record" | "emergencyCard";
+            entityType: "child" | "consent" | "record" | "emergencyCard" | "timelineEntry";
             /** @description UUIDv7 identifier */
             entityId: string;
             /** @enum {string} */
@@ -230,6 +4293,2621 @@ export interface components {
             /** @description Mutable entity revision */
             baseRevision: number | null;
             localDependencyIds: string[];
+        };
+        ChildProfileProjection: {
+            /** @description UUIDv7 identifier */
+            childId: string;
+            /** Format: date */
+            dateOfBirth: string;
+            preferredName: string;
+            /** @description Mutable entity revision */
+            revision: number;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            updatedAt: string;
+        };
+        ChildProfileSyncMutation: {
+            /** @description Mutable entity revision */
+            baseRevision: number;
+            /** @description UUIDv7 identifier */
+            entityId: string;
+            /** @enum {string} */
+            entityType: "child";
+            /** @description UUIDv7 identifier */
+            idempotencyKey: string;
+            localDependencyIds: string[];
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+            /** @enum {string} */
+            operation: "update";
+            payload: {
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+            };
+        };
+        SyncMutationResult: {
+            /** @description UUIDv7 identifier */
+            entityId: string;
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+            entity: {
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+            } | {
+                /** @enum {string} */
+                accessMode: "standard";
+                /** @description UUIDv7 identifier */
+                cardId: string;
+                /** @description UUIDv7 identifier */
+                childId: string;
+                content: {
+                    allergies: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    bloodGroup: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    criticalNotes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    /** Format: date */
+                    dateOfBirth: string;
+                    guardianContacts: {
+                        name: string;
+                        phone: string;
+                        relationship: string;
+                    }[];
+                    pediatrician: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        name: string;
+                        phone: string;
+                    };
+                    preferredName: string;
+                    urgentMedications: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                };
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
+            } | {
+                /** @enum {string} */
+                accessScope: "selectedHealthRecords" | "identityDocuments";
+                /** @enum {string} */
+                category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** @enum {string} */
+                confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                content: {
+                    details: {
+                        documentKind: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {string} */
+                        schema: "document.v1";
+                    } | {
+                        batchLot: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        dateMeaning: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** @enum {string} */
+                            value: "due" | "given";
+                        };
+                        /** @enum {string} */
+                        schema: "vaccination.v1";
+                        vaccineName: string;
+                    } | {
+                        followUpDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        reasonForVisit: string;
+                        /** @enum {string} */
+                        schema: "doctor_visit.v1";
+                        tags: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    } | {
+                        duration: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        endDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        medicines: string;
+                        /** @enum {string} */
+                        schema: "prescription.v1";
+                        writtenSchedule: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    };
+                    notes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    providerFacility: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    /** @enum {number} */
+                    schemaVersion: 1;
+                    title: string;
+                };
+                /** @description Normalized UTC ISO 8601 timestamp */
+                eventAt: string | null;
+                provenance: {
+                    /** @enum {string} */
+                    sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                    trustedIssuer: boolean;
+                };
+                /** @description UUIDv7 identifier */
+                recordId: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
+                /** @description UUIDv7 identifier */
+                versionId: string;
+            };
+            /** @enum {string} */
+            status: "applied" | "duplicate";
+        } | {
+            /** @description UUIDv7 identifier */
+            entityId: string;
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+            current: {
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+            } | {
+                /** @enum {string} */
+                accessMode: "standard";
+                /** @description UUIDv7 identifier */
+                cardId: string;
+                /** @description UUIDv7 identifier */
+                childId: string;
+                content: {
+                    allergies: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    bloodGroup: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    criticalNotes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    /** Format: date */
+                    dateOfBirth: string;
+                    guardianContacts: {
+                        name: string;
+                        phone: string;
+                        relationship: string;
+                    }[];
+                    pediatrician: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        name: string;
+                        phone: string;
+                    };
+                    preferredName: string;
+                    urgentMedications: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                };
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
+            } | {
+                /** @enum {string} */
+                accessScope: "selectedHealthRecords" | "identityDocuments";
+                /** @enum {string} */
+                category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** @enum {string} */
+                confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                content: {
+                    details: {
+                        documentKind: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {string} */
+                        schema: "document.v1";
+                    } | {
+                        batchLot: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        dateMeaning: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** @enum {string} */
+                            value: "due" | "given";
+                        };
+                        /** @enum {string} */
+                        schema: "vaccination.v1";
+                        vaccineName: string;
+                    } | {
+                        followUpDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        reasonForVisit: string;
+                        /** @enum {string} */
+                        schema: "doctor_visit.v1";
+                        tags: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    } | {
+                        duration: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        endDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        medicines: string;
+                        /** @enum {string} */
+                        schema: "prescription.v1";
+                        writtenSchedule: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    };
+                    notes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    providerFacility: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    /** @enum {number} */
+                    schemaVersion: 1;
+                    title: string;
+                };
+                /** @description Normalized UTC ISO 8601 timestamp */
+                eventAt: string | null;
+                provenance: {
+                    /** @enum {string} */
+                    sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                    trustedIssuer: boolean;
+                };
+                /** @description UUIDv7 identifier */
+                recordId: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
+                /** @description UUIDv7 identifier */
+                versionId: string;
+            };
+            /** @enum {string} */
+            reason: "staleCriticalRevision";
+            /** @enum {string} */
+            status: "conflict";
+        } | {
+            /** @description UUIDv7 identifier */
+            entityId: string;
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+            /** @enum {string} */
+            reason: "authorizationDenied" | "dependencyFailed" | "dependencyMissing" | "idempotencyMismatch" | "tombstoneWins" | "unsupportedMutation" | "validationFailed";
+            /** @enum {string} */
+            status: "rejected";
+        };
+        SyncPullResponse: {
+            changes: ({
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                entity: {
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** Format: date */
+                    dateOfBirth: string;
+                    preferredName: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                };
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "child";
+                /** @enum {string} */
+                operation: "upsert";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "child";
+                /** @enum {string} */
+                operation: "delete";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                entity: {
+                    /** @enum {string} */
+                    accessMode: "standard";
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        allergies: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        bloodGroup: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        criticalNotes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        /** Format: date */
+                        dateOfBirth: string;
+                        guardianContacts: {
+                            name: string;
+                            phone: string;
+                            relationship: string;
+                        }[];
+                        pediatrician: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            name: string;
+                            phone: string;
+                        };
+                        preferredName: string;
+                        urgentMedications: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                    };
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
+                };
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "emergencyCard";
+                /** @enum {string} */
+                operation: "upsert";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "emergencyCard";
+                /** @enum {string} */
+                operation: "delete";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                entity: {
+                    /** @enum {string} */
+                    accessScope: "selectedHealthRecords" | "identityDocuments";
+                    /** @enum {string} */
+                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** @enum {string} */
+                    confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                    content: {
+                        details: {
+                            documentKind: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            /** @enum {string} */
+                            schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        };
+                        notes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        providerFacility: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {number} */
+                        schemaVersion: 1;
+                        title: string;
+                    };
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    eventAt: string | null;
+                    provenance: {
+                        /** @enum {string} */
+                        sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                        trustedIssuer: boolean;
+                    };
+                    /** @description UUIDv7 identifier */
+                    recordId: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
+                    /** @description UUIDv7 identifier */
+                    versionId: string;
+                };
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "record";
+                /** @enum {string} */
+                operation: "upsert";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "record";
+                /** @enum {string} */
+                operation: "delete";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                entity: {
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        /** @enum {string} */
+                        category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                        /** @enum {string} */
+                        dateAuthority: "recordEventAt" | "confirmedAtFallback";
+                        title: string;
+                    };
+                    /** @description UUIDv7 identifier */
+                    entryId: string;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    eventAt: string;
+                    /** @description UUIDv7 identifier */
+                    recordId: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description UUIDv7 identifier */
+                    sourceVersionId: string;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                };
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "timelineEntry";
+                /** @enum {string} */
+                operation: "upsert";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            } | {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                changedAt: string;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "timelineEntry";
+                /** @enum {string} */
+                operation: "delete";
+                /** @description Mutable entity revision */
+                revision: number;
+                sequence: number;
+            })[];
+            hasMore: boolean;
+            /** @enum {string} */
+            kind: "changes";
+            /** @description Opaque pagination or synchronization cursor */
+            nextCursor: string;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            serverTime: string;
+        } | {
+            /** @enum {string} */
+            kind: "resetRequired";
+            /** @enum {string} */
+            reason: "initialSync" | "cursorExpired";
+            /** @description Normalized UTC ISO 8601 timestamp */
+            serverTime: string;
+        };
+        SyncSnapshotPage: {
+            /** @description Opaque pagination or synchronization cursor */
+            capturedCursor: string;
+            hasMore: boolean;
+            items: ({
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+            } | {
+                /** @enum {string} */
+                accessMode: "standard";
+                /** @description UUIDv7 identifier */
+                cardId: string;
+                /** @description UUIDv7 identifier */
+                childId: string;
+                content: {
+                    allergies: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    bloodGroup: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    criticalNotes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                    /** Format: date */
+                    dateOfBirth: string;
+                    guardianContacts: {
+                        name: string;
+                        phone: string;
+                        relationship: string;
+                    }[];
+                    pediatrician: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        name: string;
+                        phone: string;
+                    };
+                    preferredName: string;
+                    urgentMedications: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "noneConfirmed";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        values: string[];
+                    };
+                };
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
+            } | {
+                /** @enum {string} */
+                accessScope: "selectedHealthRecords" | "identityDocuments";
+                /** @enum {string} */
+                category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                /** @description UUIDv7 identifier */
+                childId: string;
+                /** @enum {string} */
+                confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                content: {
+                    details: {
+                        documentKind: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {string} */
+                        schema: "document.v1";
+                    } | {
+                        batchLot: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        dateMeaning: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** @enum {string} */
+                            value: "due" | "given";
+                        };
+                        /** @enum {string} */
+                        schema: "vaccination.v1";
+                        vaccineName: string;
+                    } | {
+                        followUpDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        reasonForVisit: string;
+                        /** @enum {string} */
+                        schema: "doctor_visit.v1";
+                        tags: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    } | {
+                        duration: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        endDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        medicines: string;
+                        /** @enum {string} */
+                        schema: "prescription.v1";
+                        writtenSchedule: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    };
+                    notes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    providerFacility: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    /** @enum {number} */
+                    schemaVersion: 1;
+                    title: string;
+                };
+                /** @description Normalized UTC ISO 8601 timestamp */
+                eventAt: string | null;
+                provenance: {
+                    /** @enum {string} */
+                    sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                    trustedIssuer: boolean;
+                };
+                /** @description UUIDv7 identifier */
+                recordId: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+                /** @description Mutable entity revision */
+                version: number;
+                /** @description UUIDv7 identifier */
+                versionId: string;
+            } | {
+                /** @description UUIDv7 identifier */
+                childId: string;
+                content: {
+                    /** @enum {string} */
+                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                    /** @enum {string} */
+                    dateAuthority: "recordEventAt" | "confirmedAtFallback";
+                    title: string;
+                };
+                /** @description UUIDv7 identifier */
+                entryId: string;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                eventAt: string;
+                /** @description UUIDv7 identifier */
+                recordId: string;
+                /** @description Mutable entity revision */
+                revision: number;
+                /** @description UUIDv7 identifier */
+                sourceVersionId: string;
+                /** @description Normalized UTC ISO 8601 timestamp */
+                updatedAt: string;
+            })[];
+            /** @description Opaque pagination or synchronization cursor */
+            nextSnapshotCursor: string | null;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            serverTime: string;
+        };
+        SyncMutationPushRequest: {
+            mutations: ({
+                /** @description Mutable entity revision */
+                baseRevision: number;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "child";
+                /** @description UUIDv7 identifier */
+                idempotencyKey: string;
+                localDependencyIds: string[];
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                operation: "update";
+                payload: {
+                    /** Format: date */
+                    dateOfBirth: string;
+                    preferredName: string;
+                };
+            } | {
+                /** @description Mutable entity revision */
+                baseRevision: number | null;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "emergencyCard";
+                /** @description UUIDv7 identifier */
+                idempotencyKey: string;
+                localDependencyIds: string[];
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                operation: "create" | "update";
+                payload: {
+                    /** @enum {string} */
+                    accessMode: "standard";
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        allergies: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        bloodGroup: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        criticalNotes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        /** Format: date */
+                        dateOfBirth: string;
+                        guardianContacts: {
+                            name: string;
+                            phone: string;
+                            relationship: string;
+                        }[];
+                        pediatrician: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            name: string;
+                            phone: string;
+                        };
+                        preferredName: string;
+                        urgentMedications: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                    };
+                };
+            } | {
+                baseRevision: null;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "record";
+                /** @description UUIDv7 identifier */
+                idempotencyKey: string;
+                localDependencyIds: string[];
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                operation: "create";
+                payload: {
+                    /** @enum {string} */
+                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        details: {
+                            documentKind: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            /** @enum {string} */
+                            schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        };
+                        notes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        providerFacility: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {number} */
+                        schemaVersion: 1;
+                        title: string;
+                    };
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    eventAt: string | null;
+                    /** @enum {string} */
+                    sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                };
+            } | {
+                /** @description Mutable entity revision */
+                baseRevision: number;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "record";
+                /** @description UUIDv7 identifier */
+                idempotencyKey: string;
+                localDependencyIds: string[];
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                operation: "update";
+                payload: {
+                    /** @enum {string} */
+                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        details: {
+                            documentKind: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            /** @enum {string} */
+                            schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        };
+                        notes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        providerFacility: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {number} */
+                        schemaVersion: 1;
+                        title: string;
+                    };
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    eventAt: string | null;
+                    /** @enum {string} */
+                    sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                };
+            } | {
+                /** @description Mutable entity revision */
+                baseRevision: number;
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @enum {string} */
+                entityType: "record";
+                /** @description UUIDv7 identifier */
+                idempotencyKey: string;
+                localDependencyIds: string[];
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                operation: "delete";
+            })[];
+        };
+        SyncMutationPushResponse: {
+            results: ({
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                entity: {
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** Format: date */
+                    dateOfBirth: string;
+                    preferredName: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                } | {
+                    /** @enum {string} */
+                    accessMode: "standard";
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        allergies: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        bloodGroup: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        criticalNotes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        /** Format: date */
+                        dateOfBirth: string;
+                        guardianContacts: {
+                            name: string;
+                            phone: string;
+                            relationship: string;
+                        }[];
+                        pediatrician: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            name: string;
+                            phone: string;
+                        };
+                        preferredName: string;
+                        urgentMedications: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                    };
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
+                } | {
+                    /** @enum {string} */
+                    accessScope: "selectedHealthRecords" | "identityDocuments";
+                    /** @enum {string} */
+                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** @enum {string} */
+                    confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                    content: {
+                        details: {
+                            documentKind: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            /** @enum {string} */
+                            schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        };
+                        notes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        providerFacility: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {number} */
+                        schemaVersion: 1;
+                        title: string;
+                    };
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    eventAt: string | null;
+                    provenance: {
+                        /** @enum {string} */
+                        sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                        trustedIssuer: boolean;
+                    };
+                    /** @description UUIDv7 identifier */
+                    recordId: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
+                    /** @description UUIDv7 identifier */
+                    versionId: string;
+                };
+                /** @enum {string} */
+                status: "applied" | "duplicate";
+            } | {
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                current: {
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** Format: date */
+                    dateOfBirth: string;
+                    preferredName: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                } | {
+                    /** @enum {string} */
+                    accessMode: "standard";
+                    /** @description UUIDv7 identifier */
+                    cardId: string;
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    content: {
+                        allergies: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        bloodGroup: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        criticalNotes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                        /** Format: date */
+                        dateOfBirth: string;
+                        guardianContacts: {
+                            name: string;
+                            phone: string;
+                            relationship: string;
+                        }[];
+                        pediatrician: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            name: string;
+                            phone: string;
+                        };
+                        preferredName: string;
+                        urgentMedications: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "noneConfirmed";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            values: string[];
+                        };
+                    };
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
+                } | {
+                    /** @enum {string} */
+                    accessScope: "selectedHealthRecords" | "identityDocuments";
+                    /** @enum {string} */
+                    category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+                    /** @description UUIDv7 identifier */
+                    childId: string;
+                    /** @enum {string} */
+                    confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                    content: {
+                        details: {
+                            documentKind: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            /** @enum {string} */
+                            schema: "document.v1";
+                        } | {
+                            batchLot: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            dateMeaning: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** @enum {string} */
+                                value: "due" | "given";
+                            };
+                            /** @enum {string} */
+                            schema: "vaccination.v1";
+                            vaccineName: string;
+                        } | {
+                            followUpDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            reasonForVisit: string;
+                            /** @enum {string} */
+                            schema: "doctor_visit.v1";
+                            tags: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        } | {
+                            duration: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                            endDate: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                /** Format: date */
+                                value: string;
+                            };
+                            medicines: string;
+                            /** @enum {string} */
+                            schema: "prescription.v1";
+                            writtenSchedule: {
+                                /** @enum {string} */
+                                state: "notProvided";
+                            } | {
+                                /** @enum {string} */
+                                state: "confirmed";
+                                value: string;
+                            };
+                        };
+                        notes: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        providerFacility: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {number} */
+                        schemaVersion: 1;
+                        title: string;
+                    };
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    eventAt: string | null;
+                    provenance: {
+                        /** @enum {string} */
+                        sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                        trustedIssuer: boolean;
+                    };
+                    /** @description UUIDv7 identifier */
+                    recordId: string;
+                    /** @description Mutable entity revision */
+                    revision: number;
+                    /** @description Normalized UTC ISO 8601 timestamp */
+                    updatedAt: string;
+                    /** @description Mutable entity revision */
+                    version: number;
+                    /** @description UUIDv7 identifier */
+                    versionId: string;
+                };
+                /** @enum {string} */
+                reason: "staleCriticalRevision";
+                /** @enum {string} */
+                status: "conflict";
+            } | {
+                /** @description UUIDv7 identifier */
+                entityId: string;
+                /** @description UUIDv7 identifier */
+                mutationId: string;
+                /** @enum {string} */
+                reason: "authorizationDenied" | "dependencyFailed" | "dependencyMissing" | "idempotencyMismatch" | "tombstoneWins" | "unsupportedMutation" | "validationFailed";
+                /** @enum {string} */
+                status: "rejected";
+            })[];
+            /** @description Normalized UTC ISO 8601 timestamp */
+            serverTime: string;
+        };
+        OwnerOnboardingRequest: {
+            adultVerificationAssertion: string;
+            child: {
+                /** Format: date */
+                dateOfBirth: string;
+                preferredName: string;
+            };
+            /** @enum {string} */
+            childDataConsentVersion: "child-data-processing-v1";
+            countryCode: string;
+            parent: {
+                displayName: string;
+                relationship: string;
+            };
+            /** @enum {string} */
+            parentNoticeVersion: "parent-notice-v1";
+            timeZone: string;
+        };
+        OwnerOnboardingResponse: {
+            /** @description UUIDv7 identifier */
+            childDataConsentId: string;
+            /** @description UUIDv7 identifier */
+            childId: string;
+            /** @description UUIDv7 identifier */
+            householdId: string;
+            /** @description UUIDv7 identifier */
+            membershipId: string;
+            /** @description UUIDv7 identifier */
+            parentNoticeConsentId: string;
+            /** @description UUIDv7 identifier */
+            parentProfileId: string;
+            replayed: boolean;
+        };
+        DeviceEnrollmentRequest: {
+            appVersion: string;
+            /** @description UUIDv7 identifier */
+            deviceId: string;
+            localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+            /** @enum {string} */
+            platform: "android" | "ios";
+        };
+        DeviceEnrollmentResponse: {
+            /** @description UUIDv7 identifier */
+            deviceId: string;
+            /** @enum {string} */
+            enrollmentStatus: "active";
+            /** @description UUIDv7 identifier */
+            householdId: string;
+            localSchemaVersion: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+            replayed: boolean;
+        };
+        EmergencyCardProjection: {
+            /** @enum {string} */
+            accessMode: "standard";
+            /** @description UUIDv7 identifier */
+            cardId: string;
+            /** @description UUIDv7 identifier */
+            childId: string;
+            content: {
+                allergies: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+                bloodGroup: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    value: string;
+                };
+                criticalNotes: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+                /** Format: date */
+                dateOfBirth: string;
+                guardianContacts: {
+                    name: string;
+                    phone: string;
+                    relationship: string;
+                }[];
+                pediatrician: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    name: string;
+                    phone: string;
+                };
+                preferredName: string;
+                urgentMedications: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+            };
+            /** @description Mutable entity revision */
+            revision: number;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            updatedAt: string;
+            /** @description Mutable entity revision */
+            version: number;
+        };
+        EmergencyCardPutRequest: {
+            /** @description Mutable entity revision */
+            baseRevision: number | null;
+            /** @description UUIDv7 identifier */
+            childId: string;
+            content: {
+                allergies: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+                bloodGroup: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    value: string;
+                };
+                criticalNotes: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+                /** Format: date */
+                dateOfBirth: string;
+                guardianContacts: {
+                    name: string;
+                    phone: string;
+                    relationship: string;
+                }[];
+                pediatrician: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    name: string;
+                    phone: string;
+                };
+                preferredName: string;
+                urgentMedications: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "noneConfirmed";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    values: string[];
+                };
+            };
+            /** @description UUIDv7 identifier */
+            mutationId: string;
+        };
+        RecordProjection: {
+            /** @enum {string} */
+            accessScope: "selectedHealthRecords" | "identityDocuments";
+            /** @enum {string} */
+            category: "emergency" | "identity" | "vaccination" | "doctor_visit" | "prescription" | "document" | "memory";
+            /** @description UUIDv7 identifier */
+            childId: string;
+            /** @enum {string} */
+            confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+            content: {
+                details: {
+                    documentKind: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    /** @enum {string} */
+                    schema: "document.v1";
+                } | {
+                    batchLot: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    dateMeaning: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** @enum {string} */
+                        value: "due" | "given";
+                    };
+                    /** @enum {string} */
+                    schema: "vaccination.v1";
+                    vaccineName: string;
+                } | {
+                    followUpDate: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** Format: date */
+                        value: string;
+                    };
+                    reasonForVisit: string;
+                    /** @enum {string} */
+                    schema: "doctor_visit.v1";
+                    tags: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                } | {
+                    duration: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    endDate: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** Format: date */
+                        value: string;
+                    };
+                    medicines: string;
+                    /** @enum {string} */
+                    schema: "prescription.v1";
+                    writtenSchedule: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                };
+                notes: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    value: string;
+                };
+                providerFacility: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    value: string;
+                };
+                /** @enum {number} */
+                schemaVersion: 1;
+                title: string;
+            };
+            /** @description Normalized UTC ISO 8601 timestamp */
+            eventAt: string | null;
+            provenance: {
+                /** @enum {string} */
+                sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                trustedIssuer: boolean;
+            };
+            /** @description UUIDv7 identifier */
+            recordId: string;
+            /** @description Mutable entity revision */
+            revision: number;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            updatedAt: string;
+            /** @description Mutable entity revision */
+            version: number;
+            /** @description UUIDv7 identifier */
+            versionId: string;
+        };
+        RecordVersionProjection: {
+            /** @description Normalized UTC ISO 8601 timestamp */
+            confirmedAt: string | null;
+            /** @enum {string} */
+            confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+            content: {
+                details: {
+                    documentKind: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    /** @enum {string} */
+                    schema: "document.v1";
+                } | {
+                    batchLot: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    dateMeaning: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** @enum {string} */
+                        value: "due" | "given";
+                    };
+                    /** @enum {string} */
+                    schema: "vaccination.v1";
+                    vaccineName: string;
+                } | {
+                    followUpDate: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** Format: date */
+                        value: string;
+                    };
+                    reasonForVisit: string;
+                    /** @enum {string} */
+                    schema: "doctor_visit.v1";
+                    tags: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                } | {
+                    duration: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    endDate: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        /** Format: date */
+                        value: string;
+                    };
+                    medicines: string;
+                    /** @enum {string} */
+                    schema: "prescription.v1";
+                    writtenSchedule: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                };
+                notes: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    value: string;
+                };
+                providerFacility: {
+                    /** @enum {string} */
+                    state: "notProvided";
+                } | {
+                    /** @enum {string} */
+                    state: "confirmed";
+                    value: string;
+                };
+                /** @enum {number} */
+                schemaVersion: 1;
+                title: string;
+            };
+            /** @description Normalized UTC ISO 8601 timestamp */
+            createdAt: string;
+            provenance: {
+                /** @enum {string} */
+                sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                trustedIssuer: boolean;
+            };
+            /** @description UUIDv7 identifier */
+            recordId: string;
+            /** @description UUIDv7 identifier */
+            supersedesVersionId: string | null;
+            /** @description Mutable entity revision */
+            version: number;
+            /** @description UUIDv7 identifier */
+            versionId: string;
+        };
+        RecordVersionPage: {
+            items: {
+                /** @description Normalized UTC ISO 8601 timestamp */
+                confirmedAt: string | null;
+                /** @enum {string} */
+                confirmationState: "draft" | "suggested" | "confirmed" | "archived";
+                content: {
+                    details: {
+                        documentKind: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        /** @enum {string} */
+                        schema: "document.v1";
+                    } | {
+                        batchLot: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        dateMeaning: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** @enum {string} */
+                            value: "due" | "given";
+                        };
+                        /** @enum {string} */
+                        schema: "vaccination.v1";
+                        vaccineName: string;
+                    } | {
+                        followUpDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        reasonForVisit: string;
+                        /** @enum {string} */
+                        schema: "doctor_visit.v1";
+                        tags: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    } | {
+                        duration: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                        endDate: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            /** Format: date */
+                            value: string;
+                        };
+                        medicines: string;
+                        /** @enum {string} */
+                        schema: "prescription.v1";
+                        writtenSchedule: {
+                            /** @enum {string} */
+                            state: "notProvided";
+                        } | {
+                            /** @enum {string} */
+                            state: "confirmed";
+                            value: string;
+                        };
+                    };
+                    notes: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    providerFacility: {
+                        /** @enum {string} */
+                        state: "notProvided";
+                    } | {
+                        /** @enum {string} */
+                        state: "confirmed";
+                        value: string;
+                    };
+                    /** @enum {number} */
+                    schemaVersion: 1;
+                    title: string;
+                };
+                /** @description Normalized UTC ISO 8601 timestamp */
+                createdAt: string;
+                provenance: {
+                    /** @enum {string} */
+                    sourceType: "manual" | "imported" | "ocr_assisted" | "ai_assisted" | "provider_issued" | "government_imported";
+                    trustedIssuer: boolean;
+                };
+                /** @description UUIDv7 identifier */
+                recordId: string;
+                /** @description UUIDv7 identifier */
+                supersedesVersionId: string | null;
+                /** @description Mutable entity revision */
+                version: number;
+                /** @description UUIDv7 identifier */
+                versionId: string;
+            }[];
+            /** @description Opaque pagination or synchronization cursor */
+            nextCursor: string | null;
+        };
+        CreateUploadSessionRequest: {
+            /** @enum {number} */
+            aadVersion: 1;
+            authTag: string;
+            /** @description UUIDv7 identifier */
+            captureAssetId: string;
+            /** @description UUIDv7 identifier */
+            childId: string;
+            ciphertextBytes: number;
+            ciphertextSha256: string;
+            contentNonce: string;
+            /** @enum {string} */
+            declaredMime: "image/jpeg" | "image/png" | "image/heic" | "application/pdf";
+            /** @description UUIDv7 identifier */
+            deviceId: string;
+            encodedFileKey: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @description UUIDv7 identifier */
+            uploadSessionId: string;
+        };
+        UploadSession: {
+            /** @description Normalized UTC ISO 8601 timestamp */
+            expiresAt: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {number} */
+            partBytes: 5242880;
+            parts: {
+                etag: string;
+                partNumber: number;
+                size: number;
+            }[];
+            safeErrorCode: string | null;
+            /** @description UUIDv7 identifier */
+            sessionId: string;
+            /** @enum {string} */
+            state: "created" | "uploading" | "completing" | "uploaded" | "cancelled" | "expired" | "failed";
+        };
+        SignedUploadPart: {
+            /** @description Normalized UTC ISO 8601 timestamp */
+            expiresAt: string;
+            /** @enum {string} */
+            method: "PUT";
+            partNumber: number;
+            /** Format: uri */
+            url: string;
+        };
+        ReconcileUploadPartsRequest: {
+            parts: {
+                etag: string;
+                partNumber: number;
+                size: number;
+            }[];
+        };
+        CompleteUploadRequest: {
+            parts: {
+                etag: string;
+                partNumber: number;
+                size: number;
+            }[];
+        };
+        FileObjectProjection: {
+            ciphertextBytes: number;
+            ciphertextSha256: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {string} */
+            uploadState: "uploaded";
+            /** @enum {string} */
+            validationState: "pending" | "queued" | "validating" | "result_pending_cleanup" | "ready" | "rejected" | "failed";
+        };
+        FileDownloadGrant: {
+            /** @enum {number} */
+            aadVersion: 1;
+            authTag: string;
+            ciphertextBytes: number;
+            ciphertextSha256: string;
+            contentNonce: string;
+            /** @enum {string} */
+            declaredMime: "image/jpeg" | "image/png" | "image/heic" | "application/pdf";
+            encodedFileKey: string;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            expiresAt: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {string} */
+            method: "GET";
+            /** Format: uri */
+            url: string;
+        };
+        FilePreviewDownloadGrant: {
+            /** @enum {number} */
+            aadVersion: 1;
+            authTag: string;
+            ciphertextBytes: number;
+            ciphertextSha256: string;
+            contentNonce: string;
+            /** @enum {string} */
+            declaredMime: "image/jpeg";
+            /** @description UUIDv7 identifier */
+            derivativeId: string;
+            encodedFileKey: string;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            expiresAt: string;
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {string} */
+            method: "GET";
+            /** @enum {number} */
+            previewPolicyVersion: 1;
+            /** Format: uri */
+            url: string;
+        };
+        FileProcessingStatus: {
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {string} */
+            previewState: "not_authorized" | "pending" | "processing" | "ready" | "failed";
+            /** @enum {string|null} */
+            safeErrorCode: "type_mismatch" | "unsupported_format" | "malformed_structure" | "resource_limit_exceeded" | "ciphertext_integrity_mismatch" | "authenticated_decryption_failed" | "pdf_encrypted" | "pdf_active_content" | "pdf_embedded_content" | "malware_detected" | "scanner_unavailable" | "scanner_signatures_stale" | "plaintext_cleanup_retry" | "validation_retry_exhausted" | null;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            updatedAt: string;
+            /** @enum {string} */
+            validationState: "pending" | "queued" | "validating" | "result_pending_cleanup" | "ready" | "rejected" | "failed";
         };
     };
     responses: never;

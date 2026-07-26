@@ -11,5 +11,5 @@ if (violations.length > 0) {
   }
   process.exitCode = 1;
 } else {
-  console.log("Railway staging skeleton verified: 3 services, 1 PostgreSQL, 2 buckets");
+  console.log("Railway staging skeleton verified: 4 services, 1 PostgreSQL, 2 buckets");
 }

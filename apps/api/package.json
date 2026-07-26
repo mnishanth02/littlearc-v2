@@ -11,14 +11,32 @@
     "dev": "pnpm build --watch",
     "start": "node dist/index.js",
     "test": "pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && vitest run src",
-    "typecheck": "tsc --project tsconfig.json"
+    "test:postgres": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts",
+    "validate:device:off02": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device",
+    "validate:device:off03": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off03",
+    "validate:device:off04": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off04",
+    "validate:device:off05": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off05",
+    "validate:device:off06": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-off06",
+    "validate:device:vlt01": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && tsx integration/off-02-household.ts --device-vlt01",
+    "validate:device:vlt04": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/contracts build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && pnpm --filter @littlearc/storage build && tsx integration/off-02-household.ts --device-vlt04",
+    "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.integration.json"
   },
   "dependencies": {
     "@fastify/cors": "11.3.0",
     "@fastify/helmet": "13.1.0",
+    "@littlearc/auth": "workspace:*",
     "@littlearc/contracts": "workspace:*",
+    "@littlearc/crypto": "workspace:*",
     "@littlearc/database": "workspace:*",
+    "@littlearc/domain": "workspace:*",
     "@littlearc/observability": "workspace:*",
+    "@littlearc/storage": "workspace:*",
     "fastify": "5.10.0"
+  },
+  "devDependencies": {
+    "@fastify/rate-limit": "11.1.0",
+    "@types/pg": "8.16.0",
+    "pg": "8.22.0",
+    "tsx": "4.23.1"
   }
 }

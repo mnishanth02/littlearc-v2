@@ -35,6 +35,26 @@
           "source": "railway-secret"
         },
         {
+          "classification": "public",
+          "name": "AUTH_BASE_URL",
+          "source": "railway-domain"
+        },
+        {
+          "classification": "sensitive",
+          "name": "AUTH_TRUSTED_ORIGINS",
+          "source": "explicit-staging-origins"
+        },
+        {
+          "classification": "public",
+          "name": "AUTH_EMAIL_FROM",
+          "source": "synthetic-staging-sender"
+        },
+        {
+          "classification": "secret",
+          "name": "RESEND_API_KEY",
+          "source": "railway-secret"
+        },
+        {
           "classification": "sensitive",
           "name": "S3_ENDPOINT",
           "source": "railway-bucket-reference"
@@ -55,11 +75,27 @@
           "source": "railway-bucket-reference"
         },
         {
+          "classification": "public",
+          "name": "S3_REGION",
+          "source": "literal:auto"
+        },
+        {
+          "classification": "public",
+          "name": "UPLOADS_ENABLED",
+          "source": "literal:true"
+        },
+        {
           "classification": "secret",
           "name": "KEY_WRAPPING_SECRET_V1",
           "source": "railway-secret"
         }
       ]
+    },
+    {
+      "configFile": "infra/railway/staging/clamav.railway.json",
+      "kind": "worker",
+      "name": "littlearc-clamav-staging",
+      "requiredVariables": []
     },
     {
       "configFile": "infra/railway/staging/worker.railway.json",
@@ -97,9 +133,89 @@
           "source": "railway-bucket-reference"
         },
         {
+          "classification": "public",
+          "name": "S3_REGION",
+          "source": "literal:auto"
+        },
+        {
           "classification": "secret",
           "name": "KEY_WRAPPING_SECRET_V1",
           "source": "railway-secret"
+        },
+        {
+          "classification": "public",
+          "name": "FILE_VALIDATION_ENABLED",
+          "source": "literal:true"
+        },
+        {
+          "classification": "public",
+          "name": "FILE_PREVIEWS_ENABLED",
+          "source": "literal:true"
+        },
+        {
+          "classification": "public",
+          "name": "FILE_VALIDATION_STAGING_PROBE",
+          "source": "literal:false"
+        },
+        {
+          "classification": "sensitive",
+          "name": "FILE_VALIDATION_TMP_DIR",
+          "source": "literal:/tmp/littlearc-file-validation"
+        },
+        {
+          "classification": "public",
+          "name": "FILE_VALIDATION_CONCURRENCY",
+          "source": "literal:1"
+        },
+        {
+          "classification": "sensitive",
+          "name": "FILE_VALIDATION_SANDBOX_EXECUTABLE",
+          "source": "literal:/usr/bin/setpriv"
+        },
+        {
+          "classification": "sensitive",
+          "name": "QPDF_EXECUTABLE",
+          "source": "literal:/app/apps/worker/.tools/qpdf-12.3.2/bin/qpdf"
+        },
+        {
+          "classification": "sensitive",
+          "name": "PDFTOPPM_EXECUTABLE",
+          "source": "literal:/usr/bin/pdftoppm"
+        },
+        {
+          "classification": "sensitive",
+          "name": "CLAMD_HOST",
+          "source": "railway-private-domain-reference"
+        },
+        {
+          "classification": "sensitive",
+          "name": "CLAMD_PORT",
+          "source": "literal:3310"
+        },
+        {
+          "classification": "public",
+          "name": "CLAMD_SIGNATURE_MAX_AGE_HOURS",
+          "source": "literal:72"
+        },
+        {
+          "classification": "public",
+          "name": "CLAMD_SIGNATURE_MIN_VERSION",
+          "source": "staging-freshclam-attestation"
+        },
+        {
+          "classification": "public",
+          "name": "CLAMD_SIGNATURE_OBSERVED_AT",
+          "source": "staging-freshclam-attestation"
+        },
+        {
+          "classification": "public",
+          "name": "RAILPACK_BUILD_APT_PACKAGES",
+          "source": "literal:unzip"
+        },
+        {
+          "classification": "public",
+          "name": "RAILPACK_DEPLOY_APT_PACKAGES",
+          "source": "literal:libatomic1 util-linux"
         }
       ]
     },

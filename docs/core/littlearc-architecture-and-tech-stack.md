@@ -2,7 +2,7 @@
 
 > **Status:** Accepted architecture baseline  
 > **Version:** 1.3
-> **Last updated:** 18 July 2026
+> **Last updated:** 22 July 2026
 > **Product source:** [LittleArc Complete Product Plan](./littlearc-complete-product-plan.md)  
 > **M0 source:** [M0 Readiness and Evidence Dossier](./m0-readiness-and-evidence.md)
 > **Audience:** Engineering, product, security, operations, and future implementation agents
@@ -102,6 +102,12 @@ Cost efficiency must not bypass the first five priorities.
 | AI safety | Zero reminders or confirmed fields created without user confirmation |
 
 These are engineering acceptance targets, not external service-level guarantees.
+
+`OFF-05` implements the emergency targets through the standard post-unlock
+boundary recorded in
+[ADR-0013](../adr/0013-emergency-card-aggregate-and-standard-access-boundary.md).
+Locked OS quick access remains unimplemented until `OD-03` approves its exposed
+fields, warning, screenshot posture, timeout, and key-separation model.
 
 ---
 
@@ -262,7 +268,7 @@ If either package fails its acceptance gate, replace it with a local Expo module
 
 | Package | Version |
 | --- | ---: |
-| `next` | 16.2.10 |
+| `next` | 16.2.12 |
 | `@playwright/test` | 1.61.1 |
 | `jest-expo` | 57.0.2 |
 | `@testing-library/react-native` | 14.0.1 |
@@ -602,6 +608,9 @@ Enable WAL mode after confirming SQLCipher compatibility. Use migrations with fo
 ### 10.1 Consumer authentication
 
 Better Auth is mounted in the Fastify application and persists sessions in PostgreSQL.
+
+The implemented consumer boundary and its provider-schema handling are recorded
+in [ADR-0009](../adr/0009-consumer-authentication-and-session-boundary.md).
 
 Supported launch methods:
 
@@ -1792,7 +1801,9 @@ Retention durations must be configuration-driven and approved by legal/privacy r
 ### 27.3 Mandatory offline cases
 
 - Emergency card opens with no network.
-- Biometric-required and quick-access emergency modes behave as configured.
+- The implemented standard post-unlock emergency mode obeys biometric key
+  custody; any future quick-access mode must first resolve `OD-03` and pass its
+  own physical-device security/privacy acceptance.
 - Draft creation survives process termination.
 - Upload resumes after network loss.
 - Duplicate mutation retry does not duplicate records.

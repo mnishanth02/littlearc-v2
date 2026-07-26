@@ -7,7 +7,7 @@ import {
   parseUuidV7,
 } from "@littlearc/domain";
 import { describe, expect, it } from "vitest";
-import { createChangeFeedCursor, parseChangeFeedCursor } from "./change-feed.js";
+import { createSyncCursorCodec } from "./change-feed.js";
 import { assertReplayMatchesReservation, idempotencyScopeKey } from "./idempotency.js";
 import { isOutboxDispatchable, outboxDispatchState } from "./outbox.js";
 import { databaseRoleName, orderedDatabaseRoleKinds } from "./roles.js";
@@ -24,12 +24,14 @@ describe("database primitives", () => {
       actorId: "littlearc.current_actor_id",
       actorRole: "littlearc.current_actor_role",
       householdId: "littlearc.current_household_id",
+      identityUserId: "littlearc.current_identity_user_id",
     });
     expect(
       tenantContextSetSql({
         actorId,
         actorRole: "owner",
         householdId,
+        identityUserId: "synthetic-auth-user",
       }),
     ).toEqual({
       params: [
@@ -39,11 +41,14 @@ describe("database primitives", () => {
         actorId,
         "littlearc.current_actor_role",
         "owner",
+        "littlearc.current_identity_user_id",
+        "synthetic-auth-user",
       ],
       sql: [
         "select set_config($1, $2, true);",
         "select set_config($3, $4, true);",
         "select set_config($5, $6, true);",
+        "select set_config($7, $8, true);",
       ].join("\n"),
     });
   });
@@ -80,14 +85,30 @@ describe("database primitives", () => {
     ).toThrow("different request fingerprint");
   });
 
-  it("encodes opaque change-feed cursors from server sequence numbers", () => {
-    const cursor = createChangeFeedCursor(42);
+  it("round-trips integrity-protected kind-bound sync cursors", () => {
+    const codec = createSyncCursorCodec(Buffer.alloc(32, 7));
+    const cursor = codec.createChangesCursor(42);
+    const snapshot = codec.createSnapshotCursor({ afterId: householdId, sequence: 51 });
 
-    expect(parseChangeFeedCursor(cursor)).toEqual({ sequence: 42, version: 1 });
-    expect(() => parseChangeFeedCursor(parseCursor("not-json-value"))).toThrow(
-      "Change-feed cursor payload is invalid.",
+    expect(codec.parseChangesCursor(cursor)).toEqual({
+      kind: "changes",
+      sequence: 42,
+      version: 1,
+    });
+    expect(codec.parseSnapshotCursor(snapshot)).toEqual({
+      afterId: householdId,
+      kind: "snapshot",
+      sequence: 51,
+      version: 1,
+    });
+    expect(() => codec.parseSnapshotCursor(cursor)).toThrow("invalid or has been modified");
+    expect(() => codec.parseChangesCursor(parseCursor("not-json-value"))).toThrow(
+      "invalid or has been modified",
     );
-    expect(() => createChangeFeedCursor(-1)).toThrow("non-negative safe integer");
+    const tampered = parseCursor(`${cursor.slice(0, -1)}${cursor.endsWith("A") ? "B" : "A"}`);
+    expect(() => codec.parseChangesCursor(tampered)).toThrow("invalid or has been modified");
+    expect(() => codec.createChangesCursor(-1)).toThrow("non-negative safe integer");
+    expect(() => createSyncCursorCodec(Buffer.alloc(31))).toThrow("32 bytes");
   });
 
   it("classifies outbox dispatch state from durable fields", () => {

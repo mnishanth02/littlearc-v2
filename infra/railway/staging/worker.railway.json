@@ -1,11 +1,18 @@
 {
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
-    "builder": "RAILPACK",
-    "buildCommand": "pnpm --filter @littlearc/worker... build",
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "infra/railway/staging/worker/Dockerfile",
     "watchPatterns": [
       "/apps/worker/**",
+      "/packages/crypto/**",
       "/packages/database/**",
+      "/packages/domain/**",
+      "/packages/observability/**",
+      "/packages/storage/**",
+      "/tooling/file-validation/**",
+      "/infra/railway/staging/worker/**",
+      "/infra/railway/staging/worker-image-dependencies.json",
       "/package.json",
       "/pnpm-lock.yaml",
       "/pnpm-workspace.yaml",
@@ -14,8 +21,9 @@
   },
   "deploy": {
     "drainingSeconds": 15,
+    "preDeployCommand": "node apps/worker/dist/staging-probe.js",
     "restartPolicyMaxRetries": 10,
     "restartPolicyType": "ALWAYS",
-    "startCommand": "pnpm --filter @littlearc/worker start"
+    "startCommand": "node apps/worker/dist/index.js"
   }
 }

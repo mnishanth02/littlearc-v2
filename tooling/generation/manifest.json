@@ -7,9 +7,19 @@
       "outputs": ["packages/contracts/baseline", "packages/contracts/src/generated"]
     },
     {
+      "name": "better-auth-schema",
+      "command": ["pnpm", "--filter", "@littlearc/auth", "adapt:schema"],
+      "outputs": ["packages/database/src/schema/auth.ts"]
+    },
+    {
       "name": "database-migrations",
       "command": ["pnpm", "--filter", "@littlearc/database", "generate"],
       "outputs": ["packages/database/migrations"]
+    },
+    {
+      "name": "pg-boss-v37-plan",
+      "command": ["pnpm", "--filter", "@littlearc/worker", "generate:file-validation-queue-plan"],
+      "outputs": ["packages/database/queue-plans/pgboss-v37.sql"]
     }
   ]
 }
