@@ -11,10 +11,11 @@ trap cleanup EXIT HUP INT TERM
 
 cd "$repository_root"
 node tooling/check-toolchain.mjs
+pnpm_command=$(command -v pnpm)
 node tooling/create-source-snapshot.mjs "$snapshot_root"
 
 cd "$snapshot_root"
-corepack pnpm install --frozen-lockfile
-corepack pnpm validate
+"$pnpm_command" install --frozen-lockfile
+"$pnpm_command" validate
 
 echo "Clean-checkout validation passed in temporary source-only snapshot"

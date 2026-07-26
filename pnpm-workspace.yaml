@@ -4,27 +4,75 @@ packages:
 
 overrides:
   "@infinitered/react-native-mlkit-core": 5.0.0
+  "brace-expansion@5": 5.0.8
+  "fast-uri@3": 3.1.4
+  "fast-uri@4": 4.1.1
+  find-my-way: 9.7.0
+  "next>postcss": 8.5.19
+  "next>sharp": 0.35.3
 
 minimumReleaseAgeExclude:
-  - "@expo/cli@57.0.9"
-  - "@expo/metro-config@57.0.6"
-  - "@expo/prebuild-config@57.0.8"
+  - '@expo/cli@57.0.9 || 57.0.10'
+  - '@expo/metro-config@57.0.6 || 57.0.7'
+  - '@expo/prebuild-config@57.0.8 || 57.0.9'
   - expo-application@57.0.2
-  - expo-asset@57.0.6
-  - expo-build-properties@57.0.6
-  - expo-constants@57.0.6
-  - expo-dev-client@57.0.7
-  - expo-dev-launcher@57.0.7
-  - expo-dev-menu@57.0.7
-  - expo-image-picker@57.0.5
-  - expo-modules-autolinking@57.0.8
-  - expo-modules-core@57.0.6
-  - expo-notifications@57.0.6
-  - expo@57.0.7
+  - expo-asset@57.0.6 || 57.0.7
+  - expo-build-properties@57.0.6 || 57.0.7
+  - expo-constants@57.0.6 || 57.0.7
+  - expo-dev-client@57.0.7 || 57.0.8 || 57.0.9
+  - expo-dev-launcher@57.0.7 || 57.0.8 || 57.0.9
+  - expo-dev-menu@57.0.7 || 57.0.8 || 57.0.9
+  - expo-image-picker@57.0.5 || 57.0.6
+  - expo-modules-autolinking@57.0.8 || 57.0.9
+  - expo-modules-core@57.0.6 || 57.0.7
+  - expo-notifications@57.0.6 || 57.0.7
+  - expo@57.0.7 || 57.0.8
   - "@asteasolutions/zod-to-openapi@9.1.0"
   - drizzle-kit@0.31.10
   - drizzle-orm@0.45.2
+  - '@expo/config-plugins@57.0.6'
+  - '@expo/config@57.0.6'
+  - '@expo/fingerprint@0.20.6'
+  - '@expo/image-utils@0.11.4'
+  - '@expo/metro-runtime@57.0.7'
+  - '@expo/require-utils@57.0.4'
+  - '@expo/router-server@57.0.4'
+  - babel-preset-expo@57.0.4
+  - expo-modules-jsi@57.0.4
+  - expo-linking@57.0.4
+  - expo-local-authentication@57.0.2
+  - expo-router@57.0.8
+  - expo-web-browser@57.0.2
+  - '@aws-sdk/checksums@3.1000.20'
+  - '@aws-sdk/client-s3@3.1095.0'
+  - '@aws-sdk/core@3.977.0'
+  - '@aws-sdk/credential-provider-env@3.972.61'
+  - '@aws-sdk/credential-provider-http@3.972.63'
+  - '@aws-sdk/credential-provider-ini@3.973.6'
+  - '@aws-sdk/credential-provider-login@3.972.68'
+  - '@aws-sdk/credential-provider-node@3.972.72'
+  - '@aws-sdk/credential-provider-process@3.972.61'
+  - '@aws-sdk/credential-provider-sso@3.973.5'
+  - '@aws-sdk/credential-provider-web-identity@3.972.67'
+  - '@aws-sdk/middleware-sdk-s3@3.972.66'
+  - '@aws-sdk/nested-clients@3.997.35'
+  - '@aws-sdk/s3-request-presigner@3.1095.0'
+  - '@aws-sdk/signature-v4-multi-region@3.996.42'
+  - '@aws-sdk/token-providers@3.1095.0'
+  - '@aws-sdk/xml-builder@3.972.37'
+  - '@next/env@16.2.12'
+  - '@next/swc-darwin-arm64@16.2.12'
+  - '@next/swc-darwin-x64@16.2.12'
+  - '@next/swc-linux-arm64-gnu@16.2.12'
+  - '@next/swc-linux-arm64-musl@16.2.12'
+  - '@next/swc-linux-x64-gnu@16.2.12'
+  - '@next/swc-linux-x64-musl@16.2.12'
+  - '@next/swc-win32-arm64-msvc@16.2.12'
+  - '@next/swc-win32-x64-msvc@16.2.12'
+  - next@16.2.12
 
 allowBuilds:
+  "@prisma/client": false
+  better-sqlite3: false
   esbuild: true
   sharp: true

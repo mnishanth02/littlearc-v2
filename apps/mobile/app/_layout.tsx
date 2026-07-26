@@ -1,6 +1,7 @@
 import "react-native-gesture-handler";
 import "../src/theme/unistyles";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { View } from "react-native";
@@ -11,6 +12,15 @@ import { mobileObservability } from "../src/bootstrap/observability";
 import { Button } from "../src/components/ui/Button";
 import { Typography } from "../src/components/ui/Typography";
 import { useDesignSystemPreferences } from "../src/theme/unistyles";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      staleTime: Number.POSITIVE_INFINITY,
+    },
+  },
+});
 
 type RouteErrorBoundaryProps = {
   readonly error: Error;
@@ -45,12 +55,15 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(app)" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <SafeAreaProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(app)" />
+            <Stack.Screen name="(onboarding)" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </SafeAreaProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }

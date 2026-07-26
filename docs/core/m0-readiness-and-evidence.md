@@ -510,6 +510,20 @@ add a later retest row and link the superseding result.
 
 ---
 
+## iOS Simulator Parity Follow-Up — 23 July 2026
+
+The retained harness was regenerated against the accepted Expo 57 package
+pins and rebuilt for the iPhone 17 Pro Simulator on iOS 26.5. Runtime/auth,
+AES-GCM, SQLCipher 4.7.0 Community, simulated Face ID/protected SecureStore,
+safe document cancellation, one fixed synthetic photo import, and generic
+local-notification scheduling passed. Scanner/OCR correctly returned the
+bounded unsupported-camera result.
+
+This refresh does not replace the retained physical-iOS camera/OCR, biometric,
+notification-delivery, signing, or upgrade obligations. The complete current
+matrix is in the
+[cross-milestone parity dossier](../impl-plan/ios-simulator-parity-validation-evidence.md).
+
 ## 12. Primary Sources
 
 - [Expo SDK version and platform support](https://docs.expo.dev/versions/latest/)

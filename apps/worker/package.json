@@ -9,13 +9,30 @@
     "build": "tsc --project tsconfig.build.json",
     "clean": "rm -rf dist coverage",
     "dev": "pnpm build --watch",
+    "prepare:file-validation-queue": "tsx src/queue/prepare.ts",
+    "prebuild": "node ../../tooling/file-validation/install-qpdf.mjs",
+    "generate:file-validation-queue-plan": "tsx src/queue/write-plan.ts",
     "start": "node dist/index.js",
-    "test": "pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && vitest run src",
-    "typecheck": "tsc --project tsconfig.json"
+    "probe:staging:file-validation": "node dist/staging-probe.js",
+    "test:integration:clamav": "tsx integration/clamav.ts",
+    "test:integration:heic": "pnpm build && node dist/integration/heic.js",
+    "test:integration:file-preview": "pnpm build && node dist/integration/file-preview.js",
+    "test": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && pnpm --filter @littlearc/storage build && vitest run src",
+    "typecheck": "tsc --project tsconfig.json && tsc --project tsconfig.integration.json"
   },
   "dependencies": {
+    "@littlearc/crypto": "workspace:*",
     "@littlearc/database": "workspace:*",
+    "@littlearc/domain": "workspace:*",
     "@littlearc/observability": "workspace:*",
-    "pg-boss": "12.26.1"
+    "@littlearc/storage": "workspace:*",
+    "file-type": "22.0.1",
+    "pg-boss": "12.26.1",
+    "sharp": "0.35.3"
+  },
+  "devDependencies": {
+    "node-addon-api": "8.5.0",
+    "node-gyp": "11.5.0",
+    "tsx": "4.23.1"
   }
 }

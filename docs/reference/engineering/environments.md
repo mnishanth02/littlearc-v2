@@ -1,7 +1,7 @@
 # Environments
 
 > **Status:** Active
-> **Last updated:** 2026-07-19
+> **Last updated:** 2026-07-25
 > **Owner:** Engineering
 > **Applies to:** Local development and Railway staging
 > **Decision:** [ADR-0006](../../adr/0006-railway-singapore-environment-topology.md)
@@ -13,6 +13,11 @@
 | Local | Synthetic only | Untracked app `.env` copied from `.env.example` | Implemented |
 | Staging | Synthetic/test accounts only | Railway staging variables plus `infra/railway/staging` descriptors | Implemented and deployed |
 | Production | No traffic or data | Future isolated project, secrets, recovery, domains, and approval | Deferred |
+
+VLT-05 adds a private staging-only ClamAV service. It has no public domain and
+may receive only generated synthetic plaintext from the staging worker.
+Validation and its one-shot probe are rejected in production; previews remain
+disabled in every environment.
 
 `tooling/environment/variables.mjs` and the
 [variable catalog](../environment-variable-catalog.md) own variable names,

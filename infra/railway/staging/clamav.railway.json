@@ -1,0 +1,13 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "infra/railway/staging/clamav/Dockerfile",
+    "watchPatterns": ["/infra/railway/staging/clamav/**"]
+  },
+  "deploy": {
+    "restartPolicyMaxRetries": 10,
+    "restartPolicyType": "ALWAYS",
+    "sleepApplication": false
+  }
+}

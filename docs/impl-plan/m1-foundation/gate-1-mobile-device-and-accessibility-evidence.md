@@ -94,3 +94,16 @@ complete under the accepted iOS-simulator plus physical-Android matrix.** This
 evidence closes only those two criteria. Gate 1 and M1 remain open until the
 seeded cross-household RLS rejection criterion is evidenced or formally
 replanned.
+
+## iOS Simulator Parity Follow-Up — 23 July 2026
+
+The current production custom development client was exercised on the iPhone
+17 Pro Simulator (`7C8183EE-08E8-4F3D-A064-D3C404A10CC9`) with iOS 26.5. The
+landing/status routes and design-system gallery rendered in light, dark,
+increased-contrast, and maximum accessibility content-size states. The
+reference content retained vertical reflow and reachable actions without a
+horizontal-scrolling dependency or navigation failure.
+
+This refresh changes neither the accepted Gate 1 matrix nor the physical-iOS
+pre-pilot obligation. See the
+[cross-milestone parity dossier](../ios-simulator-parity-validation-evidence.md).

@@ -63,7 +63,7 @@ source; domain components still arrive with their first production consumer.
 
 ## Build, Test, and Development Commands
 
-Use Node 24.18.0 and pnpm 11.14.0. From the repository root:
+Use Node 26.4.0 and pnpm 11.14.0. From the repository root:
 
 ```sh
 pnpm install --frozen-lockfile

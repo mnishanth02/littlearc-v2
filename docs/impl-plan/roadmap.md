@@ -2,7 +2,7 @@
 
 > **Status:** Accepted execution baseline — see the [Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) for live delivery state
 > **Version:** 1.2
-> **Last updated:** 18 July 2026
+> **Last updated:** 25 July 2026
 > **Product source:** [LittleArc Complete Product Plan](../core/littlearc-complete-product-plan.md)
 > **Architecture source:** [LittleArc Architecture and Technology Stack](../core/littlearc-architecture-and-tech-stack.md)
 > **Design-system source:** [LittleArc Design System](../core/design-system.md)
@@ -585,6 +585,11 @@ through the production-shaped architecture.
 
 #### `OFF-02` Household, parent, child, consent, and audit
 
+> **Implementation status (22 July 2026): COMPLETE.** The synthetic-only
+> implementation, reviewed migration, Aiven PostgreSQL integration, automated
+> repository gates, and bounded Pixel 8 UI/HTTP/database acceptance pass. See the
+> [OFF-02 evidence dossier](./m2-offline-trust/off-02-implementation-evidence.md).
+
 - Implement the first household owner, parent profile, and one child.
 - Record versioned notice and consent acceptance before child creation.
 - Add household membership and capability policies without exposing future
@@ -593,6 +598,13 @@ through the production-shaped architecture.
 - Encrypt child and parent payload fields as defined by the data map.
 
 #### `OFF-03` Local security and enrollment
+
+> **Implementation status (22 July 2026): COMPLETE.** Authority-neutral device
+> enrollment, device-bound key custody, strong-biometric app lock, keyed
+> SQLCipher migrations, independent authenticated file encryption, invalidation
+> recovery, verified wipe, repository gates, Aiven PostgreSQL, and the bounded
+> Pixel 8 lifecycle pass. See the
+> [OFF-03 evidence dossier](./m2-offline-trust/off-03-implementation-evidence.md).
 
 - Generate and store a random SQLCipher key in SecureStore.
 - Create the encrypted local schema and forward migrations.
@@ -604,6 +616,13 @@ through the production-shaped architecture.
 
 #### `OFF-04` Repository and synchronization engine
 
+> **Implementation status (22 July 2026): COMPLETE.** Signed cursors,
+> authenticated pull/snapshot/push, atomic PostgreSQL evidence, SQLCipher schema
+> V2 repositories, ordered offline mutations, explicit critical conflicts,
+> tombstones, reset-safe reconciliation, sign-out warnings, 151 tests, Aiven
+> integration, repository gates, and the bounded Pixel 8 lifecycle pass. See the
+> [OFF-04 evidence dossier](./m2-offline-trust/off-04-implementation-evidence.md).
+
 - Implement repository reads from SQLCipher and background network refresh.
 - Implement local mutation IDs, dependency ordering, retry/backoff, and status.
 - Implement server change sequence, opaque cursor pull, mutation push,
@@ -613,6 +632,15 @@ through the production-shaped architecture.
   truth.
 
 #### `OFF-05` Emergency-card vertical slice
+
+> **Implementation status (22 July 2026): COMPLETE.** The accepted standard-
+> access slice now includes a dedicated encrypted aggregate, immutable versions,
+> shared synchronization, SQLCipher schema V3, accessible production routes,
+> 164 tests, Aiven PostgreSQL evidence, Android/iOS exports, and the bounded
+> Pixel 8 offline/dialer/conflict/wipe lifecycle. See the
+> [OFF-05 evidence dossier](./m2-offline-trust/off-05-implementation-evidence.md).
+> Locked quick access remains gated by `OD-03`; this completion does not close
+> Gate 2 or claim physical iOS/two-device evidence.
 
 - Implement profile fields with "not provided" versus "none confirmed" states.
 - Make the card reachable in no more than two deliberate post-unlock actions.
@@ -624,6 +652,37 @@ through the production-shaped architecture.
 - Defer shareable image/PDF unless explicitly promoted into committed MVP scope.
 
 #### `OFF-06` Onboarding activation shell
+
+> **Implementation status (23 July 2026): COMPLETE.** The accepted synthetic
+> slice composes the OFF-01 through OFF-05 boundaries into a seven-step
+> accessible shell with atomic owner/child creation, protected SQLCipher
+> enrollment, shared authoritative emergency-card synchronization, an
+> explicitly non-persisted first-record preview, strict coarse analytics, 176
+> tests, Aiven integration, Android/iOS exports, a bounded Pixel 8 lifecycle,
+> and an iOS 26.5 iPhone 17 Pro Simulator follow-up covering the full shell,
+> simulated Face ID, API-down safe retry, accessibility sizing, restart, and
+> API-offline SQLCipher read. See the
+> [OFF-06 evidence dossier](./m2-offline-trust/off-06-implementation-evidence.md).
+> The abandoned OnePlus attempt was blocked by unavailable enrolled biometrics
+> and is recorded as capability evidence only. Gate 2 remains open for
+> two-device conflict, the complete assistive-technology/low-end matrix, and
+> its other unproven named criteria. Physical-iOS pre-pilot evidence remains
+> unchanged; simulated Face ID is not physical Secure Enclave evidence.
+<!-- Follow-up evidence is a separate status callout. -->
+> **Release-bundle containment follow-up (24 July 2026): COMPLETE.** Metro
+> retains the synthetic OFF-06 evidence route in development bundles and
+> substitutes a redirect-only implementation for release exports. The current
+> 179-test suite, Android/iOS Hermes canary scans, root validation, and
+> clean-checkout proof pass. This changes no Gate 2 criterion or evidence
+> boundary.
+<!-- Follow-up evidence is a separate status callout. -->
+> **Cross-milestone validation follow-up (23 July 2026): COMPLETE.** A current
+> iPhone 17 Pro Simulator pass classified every implemented `RDY`, `FND`,
+> Gate 1, and `OFF-01` through `OFF-06` row and exercised every applicable
+> production mobile flow. See the
+> [cross-milestone evidence dossier](./ios-simulator-parity-validation-evidence.md).
+> The follow-up changes no roadmap order or gate definition and does not convert
+> Simulator results into physical-iOS evidence.
 
 - Implement value/privacy promise, account, consent, child basics, and emergency
   card setup.
@@ -653,9 +712,40 @@ M3 feature breadth is authorized when:
 **Goal:** Let a parent reliably capture, store, confirm, search, retrieve, and
 correct the MVP's core child records.
 
+> **Delivery note — 25 July 2026:** Founder direction separately authorized the
+> bounded `VLT-01` record-foundation, `VLT-02` manual-record, and `VLT-03`
+> capture/import packages. `VLT-01` through `VLT-03` are complete within their
+> linked synthetic and device evidence boundaries. `VLT-03` implementation,
+> biometric remediation, automated validation, iOS Simulator flow, the
+> agent-captured Pixel restart/gallery/file/share evidence, and the
+> user-attested Pixel scanner/camera/permission rows pass. Its free Personal
+> Team iPhone profile is ready; physical-iPhone execution is deferred to the
+> pre-pilot physical-device capability matrix.
+> The reviewed `VLT-04` plan was separately accepted on 25 July 2026. Its
+> bounded implementation, review remediation, automated/Aiven checks, hosted
+> migration, final healthy staging API/worker deployments, storage-provider
+> probe and cleanup, physical Pixel 8 and iOS-Simulator client flows, broad
+> validation, and clean-checkout proof pass. `VLT-04` is `COMPLETE` within its
+> linked evidence boundary.
+> These package-specific exceptions do not close Gate 2, authorize `VLT-05` or
+> later M3 breadth, or
+> broaden real-data, provider, physical-iOS, low-end-Android, two-device, or
+> pilot claims. See the
+> [reviewed VLT-01 plan](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md),
+> the [VLT-02 plan](./m3-vault-wedge/vlt-02-manual-record-creation-plan.md),
+> its [implementation evidence](./m3-vault-wedge/vlt-02-implementation-evidence.md),
+> and the [VLT-03 evidence](./m3-vault-wedge/vlt-03-implementation-evidence.md).
+
 ### 12.1 Ordered work packages
 
-#### `VLT-01` Record model, versions, provenance, and timeline projection
+#### [`VLT-01` Record model, versions, provenance, and timeline projection](./m3-vault-wedge/vlt-01-record-model-versions-provenance-and-timeline-projection-plan.md)
+
+> **Delivery status — 24 July 2026:** Implementation, 193 root tests,
+> disposable Aiven validation, Android/iOS release containment, and the bounded
+> iOS Simulator plus physical Pixel 8 lifecycle/accessibility checks passed.
+> Package acceptance is `COMPLETE` within the recorded synthetic and device
+> boundaries. Gate 2 remains open. See the
+> [implementation evidence](./m3-vault-wedge/vlt-01-implementation-evidence.md).
 
 - Implement common record metadata and encrypted versioned payloads.
 - Keep suggestions separate from confirmed values.
@@ -665,7 +755,17 @@ correct the MVP's core child records.
   queued purge.
 - Create a minimal linked timeline projection for all confirmed records.
 
-#### `VLT-02` Manual record creation
+#### [`VLT-02` Manual record creation](./m3-vault-wedge/vlt-02-manual-record-creation-plan.md)
+
+> **Delivery status — 24 July 2026:** `COMPLETE` under the bounded
+> package-specific authorization above. Four manual categories, SQLCipher V5
+> drafts, production create/view/correct/history/delete routes, 206 automated
+> tests, disposable Aiven validation, Android/iOS release containment, and the
+> complete functional lifecycle on physical Pixel 8 plus iPhone 17 Pro
+> Simulator passed. Gate 2, physical iOS, two-device, low-end Android,
+> complete assistive-technology, real-data, provider, and `VLT-04+` claims
+> remain open. See the
+> [implementation evidence](./m3-vault-wedge/vlt-02-implementation-evidence.md).
 
 - Start with document, vaccination, doctor visit, and prescription forms.
 - Provide manual completion for every field that later extraction may suggest.
@@ -673,7 +773,22 @@ correct the MVP's core child records.
 - Save local drafts offline and synchronize confirmed records.
 - Add create, edit/correct, view, and delete tests before scanner integration.
 
-#### `VLT-03` Capture and import adapters
+#### [`VLT-03` Capture and import adapters](./m3-vault-wedge/vlt-03-capture-and-import-adapters-plan.md)
+
+> **Delivery status — 25 July 2026:** `COMPLETE` under the bounded
+> package-specific authorization above. Production adapters, SQLCipher V6
+> resumable drafts plus V7 wrapped file keys, native byte
+> inspection/normalization/thumbnails, independently encrypted local files,
+> one-foreground-unlock biometric remediation, 236 root tests, clean Android
+> arm64 and iOS Simulator builds, release containment, Pixel
+> restart/gallery/file/share/discard evidence, user-attested synthetic
+> scanner/camera/permission evidence, the iPhone 17 Pro Simulator
+> restart/discard flow, and the opt-in free Personal Team native profile pass.
+> Physical-iPhone camera/scanner, Secure Enclave, installation, and production
+> Share Extension/App Group proof are deferred to the pre-pilot matrix and are
+> not claimed by this package. Gate 2 remains open and `VLT-04+` remain
+> blocked. See the
+> [implementation evidence](./m3-vault-wedge/vlt-03-implementation-evidence.md).
 
 - Add camera, scanner, gallery, file/PDF picker, and incoming share paths in the
   order validated by M0 spikes.
@@ -682,7 +797,18 @@ correct the MVP's core child records.
 - Normalize orientation and create bounded thumbnails off the JS thread.
 - Preserve an opaque, resumable draft when capture or import is interrupted.
 
-#### `VLT-04` File encryption and resumable upload
+#### [`VLT-04` File encryption and resumable upload](./m3-vault-wedge/vlt-04-file-encryption-and-resumable-upload-plan.md)
+
+> **Delivery status — 25 July 2026:** `COMPLETE` under the bounded
+> package-specific authorization above. Encrypted multipart upload/download,
+> SQLCipher V8 resume, concurrent exact idempotency, cleanup failure isolation,
+> disposable Aiven authorization/RLS, hosted staging migration/provider/health,
+> release containment, repository gates, and bounded physical Pixel 8 plus
+> iPhone 17 Pro Simulator flows pass. Device flows use local synthetic
+> orchestration while the real provider is proven separately by the complete
+> Railway staging probe. Gate 2 remains open and `VLT-05+` is not authorized.
+> See the
+> [implementation evidence](./m3-vault-wedge/vlt-04-implementation-evidence.md).
 
 - Generate per-file data-encryption keys on device.
 - Encrypt with AES-256-GCM and bind AAD to household/object context.
@@ -693,6 +819,17 @@ correct the MVP's core child records.
 - Ensure object keys and temporary filenames contain no sensitive values.
 
 #### `VLT-05` Worker-side file validation
+
+> **Delivery note (25 July 2026):** The founder reviewed and accepted the
+> VLT-05 plan and separately authorized bounded synthetic implementation.
+> Minimized pg-boss dispatch, authenticated decrypt, bounded JPEG/PNG/static-PDF
+> validation, private staging ClamAV scanning, cleanup-gated terminal state,
+> safe status, disposable Aiven proof, and Railway staging probe/deploy are
+> complete within the
+> [recorded evidence](./m3-vault-wedge/vlt-05-implementation-evidence.md).
+> The separately authorized bounded HEIC follow-up is also complete. Previews
+> remain disabled, production is untouched, Gate 2 remains open, and VLT-06+
+> is not authorized.
 
 - Recheck magic-byte MIME and file structure.
 - Bound PDF parsing and reject active/executable content.
@@ -1415,7 +1552,10 @@ The recommended M1 implementation sequence is:
    required organization-owned access is available.
 10. `OFF-01` + `OFF-02` — plan authentication, household, consent, and audit.
 11. `OFF-03` + `OFF-04` — plan local security and synchronization.
-12. `OFF-05` — plan the emergency-card walking skeleton and Gate 2 scenarios.
+12. `OFF-05` — complete the emergency-card walking skeleton and its bounded
+    standard-access Gate 2 contribution.
+13. `OFF-06` — complete the onboarding activation shell and record its bounded
+    Pixel 8 plus iOS Simulator Gate 2 contribution.
 
 This section expresses dependency order, not current delivery state. Use the
 [Implementation Status Tracker](../IMPLEMENTATION_STATUS.md) to select the next

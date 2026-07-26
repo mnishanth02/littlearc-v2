@@ -1,5 +1,24 @@
 import { createHash } from "node:crypto";
 import { foundationMigration, foundationMigrationSql } from "./foundation.js";
+import { off01AuthMigration, off01AuthMigrationSql } from "./off-01-auth.js";
+import { off02HouseholdMigration, off02HouseholdMigrationSql } from "./off-02-household.js";
+import {
+  off05EmergencyCardMigration,
+  off05EmergencyCardMigrationSql,
+} from "./off-05-emergency-card.js";
+import {
+  vlt01RecordFoundationMigration,
+  vlt01RecordFoundationMigrationSql,
+} from "./vlt-01-record-foundation.js";
+import { vlt04FileUploadMigration, vlt04FileUploadMigrationSql } from "./vlt-04-file-upload.js";
+import {
+  vlt05F3FilePreviewsMigration,
+  vlt05F3FilePreviewsMigrationSql,
+} from "./vlt-05-f3-file-previews.js";
+import {
+  vlt05FileValidationMigration,
+  vlt05FileValidationMigrationSql,
+} from "./vlt-05-file-validation.js";
 
 const checksumPlaceholder = "__CHECKSUM_SHA256__";
 
@@ -12,17 +31,29 @@ export type DatabaseMigration = {
 };
 
 export function databaseMigrations(): ReadonlyArray<DatabaseMigration> {
+  return [
+    migrationWithChecksum(foundationMigration, foundationMigrationSql),
+    migrationWithChecksum(off01AuthMigration, off01AuthMigrationSql),
+    migrationWithChecksum(off02HouseholdMigration, off02HouseholdMigrationSql),
+    migrationWithChecksum(off05EmergencyCardMigration, off05EmergencyCardMigrationSql),
+    migrationWithChecksum(vlt01RecordFoundationMigration, vlt01RecordFoundationMigrationSql),
+    migrationWithChecksum(vlt04FileUploadMigration, vlt04FileUploadMigrationSql),
+    migrationWithChecksum(vlt05FileValidationMigration, vlt05FileValidationMigrationSql),
+    migrationWithChecksum(vlt05F3FilePreviewsMigration, vlt05F3FilePreviewsMigrationSql),
+  ];
+}
+
+function migrationWithChecksum(
+  metadata: Omit<DatabaseMigration, "checksumSha256" | "sql">,
+  sql: string,
+): DatabaseMigration {
   const checksumSha256 = createHash("sha256")
-    .update(foundationMigrationSql.replace(checksumPlaceholder, ""))
+    .update(sql.replace(checksumPlaceholder, ""))
     .digest("hex");
 
-  return [
-    {
-      checksumSha256,
-      description: foundationMigration.description,
-      filename: foundationMigration.filename,
-      sql: foundationMigrationSql.replace(checksumPlaceholder, checksumSha256),
-      version: foundationMigration.version,
-    },
-  ];
+  return {
+    ...metadata,
+    checksumSha256,
+    sql: sql.replace(checksumPlaceholder, checksumSha256),
+  };
 }

@@ -1,4 +1,4 @@
-export const householdRoles = ["owner", "caregiver", "staff"] as const;
+export const householdRoles = ["owner", "caregiver"] as const;
 export type HouseholdRole = (typeof householdRoles)[number];
 
 export const householdCapabilities = [
@@ -38,13 +38,13 @@ const ownerCapabilities = new Set<HouseholdCapability>([
   "manageEntitlement",
 ]);
 
-const staffCapabilities = new Set<HouseholdCapability>(["manageEntitlement", "viewWorkflowStatus"]);
+export const staffCapabilities = ["manageEntitlement", "viewWorkflowStatus"] as const;
+export type StaffCapability = (typeof staffCapabilities)[number];
 
 export type HouseholdAuthorizationInput = {
   readonly role: HouseholdRole;
   readonly capability: HouseholdCapability;
   readonly grantedCapabilities?: ReadonlySet<HouseholdCapability>;
-  readonly purposeCodeRecorded?: boolean;
 };
 
 export function canPerformHouseholdCapability(input: HouseholdAuthorizationInput): boolean {
@@ -52,15 +52,14 @@ export function canPerformHouseholdCapability(input: HouseholdAuthorizationInput
     return ownerCapabilities.has(input.capability);
   }
 
-  if (input.role === "caregiver") {
-    return input.grantedCapabilities?.has(input.capability) ?? false;
-  }
+  return input.grantedCapabilities?.has(input.capability) ?? false;
+}
 
-  if (input.capability === "manageEntitlement") {
-    return input.purposeCodeRecorded === true;
-  }
-
-  return staffCapabilities.has(input.capability);
+export function canPerformStaffCapability(
+  capability: StaffCapability,
+  purposeCodeRecorded: boolean,
+): boolean {
+  return capability === "viewWorkflowStatus" || purposeCodeRecorded;
 }
 
 export const consentPurposes = [
@@ -77,11 +76,20 @@ export type ConsentState = (typeof consentStates)[number];
 export const auditActions = [
   "household_created",
   "child_created",
+  "child_updated",
   "consent_recorded",
   "record_created",
   "record_updated",
   "record_deleted",
   "membership_changed",
+  "device_enrolled",
+  "emergency_card_created",
+  "emergency_card_updated",
+  "file_upload_created",
+  "file_upload_completed",
+  "file_upload_cancelled",
+  "file_download_authorized",
+  "file_preview_download_authorized",
   "staff_action_recorded",
 ] as const;
 export type AuditAction = (typeof auditActions)[number];

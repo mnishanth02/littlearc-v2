@@ -1,0 +1,19 @@
+plugins {
+  id "com.android.library"
+  id "expo-module-gradle-plugin"
+}
+
+group = "app.littlearc.capture"
+version = "0.0.1"
+
+android {
+  namespace "app.littlearc.capture"
+  defaultConfig {
+    versionCode 1
+    versionName "0.0.1"
+  }
+}
+
+dependencies {
+  implementation "androidx.exifinterface:exifinterface:1.4.1"
+}
