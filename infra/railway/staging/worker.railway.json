@@ -5,8 +5,12 @@
     "buildCommand": "pnpm --filter @littlearc/worker... build",
     "watchPatterns": [
       "/apps/worker/**",
+      "/packages/crypto/**",
       "/packages/database/**",
+      "/packages/domain/**",
+      "/packages/observability/**",
       "/packages/storage/**",
+      "/tooling/file-validation/**",
       "/package.json",
       "/pnpm-lock.yaml",
       "/pnpm-workspace.yaml",

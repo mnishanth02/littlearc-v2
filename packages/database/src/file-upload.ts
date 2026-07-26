@@ -7,6 +7,9 @@ import type {
 } from "@littlearc/crypto";
 import {
   canPerformHouseholdCapability,
+  type FilePreviewState,
+  type FileValidationSafeErrorCode,
+  type FileValidationState,
   type HouseholdCapability,
   type HouseholdRole,
   type UuidV7,
@@ -57,6 +60,10 @@ export type InternalFileObject = {
   readonly fileObjectId: UuidV7;
   readonly keyVersion: number;
   readonly objectKey: string;
+  readonly previewState: FilePreviewState;
+  readonly safeErrorCode: FileValidationSafeErrorCode | null;
+  readonly updatedAt: string;
+  readonly validationState: FileValidationState;
   readonly wrapNonce: Buffer;
   readonly wrappedFileKey: Buffer;
 };
@@ -110,6 +117,10 @@ export type FileUploadPersistence = {
     readonly identityUserId: string;
     readonly sessionId: UuidV7;
   }) => Promise<InternalUploadSession | null>;
+  readonly readStatus: (input: {
+    readonly fileObjectId: UuidV7;
+    readonly identityUserId: string;
+  }) => Promise<InternalFileObject | null>;
   readonly reconcile: (input: {
     readonly identityUserId: string;
     readonly parts: ReadonlyArray<UploadPartRow>;
@@ -296,6 +307,16 @@ export function createFileUploadPersistence(options: {
           on conflict (household_id, origin_session_id) do nothing
         `);
         await transaction.execute(sql`
+          insert into littlearc.outbox_events (
+            id, household_id, event_type, aggregate_type, aggregate_id, payload
+          ) values (
+            ${session.fileObjectId}, ${context.householdId}, 'file_validation_requested',
+            'file_object', ${session.fileObjectId},
+            ${JSON.stringify({ fileObjectId: session.fileObjectId })}::jsonb
+          )
+          on conflict (id) do nothing
+        `);
+        await transaction.execute(sql`
           update littlearc.upload_sessions
           set status = 'uploaded', safe_error_code = null,
               completed_at = now(), updated_at = now()
@@ -395,6 +416,12 @@ export function createFileUploadPersistence(options: {
         const context = await establishContext(transaction, input.identityUserId);
         requireCapability(context, "addRecords");
         return (await readSessionRow(transaction, context, input.sessionId, false)) ?? null;
+      }),
+    readStatus: (input) =>
+      options.database.transaction(async (transaction) => {
+        const context = await establishContext(transaction, input.identityUserId);
+        requireCapability(context, "viewSelectedHealthRecords");
+        return (await readFileObjectRow(transaction, context, input.fileObjectId)) ?? null;
       }),
     reconcile: (input) =>
       options.database.transaction(async (transaction) => {
@@ -581,6 +608,11 @@ async function readFileObjectRow(
       auth_tag as "authTag",
       key_version as "keyVersion",
       aad_version as "aadVersion"
+      ,
+      validation_state as "validationState",
+      preview_state as "previewState",
+      validation_safe_error_code as "safeErrorCode",
+      updated_at as "updatedAt"
     from littlearc.file_objects
     where household_id = ${context.householdId}
       and id = ${fileObjectId}

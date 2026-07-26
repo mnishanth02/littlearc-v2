@@ -88,7 +88,50 @@ export const fileObjectProjectionSchema = z
     ciphertextSha256: ciphertextSha256Schema,
     fileObjectId: uuidV7Schema,
     uploadState: z.literal("uploaded"),
-    validationState: z.literal("pending"),
+    validationState: z.enum([
+      "pending",
+      "queued",
+      "validating",
+      "result_pending_cleanup",
+      "ready",
+      "rejected",
+      "failed",
+    ]),
+  })
+  .strict();
+
+export const filePreviewStateSchema = z.enum([
+  "not_authorized",
+  "pending",
+  "processing",
+  "ready",
+  "failed",
+]);
+
+export const fileValidationSafeErrorCodeSchema = z.enum([
+  "type_mismatch",
+  "unsupported_format",
+  "malformed_structure",
+  "resource_limit_exceeded",
+  "ciphertext_integrity_mismatch",
+  "authenticated_decryption_failed",
+  "pdf_encrypted",
+  "pdf_active_content",
+  "pdf_embedded_content",
+  "malware_detected",
+  "scanner_unavailable",
+  "scanner_signatures_stale",
+  "plaintext_cleanup_retry",
+  "validation_retry_exhausted",
+]);
+
+export const fileProcessingStatusSchema = z
+  .object({
+    fileObjectId: uuidV7Schema,
+    previewState: filePreviewStateSchema,
+    safeErrorCode: fileValidationSafeErrorCodeSchema.nullable(),
+    updatedAt: utcTimestampSchema,
+    validationState: fileObjectProjectionSchema.shape.validationState,
   })
   .strict();
 

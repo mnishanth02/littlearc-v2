@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { Readable } from "node:stream";
 import {
   assertOpaqueObjectKey,
   type CompletedPart,
@@ -97,6 +98,9 @@ export function createMemoryEncryptedObjectStorage(): MemoryEncryptedObjectStora
     },
     readObject(objectKey) {
       return objects.get(objectKey);
+    },
+    async readObjectStream(objectKey) {
+      return Readable.from(Buffer.from(requireObject(objects, objectKey)));
     },
     async signDownload(input) {
       requireObject(objects, input.objectKey);

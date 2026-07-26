@@ -1,4 +1,5 @@
 export * from "./emergency-card.js";
+export * from "./file-validation.js";
 export * from "./onboarding.js";
 export * from "./policies.js";
 export * from "./primitives.js";

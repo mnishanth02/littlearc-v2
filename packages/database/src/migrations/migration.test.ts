@@ -36,6 +36,14 @@ if (!fileUpload) {
   throw new Error("Expected the VLT-04 file-upload migration to be registered.");
 }
 const generatedFileUploadSql = readFileSync(join("migrations", fileUpload.filename), "utf8");
+const fileValidation = databaseMigrations()[6];
+if (!fileValidation) {
+  throw new Error("Expected the VLT-05 file-validation migration to be registered.");
+}
+const generatedFileValidationSql = readFileSync(
+  join("migrations", fileValidation.filename),
+  "utf8",
+);
 
 describe("database migration foundation", () => {
   it("keeps the generated migration artifact in sync with the reviewed source", () => {
@@ -115,6 +123,27 @@ describe("VLT-04 file upload migration", () => {
     expect(fileUpload.sql).not.toContain(
       "grant select, insert, update, delete on littlearc.file_objects to littlearc_worker",
     );
+  });
+});
+
+describe("VLT-05 file validation migration", () => {
+  it("keeps the reviewed source and generated artifact synchronized", () => {
+    expect(generatedFileValidationSql).toBe(`${fileValidation.sql}\n`);
+  });
+
+  it("enforces cleanup-gated state and least-authority worker functions", () => {
+    expect(fileValidation.sql).toContain("result_pending_cleanup");
+    expect(fileValidation.sql).toContain("commit_file_validation_result");
+    expect(fileValidation.sql).toContain("malware_state = 'clean'");
+    expect(fileValidation.sql).toContain(
+      "revoke select, insert, update on littlearc.outbox_events from littlearc_worker",
+    );
+    expect(fileValidation.sql).toContain("claim_file_validation_outbox");
+    expect(fileValidation.sql).toContain("fail_exhausted_file_validation");
+    expect(fileValidation.sql).toContain(
+      "validation_safe_error_code = 'validation_retry_exhausted'",
+    );
+    expect(fileValidation.sql).not.toContain("child_id uuid");
   });
 });
 

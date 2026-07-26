@@ -32,6 +32,10 @@ describe("VLT-04 encrypted upload service", () => {
         fileObjectId,
         keyVersion: 1,
         objectKey: requireSession().objectKey,
+        previewState: "not_authorized",
+        safeErrorCode: null,
+        updatedAt: "2026-07-25T12:00:00.000Z",
+        validationState: "pending",
         wrapNonce: Buffer.alloc(12),
         wrappedFileKey: Buffer.alloc(48),
       }),
@@ -70,6 +74,7 @@ describe("VLT-04 encrypted upload service", () => {
         return session;
       },
       readDownload: vi.fn(async () => null),
+      readStatus: vi.fn(async () => null),
       async readSession() {
         return session;
       },

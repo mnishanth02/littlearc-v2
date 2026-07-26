@@ -2,6 +2,7 @@ export * from "./change-feed.js";
 export * from "./client.js";
 export * from "./device-enrollment.js";
 export * from "./file-upload.js";
+export * from "./file-validation.js";
 export * from "./idempotency.js";
 export * from "./migrations/metadata.js";
 export * from "./outbox.js";

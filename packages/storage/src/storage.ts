@@ -31,6 +31,7 @@ export type EncryptedObjectStorage = {
     readonly objectKey: string;
     readonly providerUploadId: string;
   }) => Promise<ReadonlyArray<CompletedPart>>;
+  readonly readObjectStream: (objectKey: string) => Promise<Readable>;
   readonly signDownload: (input: {
     readonly expiresInSeconds: number;
     readonly objectKey: string;
@@ -56,3 +57,5 @@ export function normalizeEtag(value: string): string {
   }
   return normalized;
 }
+
+import type { Readable } from "node:stream";

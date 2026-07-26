@@ -1,16 +1,61 @@
 import { createSafeLogger, type SafeLogRecord } from "@littlearc/observability";
 import { describe, expect, it, vi } from "vitest";
-import { loadWorkerConfig } from "./config.js";
+import { constrainWorkerDatabaseUrl, loadWorkerConfig } from "./config.js";
 import { createWorkerRuntime } from "./runtime.js";
 
 describe("worker skeleton", () => {
   it("loads safe local configuration without a database URL", () => {
     expect(loadWorkerConfig({ APP_ENV: "local" })).toEqual({
       appEnv: "local",
+      fileValidation: {
+        enabled: false,
+        previewsEnabled: false,
+      },
       heartbeatIntervalMs: 30_000,
       queueConnectionMode: "deferred",
+      stagingProbeEnabled: false,
       uploadCleanupIntervalMs: 60_000,
     });
+  });
+
+  it("fails closed for previews and production validation", () => {
+    expect(() => loadWorkerConfig({ APP_ENV: "local", FILE_PREVIEWS_ENABLED: "true" })).toThrow(
+      "not authorized",
+    );
+    expect(() =>
+      loadWorkerConfig({
+        APP_ENV: "production",
+        FILE_VALIDATION_ENABLED: "true",
+      }),
+    ).toThrow("not authorized in production");
+    expect(() =>
+      loadWorkerConfig({
+        APP_ENV: "local",
+        FILE_VALIDATION_STAGING_PROBE: "true",
+      }),
+    ).toThrow("authorized only in staging");
+  });
+
+  it("constrains every configured database session to the worker role", () => {
+    const constrained = new URL(
+      constrainWorkerDatabaseUrl(
+        "postgresql://runtime:secret@database.internal:5432/littlearc?sslmode=require",
+      ),
+    );
+
+    expect(constrained.username).toBe("runtime");
+    expect(constrained.password).toBe("secret");
+    expect(constrained.searchParams.get("sslmode")).toBe("require");
+    expect(constrained.searchParams.get("options")).toBe("-c role=littlearc_worker");
+
+    const config = loadWorkerConfig({
+      APP_ENV: "local",
+      DATABASE_URL: "postgresql://runtime:secret@database.internal:5432/littlearc",
+    });
+    expect(config.databaseUrl).toBeDefined();
+    expect(new URL(config.databaseUrl ?? "").searchParams.get("options")).toBe(
+      "-c role=littlearc_worker",
+    );
   });
 
   it("logs lifecycle events without job payload data", () => {

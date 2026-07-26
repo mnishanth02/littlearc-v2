@@ -5,10 +5,16 @@ const expectedEnvironment = "staging";
 const expectedDataPolicy = "synthetic-only";
 const expectedProductionProvisioning = "deferred";
 const expectedRegion = "asia-southeast1-eqsg3a";
-const serviceConfigNames = new Set(["api.railway.json", "worker.railway.json", "ops-web.railway.json"]);
+const serviceConfigNames = new Set([
+  "api.railway.json",
+  "worker.railway.json",
+  "ops-web.railway.json",
+  "clamav.railway.json",
+]);
 const requiredServices = new Map([
   ["littlearc-api-staging", { configFile: "infra/railway/staging/api.railway.json", kind: "web" }],
   ["littlearc-worker-staging", { configFile: "infra/railway/staging/worker.railway.json", kind: "worker" }],
+  ["littlearc-clamav-staging", { configFile: "infra/railway/staging/clamav.railway.json", kind: "worker" }],
   ["littlearc-ops-web-staging", { configFile: "infra/railway/staging/ops-web.railway.json", kind: "web" }],
   ["Postgres", { kind: "postgresql" }],
   ["littlearc-documents-staging", { kind: "bucket" }],
@@ -16,6 +22,7 @@ const requiredServices = new Map([
 ]);
 
 const requiredWatchRoots = {
+  "clamav.railway.json": ["/infra/railway/staging/clamav/**"],
   "api.railway.json": [
     "/apps/api/**",
     "/packages/contracts/**",
@@ -24,7 +31,15 @@ const requiredWatchRoots = {
     "/packages/storage/**",
   ],
   "ops-web.railway.json": ["/apps/ops-web/**", "/packages/contracts/**"],
-  "worker.railway.json": ["/apps/worker/**", "/packages/database/**", "/packages/storage/**"],
+  "worker.railway.json": [
+    "/apps/worker/**",
+    "/packages/crypto/**",
+    "/packages/database/**",
+    "/packages/domain/**",
+    "/packages/observability/**",
+    "/packages/storage/**",
+    "/tooling/file-validation/**",
+  ],
 };
 
 const requiredSharedWatchRoots = ["/package.json", "/pnpm-lock.yaml", "/pnpm-workspace.yaml", "/turbo.json"];
@@ -161,6 +176,7 @@ function validateManifestService(service) {
 
 function validateServiceConfig(configName, config) {
   const violations = [];
+  const isClamav = configName === "clamav.railway.json";
 
   if (config.$schema !== "https://railway.com/railway.schema.json") {
     violations.push(`${configName}: missing Railway schema URL`);
@@ -168,13 +184,18 @@ function validateServiceConfig(configName, config) {
   if (config.environments?.production) {
     violations.push(`${configName}: must not define production environment overrides`);
   }
-  if (config.build?.builder !== "RAILPACK") {
-    violations.push(`${configName}: build.builder must be RAILPACK`);
+  if (config.build?.builder !== (isClamav ? "DOCKERFILE" : "RAILPACK")) {
+    violations.push(
+      `${configName}: build.builder must be ${isClamav ? "DOCKERFILE" : "RAILPACK"}`,
+    );
   }
   if (
+    !isClamav &&
     typeof config.build?.buildCommand !== "string" ||
-    !config.build.buildCommand.startsWith("pnpm --filter ") ||
-    !config.build.buildCommand.includes("... build")
+    (!isClamav &&
+      (!config.build.buildCommand.startsWith("pnpm --filter ") &&
+        !config.build.buildCommand.includes("pnpm --filter "))) ||
+    (!isClamav && !config.build.buildCommand.includes("... build"))
   ) {
     violations.push(
       `${configName}: build.buildCommand must use a dependency-inclusive pnpm workspace filter`,
@@ -183,7 +204,10 @@ function validateServiceConfig(configName, config) {
   if (!Array.isArray(config.build?.watchPatterns)) {
     violations.push(`${configName}: build.watchPatterns must be an array`);
   } else {
-    const required = [...(requiredWatchRoots[configName] ?? []), ...requiredSharedWatchRoots];
+    const required = [
+      ...(requiredWatchRoots[configName] ?? []),
+      ...(isClamav ? [] : requiredSharedWatchRoots),
+    ];
     for (const pattern of required) {
       if (!config.build.watchPatterns.includes(pattern)) {
         violations.push(`${configName}: missing watch pattern ${pattern}`);
@@ -191,11 +215,15 @@ function validateServiceConfig(configName, config) {
     }
   }
 
-  if (typeof config.deploy?.startCommand !== "string" || !config.deploy.startCommand.startsWith("pnpm --filter ")) {
+  if (
+    !isClamav &&
+    (typeof config.deploy?.startCommand !== "string" ||
+      !config.deploy.startCommand.startsWith("pnpm --filter "))
+  ) {
     violations.push(`${configName}: deploy.startCommand must use a pnpm workspace filter`);
   }
 
-  if (configName === "worker.railway.json") {
+  if (configName === "worker.railway.json" || isClamav) {
     if ("healthcheckPath" in (config.deploy ?? {})) {
       violations.push("worker.railway.json: worker must not expose a Railway HTTP healthcheck yet");
     }

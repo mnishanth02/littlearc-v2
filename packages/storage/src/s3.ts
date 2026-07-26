@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { Readable } from "node:stream";
 import {
   AbortMultipartUploadCommand,
   CompleteMultipartUploadCommand,
@@ -130,6 +131,13 @@ export function createS3EncryptedObjectStorage(
         marker = response.IsTruncated ? response.NextPartNumberMarker : undefined;
       } while (marker);
       return parts;
+    },
+    async readObjectStream(objectKey) {
+      const response = await client.send(new GetObjectCommand({ Bucket: bucket, Key: objectKey }));
+      if (!response.Body) {
+        throw new Error("Encrypted object response had no body.");
+      }
+      return Readable.fromWeb(response.Body.transformToWebStream() as never);
     },
     async signDownload(input) {
       return getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: input.objectKey }), {

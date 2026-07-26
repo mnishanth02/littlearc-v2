@@ -36,6 +36,7 @@ decision with a new ADR and link both records through `Supersedes` and
 | [ADR-0013](./0013-emergency-card-aggregate-and-standard-access-boundary.md) | Accepted | Dedicated immutable emergency-card versions with standard post-unlock access | 2026-07-22 | 2026-10-22 |
 | [ADR-0014](./0014-record-aggregate-provenance-and-generated-timeline-boundary.md) | Accepted | Generic immutable records with trusted provenance and source-linked Timeline projections | 2026-07-24 | 2026-10-24 |
 | [ADR-0015](./0015-encrypted-file-object-and-resumable-transport-boundary.md) | Accepted | Upload-ready device ciphertext, wrapped file keys, resumable multipart transport, verified completion, and least-authority cleanup | 2026-07-25 | 2026-10-25 |
+| [ADR-0016](./0016-worker-file-validation-and-plaintext-cleanup-boundary.md) | Accepted | Minimized durable validation, bounded parsers/scanning, cleanup-gated terminal state, and privacy-safe operations | 2026-07-25 | 2026-10-25 |
 
 Architecture candidates not represented here have not yet been implemented.
 Create their ADRs with the owning work package rather than treating the core

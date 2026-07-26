@@ -820,6 +820,16 @@ correct the MVP's core child records.
 
 #### `VLT-05` Worker-side file validation
 
+> **Delivery note (25 July 2026):** The founder reviewed and accepted the
+> VLT-05 plan and separately authorized bounded synthetic implementation.
+> Minimized pg-boss dispatch, authenticated decrypt, bounded JPEG/PNG/static-PDF
+> validation, private staging ClamAV scanning, cleanup-gated terminal state,
+> safe status, disposable Aiven proof, and Railway staging probe/deploy are
+> complete within the
+> [recorded evidence](./m3-vault-wedge/vlt-05-implementation-evidence.md).
+> HEIC and previews remain fail-closed, production is untouched, Gate 2 remains
+> open, and VLT-06+ is not authorized.
+
 - Recheck magic-byte MIME and file structure.
 - Bound PDF parsing and reject active/executable content.
 - Add malware scanning and safe preview derivation when authorized.

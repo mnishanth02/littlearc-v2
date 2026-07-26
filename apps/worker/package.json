@@ -9,14 +9,24 @@
     "build": "tsc --project tsconfig.build.json",
     "clean": "rm -rf dist coverage",
     "dev": "pnpm build --watch",
+    "prepare:file-validation-queue": "tsx src/queue/prepare.ts",
+    "prebuild": "node ../../tooling/file-validation/install-qpdf.mjs",
+    "generate:file-validation-queue-plan": "tsx src/queue/write-plan.ts",
     "start": "node dist/index.js",
-    "test": "pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && vitest run src",
+    "probe:staging:file-validation": "node dist/staging-probe.js",
+    "test": "pnpm --filter @littlearc/crypto build && pnpm --filter @littlearc/database build && pnpm --filter @littlearc/observability build && pnpm --filter @littlearc/storage build && vitest run src",
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {
+    "@littlearc/crypto": "workspace:*",
     "@littlearc/database": "workspace:*",
+    "@littlearc/domain": "workspace:*",
     "@littlearc/observability": "workspace:*",
     "@littlearc/storage": "workspace:*",
+    "file-type": "22.0.1",
     "pg-boss": "12.26.1"
+  },
+  "devDependencies": {
+    "tsx": "4.23.1"
   }
 }

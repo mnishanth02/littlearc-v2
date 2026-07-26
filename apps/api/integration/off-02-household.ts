@@ -1,6 +1,8 @@
+import { execFile } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 import {
   createFileKeyCrypto,
   createStructuredPayloadCrypto,
@@ -47,7 +49,10 @@ const migrationPaths = [
   "../../../packages/database/migrations/0004_off_05_emergency_card.sql",
   "../../../packages/database/migrations/0005_vlt_01_record_foundation.sql",
   "../../../packages/database/migrations/0006_vlt_04_file_upload.sql",
+  "../../../packages/database/migrations/0007_vlt_05_file_validation.sql",
 ].map((path) => fileURLToPath(new URL(path, import.meta.url)));
+const execFileAsync = promisify(execFile);
+const repositoryRoot = fileURLToPath(new URL("../../..", import.meta.url));
 const deviceMode = process.argv.includes("--device");
 const off03DeviceMode = process.argv.includes("--device-off03");
 const off04DeviceMode = process.argv.includes("--device-off04");
@@ -552,6 +557,12 @@ async function runFileUploadAutomated(
   }
   assert(crossHouseholdCode === "not_found", "Cross-household upload lookup did not fail closed.");
 
+  await verifyFileValidationPersistence(client, service, {
+    fileObjectId,
+    firstUser: input.firstUser,
+    secondUser: input.secondUser,
+  });
+
   await client.query(
     "update littlearc.devices set enrollment_status = 'revoked', revoked_at = now() where id = $1",
     [input.deviceId],
@@ -645,6 +656,215 @@ async function runFileUploadAutomated(
   console.log(
     "- Least-authority worker expiry claim, provider abort, and terminal cleanup passed.",
   );
+}
+
+async function verifyFileValidationPersistence(
+  client: Client,
+  service: ReturnType<typeof createFileUploadService>,
+  input: {
+    readonly fileObjectId: UuidV7;
+    readonly firstUser: string;
+    readonly secondUser: string;
+  },
+): Promise<void> {
+  const attemptId = nextId();
+  const eventShape = await client.query<{ readonly payload: unknown }>(
+    `select payload
+       from littlearc.outbox_events
+      where aggregate_id = $1 and event_type = 'file_validation_requested'`,
+    [input.fileObjectId],
+  );
+  assert(
+    JSON.stringify(eventShape.rows[0]?.payload) ===
+      JSON.stringify({ fileObjectId: input.fileObjectId }),
+    "VLT-05 outbox payload was not the exact minimized shape.",
+  );
+  await client.query("begin");
+  try {
+    await client.query("set local role littlearc_worker");
+    await client.query("savepoint direct_worker_read");
+    let directReadCode: string | undefined;
+    try {
+      await client.query("select id from littlearc.file_objects where id = $1", [
+        input.fileObjectId,
+      ]);
+    } catch (error) {
+      directReadCode = persistenceCode(error);
+      await client.query("rollback to savepoint direct_worker_read");
+    }
+    assert(directReadCode === "42501", "Worker direct file-object reads were not denied.");
+
+    const dispatch = await client.query<{
+      readonly eventId: string;
+      readonly fileObjectId: string;
+    }>(
+      `select event_id::text "eventId", file_object_id::text "fileObjectId"
+         from littlearc.claim_file_validation_outbox(10)`,
+    );
+    assert(dispatch.rowCount === 1, "VLT-05 minimized outbox dispatch was not claimable.");
+    assert(
+      dispatch.rows[0]?.fileObjectId === input.fileObjectId,
+      "VLT-05 dispatch returned an unexpected file object.",
+    );
+    await client.query("select littlearc.finish_file_validation_outbox($1, true)", [
+      dispatch.rows[0]?.eventId,
+    ]);
+
+    const claim = await client.query<Record<string, unknown>>(
+      "select * from littlearc.claim_file_validation($1, $2, 900)",
+      [input.fileObjectId, attemptId],
+    );
+    assert(claim.rowCount === 1, "VLT-05 validation claim was not acquired.");
+    const serializedKeys = Object.keys(claim.rows[0] ?? {}).join(",");
+    for (const prohibited of ["child", "filename", "record", "membership"]) {
+      assert(
+        !serializedKeys.includes(prohibited),
+        `VLT-05 claim exposed prohibited ${prohibited} material.`,
+      );
+    }
+    const premature = await client.query<{ readonly committed: boolean }>(
+      "select littlearc.commit_file_validation_result($1, $2, 'rejected') committed",
+      [input.fileObjectId, attemptId],
+    );
+    assert(
+      !premature.rows[0]?.committed,
+      "Validating state bypassed the result proposal boundary.",
+    );
+    const proposed = await client.query<{ readonly proposed: boolean }>(
+      `select littlearc.propose_file_validation_result(
+         $1, $2, 'rejected', 'pending', null, null, 'type_mismatch', 1
+       ) proposed`,
+      [input.fileObjectId, attemptId],
+    );
+    assert(proposed.rows[0]?.proposed, "VLT-05 rejection proposal was not persisted.");
+    const committed = await client.query<{ readonly committed: boolean }>(
+      "select littlearc.commit_file_validation_result($1, $2, 'rejected') committed",
+      [input.fileObjectId, attemptId],
+    );
+    assert(committed.rows[0]?.committed, "VLT-05 cleanup-gated rejection was not committed.");
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  }
+
+  const status = await service.readStatus({
+    fileObjectId: input.fileObjectId,
+    identityUserId: input.firstUser,
+  });
+  assert(
+    status.validationState === "rejected" &&
+      status.previewState === "not_authorized" &&
+      status.safeErrorCode === "type_mismatch",
+    "VLT-05 safe status projection was incomplete.",
+  );
+  let crossHouseholdCode: string | undefined;
+  try {
+    await service.readStatus({
+      fileObjectId: input.fileObjectId,
+      identityUserId: input.secondUser,
+    });
+  } catch (error) {
+    crossHouseholdCode = persistenceCode(error);
+  }
+  assert(crossHouseholdCode === "not_found", "Cross-household VLT-05 status did not fail closed.");
+
+  const exhaustedAttemptId = nextId();
+  await client.query(
+    `update littlearc.file_objects
+        set validation_state = 'queued',
+            validation_attempt_id = null,
+            validation_lease_expires_at = null,
+            validation_safe_error_code = null,
+            validation_completed_at = null
+      where id = $1`,
+    [input.fileObjectId],
+  );
+  await client.query("begin");
+  try {
+    await client.query("set local role littlearc_worker");
+    const exhaustedClaim = await client.query(
+      "select * from littlearc.claim_file_validation($1, $2, 900)",
+      [input.fileObjectId, exhaustedAttemptId],
+    );
+    assert(exhaustedClaim.rowCount === 1, "Retry-exhaustion claim was not acquired.");
+    const retried = await client.query<{ readonly retried: boolean }>(
+      "select littlearc.retry_file_validation($1, $2, 'scanner_unavailable') retried",
+      [input.fileObjectId, exhaustedAttemptId],
+    );
+    assert(retried.rows[0]?.retried, "Retryable failure did not return to queued.");
+    const exhausted = await client.query<{ readonly failed: boolean }>(
+      "select littlearc.fail_exhausted_file_validation($1) failed",
+      [input.fileObjectId],
+    );
+    assert(exhausted.rows[0]?.failed, "Exhausted retries did not enter terminal failed.");
+    const replay = await client.query<{ readonly failed: boolean }>(
+      "select littlearc.fail_exhausted_file_validation($1) failed",
+      [input.fileObjectId],
+    );
+    assert(!replay.rows[0]?.failed, "Retry exhaustion was not idempotent.");
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  }
+  const failedStatus = await service.readStatus({
+    fileObjectId: input.fileObjectId,
+    identityUserId: input.firstUser,
+  });
+  assert(
+    failedStatus.validationState === "failed" &&
+      failedStatus.safeErrorCode === "validation_retry_exhausted",
+    "Retry exhaustion did not expose the bounded safe state.",
+  );
+  console.log("VLT-05 PostgreSQL dispatch, least-authority claim, and safe status passed.");
+}
+
+async function prepareAndVerifyFileValidationQueue(
+  client: Client,
+  databaseUrl: string,
+): Promise<void> {
+  await execFileAsync("pnpm", ["--filter", "@littlearc/worker", "prepare:file-validation-queue"], {
+    cwd: repositoryRoot,
+    env: {
+      ...process.env,
+      APP_ENV: "local",
+      DATABASE_MIGRATION_URL: databaseUrl,
+      DATABASE_URL: databaseUrl,
+    },
+    maxBuffer: 1024 * 1024,
+    timeout: 120_000,
+  });
+  const schema = await client.query<{ readonly version: number }>(
+    "select version from pgboss.version",
+  );
+  assert(schema.rows[0]?.version === 37, "Reviewed pg-boss schema version 37 was not prepared.");
+  const queues = await client.query<{ readonly name: string }>(
+    "select name from pgboss.queue where name in ('file-validation-v1', 'file-validation-dead-v1') order by name",
+  );
+  assert(queues.rowCount === 2, "Required VLT-05 queues were not prepared.");
+  await client.query("begin");
+  try {
+    await client.query("set local role littlearc_worker");
+    const runtimeRead = await client.query(
+      "select name from pgboss.queue where name in ('file-validation-v1', 'file-validation-dead-v1')",
+    );
+    assert(runtimeRead.rowCount === 2, "Worker runtime could not read prepared queues.");
+    await client.query("savepoint schema_create");
+    let createCode: string | undefined;
+    try {
+      await client.query("create table pgboss.worker_forbidden(id integer)");
+    } catch (error) {
+      createCode = persistenceCode(error);
+      await client.query("rollback to savepoint schema_create");
+    }
+    assert(createCode === "42501", "Worker runtime retained pg-boss schema DDL authority.");
+    await client.query("rollback");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  }
+  console.log("VLT-05 reviewed pg-boss schema and runtime least authority passed.");
 }
 
 const syntheticRecordContent: RecordVersionContentV1 = {
@@ -2465,6 +2685,7 @@ async function run(): Promise<void> {
     for (const path of migrationPaths) {
       await databaseClient.query(await readFile(path, "utf8"));
     }
+    await prepareAndVerifyFileValidationQueue(databaseClient, databaseUrl);
     await databaseClient.query(
       `grant littlearc_app, littlearc_worker to ${quoteIdentifier(currentUser)}`,
     );

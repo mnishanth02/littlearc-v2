@@ -14,6 +14,7 @@ import {
   emergencyCardPutRequestSchema,
   fileDownloadGrantSchema,
   fileObjectProjectionSchema,
+  fileProcessingStatusSchema,
   householdIdentifierSchema,
   idempotencyKeySchema,
   ownerOnboardingRequestSchema,
@@ -90,6 +91,7 @@ registry.register("ReconcileUploadPartsRequest", reconcileUploadPartsRequestSche
 registry.register("CompleteUploadRequest", completeUploadRequestSchema);
 registry.register("FileObjectProjection", fileObjectProjectionSchema);
 registry.register("FileDownloadGrant", fileDownloadGrantSchema);
+registry.register("FileProcessingStatus", fileProcessingStatusSchema);
 
 registry.registerPath({
   method: "post",
@@ -124,6 +126,25 @@ registry.registerPath({
     },
     503: {
       description: "Encrypted uploads are disabled or unavailable",
+      content: { "application/problem+json": { schema: problemDetailsSchema } },
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/v1/files/{fileObjectId}/status",
+  tags: ["files"],
+  summary: "Read privacy-safe worker processing state",
+  security: [{ consumerSession: [] }],
+  request: { params: z.object({ fileObjectId: uuidV7Schema }) },
+  responses: {
+    200: {
+      description: "Current authorized file-processing state",
+      content: { "application/json": { schema: fileProcessingStatusSchema } },
+    },
+    404: {
+      description: "File object not found",
       content: { "application/problem+json": { schema: problemDetailsSchema } },
     },
   },

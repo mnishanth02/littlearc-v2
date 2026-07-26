@@ -5,6 +5,7 @@ domains:
       - vlt-02
       - vlt-03
       - vlt-04
+      - vlt-05
       - vault
       - record model
       - record version
@@ -24,6 +25,12 @@ domains:
       - multipart
       - object storage
       - file key
+      - file validation
+      - pg-boss
+      - qpdf
+      - clamav
+      - malware scanning
+      - plaintext cleanup
     docs:
       - docs/IMPLEMENTATION_STATUS.md
       - docs/impl-plan/roadmap.md
@@ -38,11 +45,14 @@ domains:
       - docs/impl-plan/m3-vault-wedge/vlt-04-file-encryption-and-resumable-upload-plan.md
       - docs/impl-plan/m3-vault-wedge/vlt-04-file-encryption-and-resumable-upload-research.md
       - docs/impl-plan/m3-vault-wedge/vlt-04-implementation-evidence.md
+      - docs/impl-plan/m3-vault-wedge/vlt-05-worker-side-file-validation-plan.md
+      - docs/impl-plan/m3-vault-wedge/vlt-05-implementation-evidence.md
       - docs/core/littlearc-complete-product-plan.md
       - docs/core/littlearc-architecture-and-tech-stack.md
       - docs/core/backend-data-model-and-database-schema.md
       - docs/core/mobile-application-flow.md
       - docs/adr/0012-server-authoritative-synchronization-and-conflict-boundary.md
+      - docs/adr/0016-worker-file-validation-and-plaintext-cleanup-boundary.md
       - docs/reference/engineering/data-classification.md
       - docs/reference/engineering/database-migrations.md
       - docs/reference/engineering/testing-strategy.md

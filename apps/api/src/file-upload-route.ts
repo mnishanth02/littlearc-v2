@@ -1,6 +1,7 @@
 import {
   completeUploadRequestSchema,
   createUploadSessionRequestSchema,
+  fileProcessingStatusSchema,
   reconcileUploadPartsRequestSchema,
   uploadSessionSchema,
   uuidV7Schema,
@@ -164,6 +165,26 @@ export function registerFileUploadRoutes(
           identityUserId,
           requestId: parseUuidV7(request.id, "requestId"),
         }),
+      );
+    } catch (error) {
+      throw mapFileError(error);
+    }
+  });
+
+  server.get("/v1/files/:fileObjectId/status", async (request, reply) => {
+    const identityUserId = await requireIdentity(request.headers, dependencies);
+    const parameters = downloadParametersSchema.safeParse(request.params);
+    if (!parameters.success) {
+      throw httpError(400, "The file object identifier is invalid.");
+    }
+    try {
+      return reply.header("cache-control", "no-store, private").send(
+        fileProcessingStatusSchema.parse(
+          await dependencies.service.readStatus({
+            fileObjectId: parseUuidV7(parameters.data.fileObjectId, "fileObjectId"),
+            identityUserId,
+          }),
+        ),
       );
     } catch (error) {
       throw mapFileError(error);

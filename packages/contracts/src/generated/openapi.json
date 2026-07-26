@@ -12194,7 +12194,13 @@
           "validationState": {
             "type": "string",
             "enum": [
-              "pending"
+              "pending",
+              "queued",
+              "validating",
+              "result_pending_cleanup",
+              "ready",
+              "rejected",
+              "failed"
             ]
           }
         },
@@ -12278,6 +12284,74 @@
           "fileObjectId",
           "method",
           "url"
+        ],
+        "additionalProperties": false
+      },
+      "FileProcessingStatus": {
+        "type": "object",
+        "properties": {
+          "fileObjectId": {
+            "type": "string",
+            "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+            "description": "UUIDv7 identifier"
+          },
+          "previewState": {
+            "type": "string",
+            "enum": [
+              "not_authorized",
+              "pending",
+              "processing",
+              "ready",
+              "failed"
+            ]
+          },
+          "safeErrorCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "type_mismatch",
+              "unsupported_format",
+              "malformed_structure",
+              "resource_limit_exceeded",
+              "ciphertext_integrity_mismatch",
+              "authenticated_decryption_failed",
+              "pdf_encrypted",
+              "pdf_active_content",
+              "pdf_embedded_content",
+              "malware_detected",
+              "scanner_unavailable",
+              "scanner_signatures_stale",
+              "plaintext_cleanup_retry",
+              "validation_retry_exhausted",
+              null
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+            "description": "Normalized UTC ISO 8601 timestamp"
+          },
+          "validationState": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "queued",
+              "validating",
+              "result_pending_cleanup",
+              "ready",
+              "rejected",
+              "failed"
+            ]
+          }
+        },
+        "required": [
+          "fileObjectId",
+          "previewState",
+          "safeErrorCode",
+          "updatedAt",
+          "validationState"
         ],
         "additionalProperties": false
       }
@@ -12869,6 +12943,205 @@
           },
           "503": {
             "description": "Encrypted uploads are disabled or unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120
+                    },
+                    "status": {
+                      "type": "integer",
+                      "minimum": 400,
+                      "maximum": 599
+                    },
+                    "detail": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    },
+                    "instance": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "bad_request",
+                        "contract_not_found",
+                        "forbidden",
+                        "not_found",
+                        "record_revision_conflict",
+                        "request_validation_failed",
+                        "unauthorized",
+                        "unknown_error"
+                      ],
+                      "description": "Stable application error code"
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "description": "Request correlation ID"
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "path": {
+                            "type": "array",
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "path",
+                          "message"
+                        ]
+                      },
+                      "default": []
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "title",
+                    "status",
+                    "detail",
+                    "instance",
+                    "code",
+                    "requestId"
+                  ],
+                  "description": "RFC Problem Details with LittleArc error code and request ID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files/{fileObjectId}/status": {
+      "get": {
+        "tags": [
+          "files"
+        ],
+        "summary": "Read privacy-safe worker processing state",
+        "security": [
+          {
+            "consumerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+              "description": "UUIDv7 identifier"
+            },
+            "required": true,
+            "description": "UUIDv7 identifier",
+            "name": "fileObjectId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized file-processing state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fileObjectId": {
+                      "type": "string",
+                      "pattern": "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$(?![\\s\\S])",
+                      "description": "UUIDv7 identifier"
+                    },
+                    "previewState": {
+                      "type": "string",
+                      "enum": [
+                        "not_authorized",
+                        "pending",
+                        "processing",
+                        "ready",
+                        "failed"
+                      ]
+                    },
+                    "safeErrorCode": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "type_mismatch",
+                        "unsupported_format",
+                        "malformed_structure",
+                        "resource_limit_exceeded",
+                        "ciphertext_integrity_mismatch",
+                        "authenticated_decryption_failed",
+                        "pdf_encrypted",
+                        "pdf_active_content",
+                        "pdf_embedded_content",
+                        "malware_detected",
+                        "scanner_unavailable",
+                        "scanner_signatures_stale",
+                        "plaintext_cleanup_retry",
+                        "validation_retry_exhausted",
+                        null
+                      ]
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$(?![\\s\\S])",
+                      "description": "Normalized UTC ISO 8601 timestamp"
+                    },
+                    "validationState": {
+                      "type": "string",
+                      "enum": [
+                        "pending",
+                        "queued",
+                        "validating",
+                        "result_pending_cleanup",
+                        "ready",
+                        "rejected",
+                        "failed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "fileObjectId",
+                    "previewState",
+                    "safeErrorCode",
+                    "updatedAt",
+                    "validationState"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "File object not found",
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -13754,7 +14027,13 @@
                     "validationState": {
                       "type": "string",
                       "enum": [
-                        "pending"
+                        "pending",
+                        "queued",
+                        "validating",
+                        "result_pending_cleanup",
+                        "ready",
+                        "rejected",
+                        "failed"
                       ]
                     }
                   },

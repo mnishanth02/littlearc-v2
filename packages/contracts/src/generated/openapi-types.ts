@@ -222,6 +222,84 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/files/{fileObjectId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read privacy-safe worker processing state */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUIDv7 identifier */
+                    fileObjectId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Current authorized file-processing state */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @description UUIDv7 identifier */
+                            fileObjectId: string;
+                            /** @enum {string} */
+                            previewState: "not_authorized" | "pending" | "processing" | "ready" | "failed";
+                            /** @enum {string|null} */
+                            safeErrorCode: "type_mismatch" | "unsupported_format" | "malformed_structure" | "resource_limit_exceeded" | "ciphertext_integrity_mismatch" | "authenticated_decryption_failed" | "pdf_encrypted" | "pdf_active_content" | "pdf_embedded_content" | "malware_detected" | "scanner_unavailable" | "scanner_signatures_stale" | "plaintext_cleanup_retry" | "validation_retry_exhausted" | null;
+                            /** @description Normalized UTC ISO 8601 timestamp */
+                            updatedAt: string;
+                            /** @enum {string} */
+                            validationState: "pending" | "queued" | "validating" | "result_pending_cleanup" | "ready" | "rejected" | "failed";
+                        };
+                    };
+                };
+                /** @description File object not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": {
+                            /** Format: uri */
+                            type: string;
+                            title: string;
+                            status: number;
+                            detail: string;
+                            instance: string;
+                            /**
+                             * @description Stable application error code
+                             * @enum {string}
+                             */
+                            code: "bad_request" | "contract_not_found" | "forbidden" | "not_found" | "record_revision_conflict" | "request_validation_failed" | "unauthorized" | "unknown_error";
+                            /** @description Request correlation ID */
+                            requestId: string;
+                            /** @default [] */
+                            errors: {
+                                path: (string | number)[];
+                                message: string;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/files/uploads/{sessionId}": {
         parameters: {
             query?: never;
@@ -546,7 +624,7 @@ export interface paths {
                             /** @enum {string} */
                             uploadState: "uploaded";
                             /** @enum {string} */
-                            validationState: "pending";
+                            validationState: "pending" | "queued" | "validating" | "result_pending_cleanup" | "ready" | "rejected" | "failed";
                         };
                     };
                 };
@@ -6655,7 +6733,7 @@ export interface components {
             /** @enum {string} */
             uploadState: "uploaded";
             /** @enum {string} */
-            validationState: "pending";
+            validationState: "pending" | "queued" | "validating" | "result_pending_cleanup" | "ready" | "rejected" | "failed";
         };
         FileDownloadGrant: {
             /** @enum {number} */
@@ -6675,6 +6753,18 @@ export interface components {
             method: "GET";
             /** Format: uri */
             url: string;
+        };
+        FileProcessingStatus: {
+            /** @description UUIDv7 identifier */
+            fileObjectId: string;
+            /** @enum {string} */
+            previewState: "not_authorized" | "pending" | "processing" | "ready" | "failed";
+            /** @enum {string|null} */
+            safeErrorCode: "type_mismatch" | "unsupported_format" | "malformed_structure" | "resource_limit_exceeded" | "ciphertext_integrity_mismatch" | "authenticated_decryption_failed" | "pdf_encrypted" | "pdf_active_content" | "pdf_embedded_content" | "malware_detected" | "scanner_unavailable" | "scanner_signatures_stale" | "plaintext_cleanup_retry" | "validation_retry_exhausted" | null;
+            /** @description Normalized UTC ISO 8601 timestamp */
+            updatedAt: string;
+            /** @enum {string} */
+            validationState: "pending" | "queued" | "validating" | "result_pending_cleanup" | "ready" | "rejected" | "failed";
         };
     };
     responses: never;

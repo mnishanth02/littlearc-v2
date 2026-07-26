@@ -70,13 +70,13 @@ export function createFileUploadService(options: {
       requireEnabled(options.enabled);
       let session = await requireSession(options.persistence, input);
       if (session.state === "uploaded") {
-        return {
-          ciphertextBytes: session.expectedCiphertextBytes,
-          ciphertextSha256: session.expectedCiphertextSha256,
-          fileObjectId: session.fileObjectId,
-          uploadState: "uploaded" as const,
-          validationState: "pending" as const,
-        };
+        return projectFileObject(
+          await options.persistence.complete({
+            identityUserId: input.identityUserId,
+            requestId: input.requestId,
+            sessionId: input.sessionId,
+          }),
+        );
       }
       if (session.state !== "completing") {
         const providerParts = await options.storage.listParts({
@@ -121,13 +121,7 @@ export function createFileUploadService(options: {
         requestId: input.requestId,
         sessionId: input.sessionId,
       });
-      return {
-        ciphertextBytes: object.ciphertextBytes,
-        ciphertextSha256: object.ciphertextSha256,
-        fileObjectId: object.fileObjectId,
-        uploadState: "uploaded" as const,
-        validationState: "pending" as const,
-      };
+      return projectFileObject(object);
     },
     async create(input: {
       readonly identityUserId: string;
@@ -224,6 +218,20 @@ export function createFileUploadService(options: {
       }
       return projectSession(session);
     },
+    async readStatus(input: { readonly fileObjectId: UuidV7; readonly identityUserId: string }) {
+      requireEnabled(options.enabled);
+      const object = await options.persistence.readStatus(input);
+      if (!object) {
+        throw new FileUploadServiceError("not_found", "The file object was not found.");
+      }
+      return {
+        fileObjectId: object.fileObjectId,
+        previewState: object.previewState,
+        safeErrorCode: object.safeErrorCode,
+        updatedAt: new Date(object.updatedAt).toISOString(),
+        validationState: object.validationState,
+      };
+    },
     async reconcile(input: { readonly identityUserId: string; readonly sessionId: UuidV7 }) {
       requireEnabled(options.enabled);
       const session = await requireSession(options.persistence, input);
@@ -262,6 +270,16 @@ export function createFileUploadService(options: {
         }),
       };
     },
+  };
+}
+
+function projectFileObject(object: Awaited<ReturnType<FileUploadPersistence["complete"]>>) {
+  return {
+    ciphertextBytes: object.ciphertextBytes,
+    ciphertextSha256: object.ciphertextSha256,
+    fileObjectId: object.fileObjectId,
+    uploadState: "uploaded" as const,
+    validationState: object.validationState,
   };
 }
 

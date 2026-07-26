@@ -1,3 +1,9 @@
+import type {
+  FileMalwareState,
+  FilePreviewState,
+  FileValidationSafeErrorCode,
+  FileValidationState,
+} from "@littlearc/domain";
 import { sql } from "drizzle-orm";
 import { check, foreignKey, index, integer, text, timestamp, unique } from "drizzle-orm/pg-core";
 import { byteaColumn, createdAtColumn, updatedAtColumn, uuidV7Column } from "./_columns.js";
@@ -25,7 +31,32 @@ export const fileObjects = littlearcSchema.table(
     keyVersion: integer("key_version").notNull(),
     aadVersion: integer("aad_version").notNull(),
     uploadState: text("upload_state").$type<"uploaded">().notNull(),
-    validationState: text("validation_state").$type<"pending">().notNull(),
+    validationState: text("validation_state").$type<FileValidationState>().notNull(),
+    malwareState: text("malware_state").$type<FileMalwareState>().notNull().default("pending"),
+    previewState: text("preview_state")
+      .$type<FilePreviewState>()
+      .notNull()
+      .default("not_authorized"),
+    detectedMime: text("detected_mime"),
+    pageCount: integer("page_count"),
+    validationPolicyVersion: integer("validation_policy_version"),
+    validationAttemptCount: integer("validation_attempt_count").notNull().default(0),
+    validationAttemptId: uuidV7Column("validation_attempt_id"),
+    validationLeaseExpiresAt: timestamp("validation_lease_expires_at", {
+      mode: "string",
+      withTimezone: true,
+    }),
+    validationStartedAt: timestamp("validation_started_at", {
+      mode: "string",
+      withTimezone: true,
+    }),
+    validationCompletedAt: timestamp("validation_completed_at", {
+      mode: "string",
+      withTimezone: true,
+    }),
+    validationSafeErrorCode: text(
+      "validation_safe_error_code",
+    ).$type<FileValidationSafeErrorCode>(),
     createdAt: createdAtColumn(),
     updatedAt: updatedAtColumn(),
     deletedAt: timestamp("deleted_at", { mode: "string", withTimezone: true }),
@@ -49,6 +80,18 @@ export const fileObjects = littlearcSchema.table(
     check("file_objects_auth_tag_check", sql`octet_length(${table.authTag}) = 16`),
     check("file_objects_key_version_check", sql`${table.keyVersion} > 0`),
     check("file_objects_aad_version_check", sql`${table.aadVersion} = 1`),
+    check(
+      "file_objects_validation_state_check",
+      sql`${table.validationState} in ('pending','queued','validating','result_pending_cleanup','ready','rejected','failed')`,
+    ),
+    check(
+      "file_objects_malware_state_check",
+      sql`${table.malwareState} in ('pending','clean','detected','unavailable','error')`,
+    ),
+    check(
+      "file_objects_preview_state_check",
+      sql`${table.previewState} in ('not_authorized','pending','processing','ready','failed')`,
+    ),
     foreignKey({
       columns: [table.householdId, table.childId],
       foreignColumns: [children.householdId, children.id],
