@@ -23,8 +23,10 @@ describe("workflow policy", () => {
   });
 
   it("allows security-event uploads only from the CodeQL workflow", () => {
-    const workflow = structuredClone(safeWorkflow);
-    workflow.permissions["security-events"] = "write";
+    const workflow = {
+      ...structuredClone(safeWorkflow),
+      permissions: { contents: "read", "security-events": "write" },
+    };
 
     expect(validateWorkflowDocument(workflow, ".github/workflows/codeql.yml")).toEqual([]);
     expect(validateWorkflowDocument(workflow, ".github/workflows/unsafe.yml")).toEqual(
